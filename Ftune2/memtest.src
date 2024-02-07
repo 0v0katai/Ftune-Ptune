@@ -1,0 +1,147 @@
+;===============================================================================
+;
+; Ftune2 is SH7305 CPG&BSC tuning utility for fx-9860GII-2      v1.02
+
+; copyright(c)2014,2015 by sentaro21
+; e-mail sentaro21@pm.matrix.jp
+;
+;===============================================================================
+ .SECTION P,CODE
+ .SECTION P,CODE
+ .EXPORT _tcount
+ .EXPORT _memread
+ .EXPORT _readSR
+ .EXPORT _writeSR
+ .EXPORT _MEMtestsR
+ .EXPORT _MEMtestsW
+
+ .ALIGN	4
+
+_nop:		; force align 16 for loop top
+	NOP
+;	NOP
+;	NOP
+
+;   align TL00:	 CPU
+;   xxxxxxx0  	7355	4  clock/loop
+;   xxxxxxx2  	5886	5  clock/loop
+;   xxxxxxx4  	5886	5  clock/loop
+;   xxxxxxx6  	5347	5.5clock/loop
+;   xxxxxxx8  	7355	4  clock/loop
+;   xxxxxxxa  	5886	5  clock/loop
+;   xxxxxxxc  	5886	5  clock/loop
+;   xxxxxxxe  	5347	5.5clock/loop
+
+_tcount:
+	MOV	#-1,R0
+TL00: 	ADD	#1,R0
+	MOV.l 	@R4,R3
+	TST	R3,R3
+	BF	TL00
+     	RTS
+	NOP
+	NOP
+
+;int readSR(void)
+_readSR:                       ; function:
+	STC	SR,R0
+	RTS
+	NOP
+	NOP
+;void writeSR(int value)
+_writeSR:                       ; function:
+	LDC	R4,SR
+	RTS
+	NOP
+	NOP
+
+
+;unsigned int* MEMtestsR(volatile unsigned int*MEM,volatile unsigned int *FLLFRQ,int FLL,int n)
+_MEMtestsR:
+	mov	r4,r0
+LOOPR:
+	mov.l	@r0,r3
+	mov.l	@r0+,r2
+	cmp/eq	r2,r3
+	bf	RETR
+	dt	r7
+	bf/s	LOOPR
+	nop
+	mov	#0,r0
+RETR:
+	mov.l	r6,@r5
+	rts
+	nop
+	nop
+	nop
+
+;unsigned int* MEMtestsW(volatile unsigned int*MEM,volatile unsigned int *FLLFRQ,int FLL,int n)
+_MEMtestsW:
+	mov.l	K5555,r2
+	mov.l	KAAAA,r3
+	mov	r4,r0
+LOOPW:
+	mov.l	r3,@r0
+	mov.l	r2,@r0
+	mov.l	@r0,r4
+	cmp/eq	r2,r4
+	bf	RETW
+	mov.l	r2,@r0
+	mov.l	r3,@r0
+	mov.l	@r0+,r4
+	cmp/eq	r3,r4
+	bf	RETW
+	dt	r7
+	bf/s	LOOPW
+	nop
+	mov	#0,r0
+RETW:
+	mov.l	r6,@r5
+	rts
+	nop
+ .align 4
+K5555:	.DATA.L	H'55555555
+KAAAA:	.DATA.L	H'AAAAAAAA
+
+_memread:
+      	mov #-1,R0
+ML00: 	add #1,R0
+	mov #8,R7
+	mov.l @R4,R1
+	mov.l @R4,R1
+	mov.l @R4,R1
+
+ML02:	mov.l @R4,R1
+	mov.l @R4,R1
+	mov.l @R4,R1
+	mov.l @R4,R1
+	mov.l @R4,R1
+	mov.l @R4,R1
+	mov.l @R4,R1
+	mov.l @R4,R1
+	mov.l @R4,R1
+	mov.l @R4,R1
+
+	mov.l @R4,R1
+	mov.l @R4,R1
+	mov.l @R4,R1
+	mov.l @R4,R1
+	mov.l @R4,R1
+	mov.l @R4,R1
+	mov.l @R4,R1
+	mov.l @R4,R1
+	mov.l @R4,R1
+	mov.l @R4,R1
+
+	mov.l @R4,R1
+	mov.l @R4,R1
+	dt R7
+	bf ML02
+
+	mov.l @R5,R3
+	tst R3,R3
+	bf ML00
+	rts
+	nop
+
+ .END

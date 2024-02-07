@@ -1,0 +1,29 @@
+ .SECTION P,CODE
+ .EXPORT _RTC_GetTicks
+ .EXPORT _System_GetOSVersion
+ .EXPORT _SysCalljmp
+ .ALIGN	4
+
+_RTC_GetTicks:
+	mov.l SYSCALL,r1
+	mov.l #H'03B,r0
+	jmp @r1
+	nop
+
+_System_GetOSVersion:
+	mov.l SYSCALL,r1
+	mov.l #H'02EE,r0
+	jmp @r1
+	nop
+
+;int SysCalljmp( int r4, int r5, int r6, int r7, int No);
+
+_SysCalljmp:
+	mov.l	SYSCALL,r1
+	mov.l	@r15,r0
+	jmp	@r1
+	nop
+
+ .ALIGN	4
+SYSCALL: .DATA.L H'80010070
+ .END

@@ -1,0 +1,128 @@
+;===============================================================================
+;
+; Ftune is SH7337/SH7355 CPG&BSC tuning utility for fx-9860G/GII series  v1.01
+;
+; copyright(c)2014,2015 by sentaro21
+; e-mail sentaro21@pm.matrix.jp
+;
+;===============================================================================
+ .SECTION P,CODE
+ .EXPORT _tcount
+ .EXPORT _memread
+ .EXPORT _readSR
+ .EXPORT _writeSR
+ .EXPORT _MEMtestsR
+ .EXPORT _MEMtestsW
+
+ .ALIGN	4
+_tcount:
+	MOV	#-1,R0
+TL00: 	ADD	#1,R0
+	MOV.l 	@R4,R3
+	TST	R3,R3
+	BF	TL00
+     	RTS
+	NOP
+
+ .ALIGN	4
+_memread:
+      	mov #-1,R0
+ML00: 	add #1,R0
+	mov #8,R7
+	mov.l @R4,R1
+	mov.l @R4,R1
+	mov.l @R4,R1
+ML02:	mov.l @R4,R1
+	mov.l @R4,R1
+	mov.l @R4,R1
+	mov.l @R4,R1
+	mov.l @R4,R1
+	mov.l @R4,R1
+	mov.l @R4,R1
+	mov.l @R4,R1
+	mov.l @R4,R1
+	mov.l @R4,R1
+
+	mov.l @R4,R1
+	mov.l @R4,R1
+	mov.l @R4,R1
+	mov.l @R4,R1
+	mov.l @R4,R1
+	mov.l @R4,R1
+	mov.l @R4,R1
+	mov.l @R4,R1
+	mov.l @R4,R1
+	mov.l @R4,R1
+
+	mov.l @R4,R1
+	mov.l @R4,R1
+	dt R7
+	bf ML02
+
+	mov.l @R5,R3
+	tst R3,R3
+	bf ML00
+	rts
+	nop
+
+ .ALIGN	4
+;int readSR(void)
+_readSR:                       ; function:
+	 STC	SR,R0
+	 RTS
+	 NOP
+ .ALIGN	4
+;void writeSR(int value)
+_writeSR:                       ; function:
+	 LDC	R4,SR
+	 RTS
+	 NOP
+
+ .ALIGN	4
+;unsigned int* MEMtestsR(volatile unsigned int*MEM,volatile unsigned int *FLLFRQ,int FLL,int n)
+_MEMtestsR:
+	mov	r4,r0
+LOOPR:
+	mov.l	@r0,r3
+	mov.l	@r0+,r2
+	cmp/eq	r2,r3
+	bf	RETR
+	dt	r7
+	bf/s	LOOPR
+	nop
+	mov	#0,r0
+RETR:
+	mov.l	r6,@r5
+	rts
+	nop
+
+ .ALIGN	4
+;unsigned int* MEMtestsW(volatile unsigned int*MEM,volatile unsigned int *FLLFRQ,int FLL,int n)
+_MEMtestsW:
+	mov.l	K5555,r2
+	mov.l	KAAAA,r3
+	mov	r4,r0
+LOOPW:
+	mov.l	r3,@r0
+	mov.l	r2,@r0
+	mov.l	@r0,r4
+	cmp/eq	r2,r4
+	bf	RETW
+	mov.l	r2,@r0
+	mov.l	r3,@r0
+	mov.l	@r0+,r4
+	cmp/eq	r3,r4
+	bf	RETW
+	dt	r7
+	bf/s	LOOPW
+	nop
+	mov	#0,r0
+RETW:
+	mov.l	r6,@r5
+	rts
+	nop
+ .ALIGN	4
+K5555:	.DATA.L	H'55555555
+KAAAA:	.DATA.L	H'AAAAAAAA
+
+ .END

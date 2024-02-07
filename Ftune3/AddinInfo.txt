@@ -1,0 +1,12 @@
+//------------------------------------------------------------------
+// Addin-Application header control file, created with the CASIO SDK
+//------------------------------------------------------------------
+[OUTPUT]     : "FTUNE3.G1A"
+[BINDATA]    : "FXADDINror.bin"
+[DISPNAME]   : "Ftune3"
+[APPNAME]    : "@FTUNE3"
+[VERSION]    : "02.40.1000"
+[APL_ICON]   : "MainIcon.bmp"
+[MODULE_NUM] : 0
+[MOD1_TITLE] : "ftune2"
+[MOD1_ICON]  : "eActivityIcon.bmp"
