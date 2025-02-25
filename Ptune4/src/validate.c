@@ -26,7 +26,7 @@ bool exceed_limit()
     const clock_frequency_t *freq = clock_freq();
     return (freq->FLL * freq->PLL > PLL_CLK_MAX) ||
            (freq->Iphi_f > CPU_CLK_MAX) || (freq->Sphi_f > SHW_CLK_MAX) ||
-           (freq->Bphi_f > BUS_CLK_MAX) || (freq->Pphi_f > IO_CLK_MAX);
+           (freq->Bphi_f > BUS_CLK_MAX) || (freq->Pphi_f > IO_CLK_MAX && freq->Pphi_div == 64);
 }
 
 unsigned int best_rom_wait(u32 Bphi_f)
