@@ -6,9 +6,6 @@
 #include "settings.h"
 #include "validate.h"
 
-#define ROM_MARGIN 5
-#define RAM_MARGIN 5
-
 #define CS2WCR_DEFAULT WAIT_2
 #define CS0WCR_DEFAULT WAIT_3
 

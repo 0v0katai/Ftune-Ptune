@@ -12,11 +12,16 @@
 
 #include "util.h"
 #include "validate.h"
-#include "memcheck.h"
+#include "mem_test.h"
 #include "dhrystone.h"
 #include "settings.h"
 
 // #define ENABLE_FP
+// #define ENABLE_GDB
+
+#ifdef ENABLE_GDB
+#include <gint/gdb.h>
+#endif
 
 u32 roR[] =
     {
@@ -54,7 +59,11 @@ static void print_preset(int current)
 }
 
 int main()
-{
+{   
+#ifdef ENABLE_GDB
+    gdb_start_on_exception();
+#endif
+    
     key_event_t key;
     u8 select = SELECT_FLL;
     bool enable_dhrystone = false;
@@ -216,7 +225,6 @@ int main()
             if (!key.shift)
                 break;
         case KEY_SETTINGS:
-            // sdram_test();
             settings_menu();
             break;
 

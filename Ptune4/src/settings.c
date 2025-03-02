@@ -56,6 +56,7 @@ void settings_menu()
         fkey_action(1, "+");
         fkey_action(2, "-");
         fkey_action(5, "Init");
+        fkey_button(6, "RAM");
 
         dupdate();
         key = getkey();
@@ -88,6 +89,11 @@ void settings_menu()
         case KEY_F5:
         case KEY_NEXTTAB:
             settings[select] = settings_def[select];
+            break;
+
+        case KEY_F6:
+        case KEY_PAGEUP:
+            sdram_test();
             break;
 
         case KEY_EXIT:

@@ -44,6 +44,9 @@ enum raR_10k_table
     raR_10    = 10000-0000
 };
 
+#define ROM_MARGIN 5
+#define RAM_MARGIN 5
+
 // void change_FLL(const i8 value);
 // void change_PLL(const i8 value);
 unsigned int best_rom_wait(u32 Bphi_f);

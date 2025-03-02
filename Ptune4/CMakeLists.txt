@@ -18,6 +18,9 @@ set(SOURCES
   src/validate.c
   src/dhrystone.c
   src/settings.c
+  src/mem_read.s
+  src/mem_write.s
+  src/mem_test.c
 )
 # Shared assets, fx-9860G-only assets and fx-CG-50-only assets
 set(ASSETS
@@ -41,7 +44,8 @@ target_compile_options(Ptune4 PRIVATE -Wall -Wextra -Os -g -flto
   -Wno-error=implicit-int
   -Wno-implicit-function-declaration
   -Wno-implicit-int
-  -Wno-return-type)
+  -Wno-return-type
+  -fpermissive)
 target_link_options(Ptune4 PRIVATE -flto=auto -Wl,-Map=map -Wl,--print-memory-usage)
 target_link_libraries(Ptune4 Gint::Gint LibProf::LibProf)
 

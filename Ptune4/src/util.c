@@ -213,4 +213,16 @@ void msg_box(int size, int center_position, char const *text)
 
 }
 
+void row_clear(int row)
+{
+	int y1 = ROW_Y + ROW_H * (row - 1);
+	int y2 = y1 + ROW_H;
+
+	#if GINT_RENDER_MONO
+	drect(0, y1, 125, y2 - 1, C_WHITE);
+	#elif GINT_RENDER_RGB
+	drect(0, y1, DWIDTH - 1, y2 - 1, C_WHITE);
+	#endif
+}
+
 #endif /* FXCG50 */
