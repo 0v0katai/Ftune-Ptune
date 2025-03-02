@@ -24,7 +24,7 @@ enum select_option
 
 static void about()
 {
-    row_print(9, 1, "Ptune4 v0.01");
+    row_print(9, 1, "Ptune4 v0.02");
     row_print(10, 1, "Copyright (C) 2025 Sentaro21, CalcLoverHK");
     row_print(11, 1, "This software is licensed under MIT/X11.");
 }

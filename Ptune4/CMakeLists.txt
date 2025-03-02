@@ -1,7 +1,7 @@
 # Configure with [fxsdk build-fx] or [fxsdk build-cg], which provide the
 # toolchain file and module path of the fxSDK
 
-set(PTUNE4_VERSION "00.01.0000")
+set(PTUNE4_VERSION "00.02.0000")
 cmake_minimum_required(VERSION 3.15)
 project(Ptune4 LANGUAGES ASM C VERSION ${PTUNE4_VERSION})
 
