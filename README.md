@@ -15,10 +15,10 @@ Ptune4 | fx-CG100, Graph Math+
 
 ## Authors
 
-[Sentaro21](mailto:sentaro21@pm.matrix.jp)
+[Sentaro21](mailto:sentaro21@pm.matrix.jp)  
 CalcLoverHK (Ptune4)
 
 ## License
 
-GNU General Public License, version 2 or later (Ftune/2/3, Ptune2/3)
-The MIT/X11 License (Ptune4)
+GNU General Public License, version 2 or later (except Ptune4)  
+MIT/X11 License (Ptune4)
