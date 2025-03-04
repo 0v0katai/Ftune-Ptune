@@ -9,6 +9,7 @@
 #include <libprof.h>
 #include <gint/mpu/cpg.h>
 #include <gint/mpu/bsc.h>
+#include <gint/gdb.h>
 
 #include "util.h"
 #include "validate.h"
@@ -18,10 +19,6 @@
 
 // #define ENABLE_FP
 // #define ENABLE_GDB
-
-#ifdef ENABLE_GDB
-#include <gint/gdb.h>
-#endif
 
 u32 roR[] =
     {
