@@ -17,7 +17,7 @@ static int ram_ad(int FLF, volatile u32 *RAM, int block_size)
     cpu_atomic_start();
     CPG.FLLFRQ.FLF = FLF;
     cpg_compute_freq();
-    BSC.CS0WCR.WR = best_rom_wait(clock_freq()->Bphi_f * (100 - RAM_MARGIN) / 100) + 1;
+    BSC.CS0WCR.WR = best_rom_wait(clock_freq()->Bphi_f * (100ull - RAM_MARGIN) / 100) + 1;
     if (*RAM == *RAM)
         ad = mem_write(RAM, &CPG.FLLFRQ.lword, FLF_x810, block_size);
     cpu_atomic_end();
@@ -27,7 +27,7 @@ static int ram_ad(int FLF, volatile u32 *RAM, int block_size)
 static int loop_write_test()
 {
     u32 temp[WRITE_N+1];
-    u32 *write_area = ((u32)&temp & 0x0FFFFFFF) | 0xA0000000;
+    u32 *write_area = (u32 *)(((u32)&temp & 0x0FFFFFFF) | 0xA0000000);
     
     row_print(13, 1, "RAM select: 0x%08x", write_area);
     row_print(14, 1, "Write Test");

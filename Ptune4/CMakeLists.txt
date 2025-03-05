@@ -41,8 +41,7 @@ target_include_directories(Ptune4 PRIVATE
 target_compile_options(Ptune4 PRIVATE -Wall -Wextra -Os -g -flto
   -Wno-implicit-fallthrough
   -Wno-implicit-function-declaration
-  -Wno-implicit-int
-  -fpermissive)
+  -Wno-implicit-int)
 target_link_options(Ptune4 PRIVATE -flto=auto -Wl,-Map=map -Wl,--print-memory-usage)
 target_link_libraries(Ptune4 Gint::Gint LibProf::LibProf)
 

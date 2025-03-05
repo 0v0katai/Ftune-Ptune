@@ -20,17 +20,11 @@
 // #define ENABLE_FP
 // #define ENABLE_GDB
 
-u32 roR[] =
+i32 roR[] =
     {
         roR_0, roR_1, roR_2, roR_3, roR_4,
         roR_5, roR_6, roR_8, roR_10, roR_12,
-        (roR_12 * 2 - roR_10) * 99 / 100,
-        ((roR_12 * 2 - roR_10) * 99 / 100 * 2 - roR_10) * 95 / 100};
-
-u32 raR[] =
-    {
-        raR_0, raR_1, raR_2, raR_3, raR_4,
-        raR_5, raR_6, raR_8, raR_10};
+        roR_14, roR_18};
 
 enum select_option
 {
@@ -162,7 +156,7 @@ int main()
         {
             u32 time_dhrystone = prof_exec(dhrystone(DHRY_LOOP));
             row_print(12, 25, "Dhry10000: %d us", time_dhrystone);
-            row_print(13, 25, "(%llu Dhry/s)", DHRY_LOOP * (u64)1000000 / time_dhrystone);
+            row_print(13, 25, "(%d Dhry/s)", DHRY_LOOP * 1000000ull / time_dhrystone);
         }
 
         dupdate();
