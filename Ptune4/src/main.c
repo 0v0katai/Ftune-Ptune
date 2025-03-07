@@ -53,6 +53,7 @@ int main()
 {   
 #ifdef ENABLE_GDB
     gdb_start_on_exception();
+    __asm__("trapa #42");
 #endif
     
     key_event_t key;
@@ -183,10 +184,6 @@ int main()
             enable_dhrystone = !enable_dhrystone;
             break;
 
-            // case KEY_SQRT:
-            //     CPG.SSCGCR.SSEN ^= 1;
-            //     break;
-
         case KEY_UP:
             if (select)
                 select--;
@@ -201,13 +198,6 @@ int main()
                 BSC.CS0WCR.WR++;
             break;
         case KEY_DIV:
-            // if (BSC.CS0WCR.WR == 0) break;
-            // if (best_rom_wait() > BSC.CS0WCR.WR) break;
-            // if (best_rom_wait() > (BSC.CS0WCR.WR - 1))
-            // {
-            //     if (f->Bphi_f/10000 > roR[BSC.CS0WCR.WR - 1]*105/100) break;
-            //     BSC.CS0WCR.WR--;
-            // }
             if (BSC.CS0WCR.WR > best_rom_wait(f.Bphi_f))
                 BSC.CS0WCR.WR--;
             break;
@@ -215,6 +205,7 @@ int main()
         case KEY_MENU:
             if (!key.shift)
                 break;
+            __attribute__((fallthrough));
         case KEY_SETTINGS:
             settings_menu();
             break;

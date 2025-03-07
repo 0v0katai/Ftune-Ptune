@@ -96,6 +96,8 @@ void fkey_menu(int position, char const *text);
 
 void msg_box(int size, int center_position, char const *text);
 
+void row_clear(int row);
+
 #endif /* FXCG50 */
 
 //---

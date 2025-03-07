@@ -38,10 +38,7 @@ fxconv_declare_assets(${ASSETS} ${ASSETS_fx} ${ASSETS_cg} WITH_METADATA)
 add_executable(Ptune4 ${SOURCES} ${ASSETS} ${ASSETS_${FXSDK_PLATFORM}})
 target_include_directories(Ptune4 PRIVATE
   "${CMAKE_CURRENT_SOURCE_DIR}/include")
-target_compile_options(Ptune4 PRIVATE -Wall -Wextra -Os -g -flto
-  -Wno-implicit-fallthrough
-  -Wno-implicit-function-declaration
-  -Wno-implicit-int)
+target_compile_options(Ptune4 PRIVATE -Wall -Wextra -Os -g -flto)
 target_link_options(Ptune4 PRIVATE -flto=auto -Wl,-Map=map -Wl,--print-memory-usage)
 target_link_libraries(Ptune4 Gint::Gint LibProf::LibProf)
 

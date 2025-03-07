@@ -4,6 +4,7 @@
 
 #include "settings.h"
 #include "validate.h"
+#include "mem_test.h"
 
 i32 settings[] =
     {

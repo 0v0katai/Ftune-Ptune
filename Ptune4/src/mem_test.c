@@ -10,10 +10,9 @@
 
 #define WRITE_N 2000
 
-static int ram_ad(int FLF, volatile u32 *RAM, int block_size)
+static u32 *ram_ad(int FLF, volatile u32 *RAM, int block_size)
 {
-    u32 *ad;
-    ad = RAM;
+    u32 *ad = (u32 *)RAM;
     cpu_atomic_start();
     CPG.FLLFRQ.FLF = FLF;
     cpg_compute_freq();
@@ -21,7 +20,7 @@ static int ram_ad(int FLF, volatile u32 *RAM, int block_size)
     if (*RAM == *RAM)
         ad = mem_write(RAM, &CPG.FLLFRQ.lword, FLF_x810, block_size);
     cpu_atomic_end();
-    return (int)ad;
+    return ad;
 }
 
 static int loop_write_test()
@@ -45,7 +44,7 @@ static int loop_write_test()
     for (int FLF = 900; FLF < 2000; FLF += 2)
     {
         if (ram_ad(FLF, write_area, WRITE_N))
-            return Bphi_f * (100ull - RAM_MARGIN) / 100;
+            break;
 
         Bphi_f = clock_freq()->Bphi_f;
         row_clear(4);
@@ -53,6 +52,8 @@ static int loop_write_test()
         row_print_color(4, 8, C_BLUE, C_WHITE, "%d KHz", Bphi_f / 1000);
         dupdate();
     }
+
+    return Bphi_f * (100ull - RAM_MARGIN) / 100;
 }
 
 void sdram_test()
