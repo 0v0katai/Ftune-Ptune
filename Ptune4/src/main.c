@@ -107,7 +107,7 @@ int main()
 
         print_options(1, 1, option, select);
         row_print(9, 2, "roR %d", rom_wait[BSC.CS0WCR.WR]);
-        row_print(10, 12, "CL %d", BSC.CS3WCR.A3CL + 1);
+        row_print(10, 2, "CL %d", BSC.CS3WCR.A3CL + 1);
 
         const clock_frequency_t f = *clock_freq();
         row_print(1, 7, "%d", f.FLL);
@@ -133,19 +133,17 @@ int main()
         row_print(6, 12, "(%d KHz)", f.Pphi_f / 1000);
 #endif
 
-        u32 time_dupdate = prof_exec(dupdate());
-        row_print(12, 1, "dupdate(): %d us", time_dupdate);
+        const u32 time_dupdate = prof_exec(dupdate());
 #ifdef ENABLE_FP
-        row_print(13, 1, "(%3.2f FPS)", 1000000.0f / time_dupdate);
+        row_print(12, 2, "dupdate(): %d us (%3.2f FPS)", time_dupdate, 1000000.0f / time_dupdate);
 #else
-        row_print(13, 1, "(%d FPS)", 1000000 / time_dupdate);
+        row_print(12, 2, "dupdate(): %d us (%d FPS)", time_dupdate, 1000000 / time_dupdate);
 #endif
 
         if (enable_dhrystone)
         {
-            u32 time_dhrystone = prof_exec(dhrystone(DHRY_LOOP));
-            row_print(12, 25, "Dhry10000: %d us", time_dhrystone);
-            row_print(13, 25, "(%llu Dhry/s)", DHRY_LOOP * 1000000ull / time_dhrystone);
+            const u32 time_dhrystone = prof_exec(dhrystone(DHRY_LOOP));
+            row_print(13, 2, "Dhry%d: %d us (%llu Dhry/s)", DHRY_LOOP, time_dhrystone, DHRY_LOOP * 1000000ull / time_dhrystone);
         }
 
         dupdate();
