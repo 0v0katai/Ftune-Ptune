@@ -21,6 +21,7 @@ set(SOURCES
   src/mem_read.s
   src/mem_write.s
   src/mem_test.c
+  src/bsc.c
 )
 # Shared assets, fx-9860G-only assets and fx-CG-50-only assets
 set(ASSETS

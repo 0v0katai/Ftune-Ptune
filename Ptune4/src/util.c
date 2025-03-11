@@ -56,7 +56,7 @@ void row_title(char const *format, ...)
 /* row_print(): Formatted printing in a predefined row */
 void row_print(int row, int x, char const *format, ...)
 {
-	if(row < _(0,1) || row > ROW_COUNT) return;
+	if(row < 0 || row > ROW_COUNT) return;
 
 	char str[80];
 	shortprint(str, format);
@@ -68,7 +68,7 @@ void row_print(int row, int x, char const *format, ...)
 /* row_print_color(): Formatted printing... with custom colors! */
 void row_print_color(int row, int x, int fg, int bg, char const *format, ...)
 {
-	if(row < _(0,1) || row > ROW_COUNT) return;
+	if(row < 0 || row > ROW_COUNT) return;
 
 	char str[80];
 	shortprint(str, format);
@@ -211,6 +211,20 @@ void fkey_menu(int position, char const *text)
 void msg_box(int size, int center_position, char const *text)
 {
 
+}
+
+void print_options(int row, int x, const char *option[], u8 select)
+{
+	for (int i = 0; option[i] != NULL; i++)
+    {
+		if (i == select)
+        {
+            row_print(row + i, x, ">");
+            row_print_color(row + i, x + 1, C_WHITE, C_BLACK, option[i]);
+        }
+        else
+            row_print(row + i, x + 1, option[i]);
+    }
 }
 
 void row_clear(int row)

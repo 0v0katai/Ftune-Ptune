@@ -16,6 +16,7 @@
 #include "mem_test.h"
 #include "dhrystone.h"
 #include "settings.h"
+#include "bsc.h"
 
 // #define ENABLE_FP
 // #define ENABLE_GDB
@@ -59,7 +60,7 @@ int main()
     key_event_t key;
     u8 select = SELECT_FLL;
     bool enable_dhrystone = false;
-    const char *option[] = {"FLL:", "PLL:", "IFC:", "SFC:", "BFC:", "PFC:"};
+    const char *option[] = {"FLL:", "PLL:", "IFC:", "SFC:", "BFC:", "PFC:", 0};
     const u8 rom_wait[] = {0, 1, 2, 3, 4, 5, 6, 8, 10, 12, 14, 18, 24};
 
 #ifdef ENABLE_FP
@@ -92,7 +93,6 @@ int main()
         row_print(8, 29, "CS2WCR:");
         row_print(9, 29, "CS3WCR:");
         row_print(10, 29, "CS5aWCR:");
-        // row_print(11, 29, "SSCGCR:");
 
         row_print(1, 38, "0x%08x", s.FLLFRQ);
         row_print(2, 38, "0x%08x", s.FRQCR);
@@ -104,22 +104,10 @@ int main()
         row_print(8, 38, "0x%08x", s.CS2WCR);
         row_print(9, 38, "0x%08x", s.CS3WCR);
         row_print(10, 38, "0x%08x", s.CS5aWCR);
-        // row_print(11, 38, "0x%08x", CPG.SSCGCR.SSEN);
 
-        for (int i = 0; i < 6; i++)
-        {
-            if (i == select)
-            {
-                row_print(i + 1, 1, ">");
-                row_print_color(i + 1, 2, C_WHITE, C_BLACK, option[i]);
-            }
-            else
-                row_print(i + 1, 2, option[i]);
-        }
-
+        print_options(1, 1, option, select);
         row_print(8, 2, "roR %d", rom_wait[BSC.CS0WCR.WR]);
-        row_print(9, 2, "CL %d", rom_wait[BSC.CS3WCR.A3CL + 1]);
-        row_print(10, 2, "IWW %d", BSC.CS0BCR.IWW);
+        row_print(8, 12, "CL %d", rom_wait[BSC.CS3WCR.A3CL + 1]);
 
         const clock_frequency_t f = *clock_freq();
         row_print(1, 7, "%d", f.FLL);
@@ -148,7 +136,7 @@ int main()
         u32 time_dupdate = prof_exec(dupdate());
         row_print(12, 1, "dupdate(): %d us", time_dupdate);
 #ifdef ENABLE_FP
-        row_print(13, 1, "(%3.2f FPS)", 1000000 / (float)time_dupdate);
+        row_print(13, 1, "(%3.2f FPS)", 1000000.0f / time_dupdate);
 #else
         row_print(13, 1, "(%d FPS)", 1000000 / time_dupdate);
 #endif
@@ -157,7 +145,7 @@ int main()
         {
             u32 time_dhrystone = prof_exec(dhrystone(DHRY_LOOP));
             row_print(12, 25, "Dhry10000: %d us", time_dhrystone);
-            row_print(13, 25, "(%d Dhry/s)", DHRY_LOOP * 1000000ull / time_dhrystone);
+            row_print(13, 25, "(%llu Dhry/s)", DHRY_LOOP * 1000000ull / time_dhrystone);
         }
 
         dupdate();
@@ -208,6 +196,9 @@ int main()
             __attribute__((fallthrough));
         case KEY_SETTINGS:
             settings_menu();
+            break;
+        case KEY_VARS:
+            bsc_menu();
             break;
 
         case KEY_LEFT:
