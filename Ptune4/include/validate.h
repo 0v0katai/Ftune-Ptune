@@ -31,9 +31,6 @@ enum roR_table
     roR_18    = (200 - 9) * 1000000
 };
 
-#define ROM_MARGIN 5
-#define RAM_MARGIN 5
-
 unsigned int best_rom_wait(i32 Bphi_f);
 void init_roR(i32 *roR_data);
 void up_roR_IWW();
