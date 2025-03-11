@@ -41,7 +41,7 @@ static int loop_write_test()
     
     BSC.CS0WCR.WR = best_rom_wait(clock_freq()->Bphi_f) + 2;
 
-    for (int FLF = 900; FLF < 2000; FLF += 2)
+    for (int FLF = 1200; FLF < 2000; FLF += 2)
     {
         if (ram_ad(FLF, write_area, WRITE_N))
             break;
