@@ -82,7 +82,7 @@ int main()
         print_preset(current_preset);
         fkey_menu(6, "Bench");
 
-        row_title("Ptune4 v0.02 (fx-CG100/Graph Math+)");
+        row_title("Ptune4 v0.03 (fx-CG100/Graph Math+)");
         row_print(1, 29, "FLLFRQ:");
         row_print(2, 29, "FRQCR:");
         row_print(3, 29, "CS0BCR:");
