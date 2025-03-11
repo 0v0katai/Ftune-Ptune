@@ -15,11 +15,10 @@ static void struct_csnbcr(sh7305_bsc_CSnBCR_t reg, u8 val[])
 
 static void print_csnbcr(select_option select)
 {
-    sh7305_bsc_t addr = BSC;
     const char *bcr_reg_name[] = {"IWW", "IWRWD", "IWRWS", "IWRRD", "IWRRS", 0};
     const u8 bcr_wait[] = {0, 1, 2, 4, 6, 8, 10, 12};
     const sh7305_bsc_CSnBCR_t bcr_addr[] =
-        {addr.CS0BCR, addr.CS2BCR, addr.CS3BCR, addr.CS4BCR, addr.CS5ABCR, addr.CS5BBCR, addr.CS6ABCR, addr.CS6BBCR};
+        {BSC.CS0BCR, BSC.CS2BCR, BSC.CS3BCR, BSC.CS4BCR, BSC.CS5ABCR, BSC.CS5BBCR, BSC.CS6ABCR, BSC.CS6BBCR};
     u8 csnbcr_val[5];
     for (int i = 0; i < 8; i++)
     {
@@ -37,7 +36,6 @@ static void print_csnbcr(select_option select)
 
 static void print_csnwcr(select_option select)
 {
-    sh7305_bsc_t addr = BSC;
     const char *csnwcr_reg_name[] = {"WW", "SW", "HW", "WR", 0};
     const char *cs3wcr_reg_name[] = {"TRP", "TRCD", "A3CL", "TRWL", "TRC", 0};
     const char *sw_hw_wait[] = {"0.5", "1.5", "2.5", "3.5"};
@@ -45,17 +43,17 @@ static void print_csnwcr(select_option select)
 
     const u8 csnwcr_2d_val[8][4] =
         {
-            {addr.CS0WCR.WW, addr.CS0WCR.SW, addr.CS0WCR.HW, addr.CS0WCR.WR},
-            {addr.CS2WCR.WW, addr.CS2WCR.SW, addr.CS2WCR.HW, addr.CS2WCR.WR},
+            {BSC.CS0WCR.WW, BSC.CS0WCR.SW, BSC.CS0WCR.HW, BSC.CS0WCR.WR},
+            {BSC.CS2WCR.WW, BSC.CS2WCR.SW, BSC.CS2WCR.HW, BSC.CS2WCR.WR},
             {0, 0, 0, 0},
-            {addr.CS4WCR.WW, addr.CS4WCR.SW, addr.CS4WCR.HW, addr.CS4WCR.WR},
-            {addr.CS5AWCR.WW, addr.CS5AWCR.SW, addr.CS5AWCR.HW, addr.CS5AWCR.WR},
-            {addr.CS5BWCR.WW, addr.CS5BWCR.SW, addr.CS5BWCR.HW, addr.CS5BWCR.WR},
-            {addr.CS6AWCR.WW, addr.CS6AWCR.SW, addr.CS6AWCR.HW, addr.CS6AWCR.WR},
-            {addr.CS6BWCR.WW, addr.CS6BWCR.SW, addr.CS6BWCR.HW, addr.CS6BWCR.WR}};
+            {BSC.CS4WCR.WW, BSC.CS4WCR.SW, BSC.CS4WCR.HW, BSC.CS4WCR.WR},
+            {BSC.CS5AWCR.WW, BSC.CS5AWCR.SW, BSC.CS5AWCR.HW, BSC.CS5AWCR.WR},
+            {BSC.CS5BWCR.WW, BSC.CS5BWCR.SW, BSC.CS5BWCR.HW, BSC.CS5BWCR.WR},
+            {BSC.CS6AWCR.WW, BSC.CS6AWCR.SW, BSC.CS6AWCR.HW, BSC.CS6AWCR.WR},
+            {BSC.CS6BWCR.WW, BSC.CS6BWCR.SW, BSC.CS6BWCR.HW, BSC.CS6BWCR.WR}};
     const u32 csnwcr_lword[8] =
-        {addr.CS0WCR.lword, addr.CS2WCR.lword, addr.CS3WCR.lword, addr.CS4WCR.lword,
-         addr.CS5AWCR.lword, addr.CS5BWCR.lword, addr.CS6AWCR.lword, addr.CS6BWCR.lword};
+        {BSC.CS0WCR.lword, BSC.CS2WCR.lword, BSC.CS3WCR.lword, BSC.CS4WCR.lword,
+         BSC.CS5AWCR.lword, BSC.CS5BWCR.lword, BSC.CS6AWCR.lword, BSC.CS6BWCR.lword};
 
     for (int i = 0; i < 8; i++)
     {
@@ -70,11 +68,11 @@ static void print_csnwcr(select_option select)
         {
             const int trc_wait[4] = {3, 4, 6, 9};
             print_options(2, 25, cs3wcr_reg_name, highlight);
-            row_print(2, 32, "%d", wr_wait[addr.CS3WCR.TRP + 1]);
-            row_print(3, 32, "%d", wr_wait[addr.CS3WCR.TRCD + 1]);
-            row_print(4, 32, "%d", wr_wait[addr.CS3WCR.A3CL + 1]);
-            row_print(5, 32, "%d", wr_wait[addr.CS3WCR.TRWL]);
-            row_print(6, 32, "%d", trc_wait[addr.CS3WCR.TRC]);
+            row_print(2, 32, "%d", wr_wait[BSC.CS3WCR.TRP + 1]);
+            row_print(3, 32, "%d", wr_wait[BSC.CS3WCR.TRCD + 1]);
+            row_print(4, 32, "%d", BSC.CS3WCR.A3CL + 1);
+            row_print(5, 32, "%d", wr_wait[BSC.CS3WCR.TRWL]);
+            row_print(6, 32, "%d", trc_wait[BSC.CS3WCR.TRC]);
             continue;
         }
 
@@ -91,13 +89,11 @@ static void print_csnwcr(select_option select)
 
 static void bsc_modify(select_option select, i8 modify)
 {
-    sh7305_bsc_t *addr = &BSC;
-
     if (select.MODE == SELECT_BCR)
     {
         sh7305_bsc_CSnBCR_t *bcr_addr[] =
-            {&addr->CS0BCR, &addr->CS2BCR, &addr->CS3BCR, &addr->CS4BCR,
-             &addr->CS5ABCR, &addr->CS5BBCR, &addr->CS6ABCR, &addr->CS6BBCR};
+            {&BSC.CS0BCR, &BSC.CS2BCR, &BSC.CS3BCR, &BSC.CS4BCR,
+             &BSC.CS5ABCR, &BSC.CS5BBCR, &BSC.CS6ABCR, &BSC.CS6BBCR};
         u8 csnbcr_val[5];
         struct_csnbcr(*bcr_addr[select.CSn], csnbcr_val);
         const i8 check = csnbcr_val[select.CSn] + modify;
@@ -131,23 +127,23 @@ static void bsc_modify(select_option select, i8 modify)
             {
             case SELECT_SW:
             {
-                const i8 check = addr->CS0WCR.SW + modify;
+                const i8 check = BSC.CS0WCR.SW + modify;
                 if (check >= 0 && check <= 3)
-                    addr->CS0WCR.SW = check;
+                    BSC.CS0WCR.SW = check;
                 return;
             }
             case SELECT_HW:
             {
-                const i8 check = addr->CS0WCR.HW + modify;
+                const i8 check = BSC.CS0WCR.HW + modify;
                 if (check >= 0 && check <= 3)
-                    addr->CS0WCR.HW = check;
+                    BSC.CS0WCR.HW = check;
                 return;
             }
             case SELECT_WR:
             {
-                const u8 check = addr->CS0WCR.WR + modify;
+                const u8 check = BSC.CS0WCR.WR + modify;
                 if (check >= best_rom_wait(clock_freq()->Bphi_f) && check <= WAIT_24)
-                    addr->CS0WCR.WR = check;
+                    BSC.CS0WCR.WR = check;
                 return;
             }
             }
@@ -157,30 +153,30 @@ static void bsc_modify(select_option select, i8 modify)
             {
             case SELECT_WW:
             {
-                const i8 check = addr->CS2WCR.WW + modify;
+                const i8 check = BSC.CS2WCR.WW + modify;
                 if (check >= 0 && check <= 7)
-                    addr->CS2WCR.WW = check;
+                    BSC.CS2WCR.WW = check;
                 return;
             }
             case SELECT_SW:
             {
-                const i8 check = addr->CS2WCR.SW + modify;
+                const i8 check = BSC.CS2WCR.SW + modify;
                 if (check >= 0 && check <= 3)
-                    addr->CS2WCR.SW = check;
+                    BSC.CS2WCR.SW = check;
                 return;
             }
             case SELECT_HW:
             {
-                const i8 check = addr->CS2WCR.HW + modify;
+                const i8 check = BSC.CS2WCR.HW + modify;
                 if (check >= 0 && check <= 3)
-                    addr->CS2WCR.HW = check;
+                    BSC.CS2WCR.HW = check;
                 return;
             }
             case SELECT_WR:
             {
-                const i8 check = addr->CS2WCR.WR + modify;
+                const i8 check = BSC.CS2WCR.WR + modify;
                 if (check >= WAIT_0 && check <= WAIT_24)
-                    addr->CS2WCR.WR = check;
+                    BSC.CS2WCR.WR = check;
                 return;
             }
             }
@@ -190,24 +186,24 @@ static void bsc_modify(select_option select, i8 modify)
             {
             case SELECT_TRP:
             {
-                const i8 check = addr->CS3WCR.TRP + modify;
+                const i8 check = BSC.CS3WCR.TRP + modify;
                 if (check >= 0 && check <= 3)
-                    addr->CS3WCR.TRP = check;
+                    BSC.CS3WCR.TRP = check;
                 return;
             }
             case SELECT_TRCD:
             {
-                const i8 check = addr->CS3WCR.TRCD + modify;
+                const i8 check = BSC.CS3WCR.TRCD + modify;
                 if (check >= 0 && check <= 3)
-                    addr->CS3WCR.TRCD = check;
+                    BSC.CS3WCR.TRCD = check;
                 return;
             }
             case SELECT_A3CL:
             {
-                const i8 check = addr->CS3WCR.A3CL + modify;
+                const i8 check = BSC.CS3WCR.A3CL + modify;
                 if (check == 1 || check == 2)
                 {
-                    addr->CS3WCR.A3CL = check;
+                    BSC.CS3WCR.A3CL = check;
                     if (check == 1)
                         *SH7305_SDMR3_CL2 = 0;
                     else
@@ -217,16 +213,16 @@ static void bsc_modify(select_option select, i8 modify)
             }
             case SELECT_TRWL:
             {
-                const i8 check = addr->CS3WCR.TRWL + modify;
+                const i8 check = BSC.CS3WCR.TRWL + modify;
                 if (check >= 0 && check <= 3)
-                    addr->CS3WCR.TRWL = check;
+                    BSC.CS3WCR.TRWL = check;
                 return;
             }
             case SELECT_TRC:
             {
-                const i8 check = addr->CS3WCR.TRC + modify;
+                const i8 check = BSC.CS3WCR.TRC + modify;
                 if (check >= 0 && check <= 3)
-                    addr->CS3WCR.TRC = check;
+                    BSC.CS3WCR.TRC = check;
                 return;
             }
             }
@@ -236,30 +232,30 @@ static void bsc_modify(select_option select, i8 modify)
             {
             case SELECT_WW:
             {
-                const i8 check = addr->CS4WCR.WW + modify;
+                const i8 check = BSC.CS4WCR.WW + modify;
                 if (check >= 0 && check <= 7)
-                    addr->CS4WCR.WW = check;
+                    BSC.CS4WCR.WW = check;
                 return;
             }
             case SELECT_SW:
             {
-                const i8 check = addr->CS4WCR.SW + modify;
+                const i8 check = BSC.CS4WCR.SW + modify;
                 if (check >= 0 && check <= 3)
-                    addr->CS4WCR.SW = check;
+                    BSC.CS4WCR.SW = check;
                 return;
             }
             case SELECT_HW:
             {
-                const i8 check = addr->CS4WCR.HW + modify;
+                const i8 check = BSC.CS4WCR.HW + modify;
                 if (check >= 0 && check <= 3)
-                    addr->CS4WCR.HW = check;
+                    BSC.CS4WCR.HW = check;
                 return;
             }
             case SELECT_WR:
             {
-                const i8 check = addr->CS4WCR.WR + modify;
+                const i8 check = BSC.CS4WCR.WR + modify;
                 if (check >= WAIT_0 && check <= WAIT_24)
-                    addr->CS4WCR.WR = check;
+                    BSC.CS4WCR.WR = check;
                 return;
             }
             }
@@ -269,30 +265,30 @@ static void bsc_modify(select_option select, i8 modify)
             {
             case SELECT_WW:
             {
-                const i8 check = addr->CS5AWCR.WW + modify;
+                const i8 check = BSC.CS5AWCR.WW + modify;
                 if (check >= 0 && check <= 7)
-                    addr->CS5AWCR.WW = check;
+                    BSC.CS5AWCR.WW = check;
                 return;
             }
             case SELECT_SW:
             {
-                const i8 check = addr->CS5AWCR.SW + modify;
+                const i8 check = BSC.CS5AWCR.SW + modify;
                 if (check >= 0 && check <= 3)
-                    addr->CS5AWCR.SW = check;
+                    BSC.CS5AWCR.SW = check;
                 return;
             }
             case SELECT_HW:
             {
-                const i8 check = addr->CS5AWCR.HW + modify;
+                const i8 check = BSC.CS5AWCR.HW + modify;
                 if (check >= 0 && check <= 3)
-                    addr->CS5AWCR.HW = check;
+                    BSC.CS5AWCR.HW = check;
                 return;
             }
             case SELECT_WR:
             {
-                const i8 check = addr->CS5AWCR.WR + modify;
+                const i8 check = BSC.CS5AWCR.WR + modify;
                 if (check >= WAIT_0 && check <= WAIT_24)
-                    addr->CS5AWCR.WR = check;
+                    BSC.CS5AWCR.WR = check;
                 return;
             }
             }
@@ -302,30 +298,30 @@ static void bsc_modify(select_option select, i8 modify)
             {
             case SELECT_WW:
             {
-                const i8 check = addr->CS5BWCR.WW + modify;
+                const i8 check = BSC.CS5BWCR.WW + modify;
                 if (check >= 0 && check <= 7)
-                    addr->CS5BWCR.WW = check;
+                    BSC.CS5BWCR.WW = check;
                 return;
             }
             case SELECT_SW:
             {
-                const i8 check = addr->CS5BWCR.SW + modify;
+                const i8 check = BSC.CS5BWCR.SW + modify;
                 if (check >= 0 && check <= 3)
-                    addr->CS5BWCR.SW = check;
+                    BSC.CS5BWCR.SW = check;
                 return;
             }
             case SELECT_HW:
             {
-                const i8 check = addr->CS5BWCR.HW + modify;
+                const i8 check = BSC.CS5BWCR.HW + modify;
                 if (check >= 0 && check <= 3)
-                    addr->CS5BWCR.HW = check;
+                    BSC.CS5BWCR.HW = check;
                 return;
             }
             case SELECT_WR:
             {
-                const i8 check = addr->CS5BWCR.WR + modify;
+                const i8 check = BSC.CS5BWCR.WR + modify;
                 if (check >= WAIT_0 && check <= WAIT_24)
-                    addr->CS5BWCR.WR = check;
+                    BSC.CS5BWCR.WR = check;
                 return;
             }
             }
@@ -335,30 +331,30 @@ static void bsc_modify(select_option select, i8 modify)
             {
             case SELECT_WW:
             {
-                const i8 check = addr->CS6AWCR.WW + modify;
+                const i8 check = BSC.CS6AWCR.WW + modify;
                 if (check >= 0 && check <= 7)
-                    addr->CS6AWCR.WW = check;
+                    BSC.CS6AWCR.WW = check;
                 return;
             }
             case SELECT_SW:
             {
-                const i8 check = addr->CS6AWCR.SW + modify;
+                const i8 check = BSC.CS6AWCR.SW + modify;
                 if (check >= 0 && check <= 3)
-                    addr->CS6AWCR.SW = check;
+                    BSC.CS6AWCR.SW = check;
                 return;
             }
             case SELECT_HW:
             {
-                const i8 check = addr->CS6AWCR.HW + modify;
+                const i8 check = BSC.CS6AWCR.HW + modify;
                 if (check >= 0 && check <= 3)
-                    addr->CS6AWCR.HW = check;
+                    BSC.CS6AWCR.HW = check;
                 return;
             }
             case SELECT_WR:
             {
-                const i8 check = addr->CS6AWCR.WR + modify;
+                const i8 check = BSC.CS6AWCR.WR + modify;
                 if (check >= WAIT_0 && check <= WAIT_24)
-                    addr->CS6AWCR.WR = check;
+                    BSC.CS6AWCR.WR = check;
                 return;
             }
             }
@@ -368,30 +364,30 @@ static void bsc_modify(select_option select, i8 modify)
             {
             case SELECT_WW:
             {
-                const i8 check = addr->CS6BWCR.WW + modify;
+                const i8 check = BSC.CS6BWCR.WW + modify;
                 if (check >= 0 && check <= 7)
-                    addr->CS6BWCR.WW = check;
+                    BSC.CS6BWCR.WW = check;
                 return;
             }
             case SELECT_SW:
             {
-                const i8 check = addr->CS6BWCR.SW + modify;
+                const i8 check = BSC.CS6BWCR.SW + modify;
                 if (check >= 0 && check <= 3)
-                    addr->CS6BWCR.SW = check;
+                    BSC.CS6BWCR.SW = check;
                 return;
             }
             case SELECT_HW:
             {
-                const i8 check = addr->CS6BWCR.HW + modify;
+                const i8 check = BSC.CS6BWCR.HW + modify;
                 if (check >= 0 && check <= 3)
-                    addr->CS6BWCR.HW = check;
+                    BSC.CS6BWCR.HW = check;
                 return;
             }
             case SELECT_WR:
             {
-                const i8 check = addr->CS6BWCR.WR + modify;
+                const i8 check = BSC.CS6BWCR.WR + modify;
                 if (check >= WAIT_0 && check <= WAIT_24)
-                    addr->CS6BWCR.WR = check;
+                    BSC.CS6BWCR.WR = check;
                 return;
             }
             }
