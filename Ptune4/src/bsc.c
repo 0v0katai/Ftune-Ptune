@@ -404,6 +404,7 @@ void bsc_menu()
 
     while (true)
     {
+        const sh7305_bsc_t unused = BSC;
         dclear(C_WHITE);
 
         if (select.MODE == SELECT_BCR)
