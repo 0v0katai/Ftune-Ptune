@@ -425,7 +425,6 @@ void bsc_menu()
         dupdate();
         key = getkey();
 
-        select_option prev_select = select;
         switch (key.key)
         {
         case KEY_F1:
@@ -440,36 +439,26 @@ void bsc_menu()
         case KEY_NEXTTAB:
         case KEY_VARS:
             select.MODE = !select.MODE;
-            if (select.CSn != SELECT_CS3WCR && select.REG == SELECT_TRC)
-                select.REG--;
-            if (select.CSn == SELECT_CS0BCR && select.REG == SELECT_WW)
-                select.REG++;
             break;
         case KEY_LEFT:
             if (select.CSn)
                 select.CSn--;
-            if (select.REG == SELECT_TRC)
-                select.REG--;
             break;
         case KEY_RIGHT:
             if (select.CSn < SELECT_CS6BBCR)
                 select.CSn++;
-            if (select.REG == SELECT_TRC)
-                select.REG--;
             break;
         case KEY_UP:
             if (select.REG)
                 select.REG--;
             break;
         case KEY_DOWN:
-            if (select.REG < SELECT_IWRRS - select.MODE + (select.CSn == SELECT_CS3WCR))
+            if (select.REG < SELECT_IWRRS)
                 select.REG++;
             break;
         case KEY_PAGEUP:
             if (select.CSn >= SELECT_CS5ABCR)
                 select.CSn -= 4;
-            if (select.CSn == SELECT_CS0BCR && select.REG == SELECT_WW)
-                select.REG++;
             break;
         case KEY_PAGEDOWN:
             if (select.CSn <= SELECT_CS4BCR)
@@ -478,7 +467,9 @@ void bsc_menu()
         case KEY_EXIT:
             return;
         }
+        if (select.MODE == SELECT_WCR && select.CSn != SELECT_CS3WCR && select.REG == SELECT_TRC)
+            select.REG--;
         if (select.byte == 0b01000000)
-            select = prev_select;
+            select.REG++;
     }
 }
