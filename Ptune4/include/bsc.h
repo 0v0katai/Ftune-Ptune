@@ -1,7 +1,7 @@
 #include <gint/mpu/bsc.h>
 
-#define SH7305_SDMR3_CL2 ((volatile uint8_t *)0xfec15040)
-#define SH7305_SDMR3_CL3 ((volatile uint8_t *)0xfec15060)
+#define SH7305_SDMR3_CL2 ((volatile uint16_t *)0xfec15040)
+#define SH7305_SDMR3_CL3 ((volatile uint16_t *)0xfec15060)
 
 enum select_bwcr_option
 {
