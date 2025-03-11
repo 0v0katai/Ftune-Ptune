@@ -56,9 +56,9 @@ enum select_mode_option
 };
 
 typedef byte_union(select_option,
-    u8 : 1;
-    u8 MODE : 1;
-    u8 CSn : 3;
-    u8 REG : 3;);
+                   u8 : 1;
+                   u8 MODE : 1;
+                   u8 CSn : 3;
+                   u8 REG : 3;);
 
 void bsc_menu();

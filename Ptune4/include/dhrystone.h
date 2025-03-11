@@ -371,11 +371,7 @@
 
 /* General definitions: */
 
-#include <gint/display.h>
-#include <gint/keyboard.h>
 #include <math.h>
-#include <fxlibc/printf.h>
-#include <libprof.h>
 #include <stdlib.h>
 #include <string.h>
 

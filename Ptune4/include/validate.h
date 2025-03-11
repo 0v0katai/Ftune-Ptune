@@ -34,8 +34,6 @@ enum roR_table
 #define ROM_MARGIN 5
 #define RAM_MARGIN 5
 
-// void change_FLL(const i8 value);
-// void change_PLL(const i8 value);
 unsigned int best_rom_wait(i32 Bphi_f);
 void init_roR(i32 *roR_data);
 void up_roR_IWW();
