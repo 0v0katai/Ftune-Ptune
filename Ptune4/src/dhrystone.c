@@ -34,6 +34,7 @@
 
 #include <dhrystone.h>
 
+#ifdef ENABLE_DHRY
 #define REG
 
 /* Global Variables: */
@@ -462,3 +463,4 @@ void dhrystone(long Number_Of_Runs)
     }
   */
 }
+#endif

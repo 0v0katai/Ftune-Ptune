@@ -374,6 +374,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
+#include "config.h"
 
 void dhrystone(long Number_Of_Runs);
 #define DHRY_LOOP 10000

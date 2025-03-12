@@ -9,7 +9,9 @@
 #include "validate.h"
 #include "mem_test.h"
 #include "dhrystone.h"
+#include "whetstone.h"
 #include "util.h"
+#include "config.h"
 
 #define WRITE_N 2000
 
@@ -116,7 +118,15 @@ void run_benchmark()
 #endif
     row_highlight(12);
 
+#ifdef ENABLE_DHRY
     const u32 time_dhrystone = prof_exec(dhrystone(DHRY_LOOP));
-    row_print(13, 2, "Dhry%d: %d us (%llu Dhry/s)", DHRY_LOOP, time_dhrystone, DHRY_LOOP * 1000000ull / time_dhrystone);
+    row_print(13, 2, "INT: %llu Dhrystone/s", DHRY_LOOP * 1000000ull / time_dhrystone);
+#endif
+
+#ifdef ENABLE_WHET
+    const u32 time_whetstone = prof_exec(whetstone());
+    row_print(13, 26, "DBL: %d KWIPS", 100 * ITERATIONS * 1000000 / time_whetstone);
+#endif
+    
     row_highlight(13);
 }

@@ -17,6 +17,7 @@ set(SOURCES
   src/util.c
   src/validate.c
   src/dhrystone.c
+  src/whetstone.c
   src/settings.c
   src/mem_read.s
   src/mem_write.s

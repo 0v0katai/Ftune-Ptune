@@ -17,9 +17,7 @@
 #include "dhrystone.h"
 #include "settings.h"
 #include "bsc.h"
-
-// #define ENABLE_FP
-// #define ENABLE_GDB
+#include "config.h"
 
 i32 roR[] =
     {
@@ -106,8 +104,8 @@ int main()
         row_print(10, 38, "0x%08x", s.CS5aWCR);
 
         print_options(1, 1, option, select);
-        row_print(9, 2, "roR %d", rom_wait[BSC.CS0WCR.WR]);
-        row_print(10, 2, "CL %d", BSC.CS3WCR.A3CL + 1);
+        row_print(8, 2, "roR %d", rom_wait[BSC.CS0WCR.WR]);
+        row_print(9, 2, "CL %d", BSC.CS3WCR.A3CL + 1);
 
         const clock_frequency_t f = *clock_freq();
         row_print(1, 7, "%d", f.FLL);
