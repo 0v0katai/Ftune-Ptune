@@ -2,7 +2,7 @@
 
 .global _mem_write
 
-.align 4
+.balign 4
 
 _mem_write:
 	mov.l	K5555, r2

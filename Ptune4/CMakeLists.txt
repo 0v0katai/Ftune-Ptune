@@ -20,6 +20,7 @@ set(SOURCES
   src/settings.c
   src/mem_read.s
   src/mem_write.s
+  src/mem_bench.s
   src/mem_test.c
   src/bsc.c
 )

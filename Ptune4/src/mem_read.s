@@ -2,7 +2,7 @@
 
 .global _mem_read
 
-.align 4
+.balign 4
 
 _mem_read:
 	mov	r4, r0

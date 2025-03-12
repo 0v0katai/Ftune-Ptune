@@ -59,7 +59,7 @@ int main()
     
     key_event_t key;
     u8 select = SELECT_FLL;
-    bool enable_dhrystone = false;
+    bool benchmark = false;
     const char *option[] = {"FLL:", "PLL:", "IFC:", "SFC:", "BFC:", "PFC:", 0};
     const u8 rom_wait[] = {0, 1, 2, 3, 4, 5, 6, 8, 10, 12, 14, 18, 24};
 
@@ -133,18 +133,8 @@ int main()
         row_print(6, 12, "(%d KHz)", f.Pphi_f / 1000);
 #endif
 
-        const u32 time_dupdate = prof_exec(dupdate());
-#ifdef ENABLE_FP
-        row_print(12, 2, "dupdate(): %d us (%3.2f FPS)", time_dupdate, 1000000.0f / time_dupdate);
-#else
-        row_print(12, 2, "dupdate(): %d us (%d FPS)", time_dupdate, 1000000 / time_dupdate);
-#endif
-
-        if (enable_dhrystone)
-        {
-            const u32 time_dhrystone = prof_exec(dhrystone(DHRY_LOOP));
-            row_print(13, 2, "Dhry%d: %d us (%llu Dhry/s)", DHRY_LOOP, time_dhrystone, DHRY_LOOP * 1000000ull / time_dhrystone);
-        }
+        if (benchmark)
+            run_benchmark();
 
         dupdate();
         key = getkey();
@@ -167,7 +157,7 @@ int main()
 
         case KEY_F6:
         case KEY_PAGEUP:
-            enable_dhrystone = !enable_dhrystone;
+            benchmark = !benchmark;
             break;
 
         case KEY_UP:
