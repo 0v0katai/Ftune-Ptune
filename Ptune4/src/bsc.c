@@ -96,25 +96,25 @@ static void bsc_modify(select_option select, i8 modify)
              &BSC.CS5ABCR, &BSC.CS5BBCR, &BSC.CS6ABCR, &BSC.CS6BBCR};
         u8 csnbcr_val[5];
         struct_csnbcr(*bcr_addr[select.CSn], csnbcr_val);
-        const i8 check = csnbcr_val[select.CSn] + modify;
+        const i8 check = csnbcr_val[select.REG] + modify;
         if (check < 0 || check > 11)
             return;
         switch (select.REG)
         {
         case SELECT_IWW:
-            bcr_addr[select.CSn]->IWW += modify;
+            bcr_addr[select.CSn]->IWW = check;
             return;
         case SELECT_IWRWD:
-            bcr_addr[select.CSn]->IWRWD += modify;
+            bcr_addr[select.CSn]->IWRWD = check;
             return;
         case SELECT_IWRWS:
-            bcr_addr[select.CSn]->IWRWS += modify;
+            bcr_addr[select.CSn]->IWRWS = check;
             return;
         case SELECT_IWRRD:
-            bcr_addr[select.CSn]->IWRRD += modify;
+            bcr_addr[select.CSn]->IWRRD = check;
             return;
         case SELECT_IWRRS:
-            bcr_addr[select.CSn]->IWRRS += modify;
+            bcr_addr[select.CSn]->IWRRS = check;
             return;
         }
     }
