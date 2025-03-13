@@ -83,25 +83,14 @@ int main()
         row_title("Ptune4 v0.03 (fx-CG100/Graph Math+)");
         row_print(1, 29, "FLLFRQ:");
         row_print(2, 29, "FRQCR:");
-        row_print(3, 29, "CS0BCR:");
-        row_print(4, 29, "CS2BCR:");
-        row_print(5, 29, "CS3BCR:");
-        row_print(6, 29, "CS5aBCR:");
-        row_print(7, 29, "CS0WCR:");
-        row_print(8, 29, "CS2WCR:");
-        row_print(9, 29, "CS3WCR:");
-        row_print(10, 29, "CS5aWCR:");
-
-        row_print(1, 38, "0x%08x", s.FLLFRQ);
-        row_print(2, 38, "0x%08x", s.FRQCR);
-        row_print(3, 38, "0x%08x", s.CS0BCR);
-        row_print(4, 38, "0x%08x", s.CS2BCR);
-        row_print(5, 38, "0x%08x", s.CS3BCR);
-        row_print(6, 38, "0x%08x", s.CS5aBCR);
-        row_print(7, 38, "0x%08x", s.CS0WCR);
-        row_print(8, 38, "0x%08x", s.CS2WCR);
-        row_print(9, 38, "0x%08x", s.CS3WCR);
-        row_print(10, 38, "0x%08x", s.CS5aWCR);
+        for (int i = 0; i < 4; i++)
+        {
+            static const char *csn_name[] = {"0", "2", "3", "5a"};
+            row_print(i + 3, 29, "CS%sBCR:", csn_name[i]);
+            row_print(i + 7, 29, "CS%sWCR:", csn_name[i]);
+        }
+        for (int i = 0; i < 10; i++)
+            row_print(i + 1, 38, "0x%08x", *(&(s.FLLFRQ) + i));
 
         print_options(1, 1, option, select);
         row_print(8, 2, "roR %d", rom_wait[BSC.CS0WCR.WR]);
@@ -115,20 +104,13 @@ int main()
         row_print(5, 7, "1/%d", f.Bphi_div);
         row_print(6, 7, "1/%d", f.Pphi_div);
 
+        u32 freq[6] = {f.FLL * 32768, f.FLL * f.PLL * 32768, f.Iphi_f, f.Sphi_f, f.Bphi_f, f.Pphi_f};
 #ifdef ENABLE_FP
-        row_print(1, 12, "(%3.2f MHz)", f.FLL * 32768 / 1e6);
-        row_print(2, 12, "(%3.2f MHz)", f.FLL * f.PLL * 32768 / 1e6);
-        row_print(3, 12, "(%3.2f MHz)", f.Iphi_f / 1e6);
-        row_print(4, 12, "(%3.2f MHz)", f.Sphi_f / 1e6);
-        row_print(5, 12, "(%3.2f MHz)", f.Bphi_f / 1e6);
-        row_print(6, 12, "(%3.2f MHz)", f.Pphi_f / 1e6);
+        for (int i = 0; i < 6; i++)
+            row_print(i + 1, 12, "(%3.2f MHz)", freq[i] / 1e6);
 #else
-        row_print(1, 12, "(%d KHz)", f.FLL * 32768 / 1000);
-        row_print(2, 12, "(%d KHz)", f.FLL * f.PLL * 32768 / 1000);
-        row_print(3, 12, "(%d KHz)", f.Iphi_f / 1000);
-        row_print(4, 12, "(%d KHz)", f.Sphi_f / 1000);
-        row_print(5, 12, "(%d KHz)", f.Bphi_f / 1000);
-        row_print(6, 12, "(%d KHz)", f.Pphi_f / 1000);
+        for (int i = 0; i < 6; i++)
+            row_print(i + 1, 16, "(%d KHz)", freq[i] / 1000);
 #endif
 
         if (benchmark)

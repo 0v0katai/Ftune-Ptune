@@ -35,17 +35,16 @@ unsigned int best_rom_wait(i32 Bphi_f)
     return i + 1;
 }
 
+static sh7305_bsc_CSnBCR_t *CS0BCR = &BSC.CS0BCR;
+
 void up_roR_IWW()
 {
     cpg_compute_freq();
+    const i32 check[3] = {roR[WAIT_2], roR[WAIT_6], roR[WAIT_12]};
     const clock_frequency_t *freq = clock_freq();
-    u32 IWW_0 = BSC.CS0BCR.IWW;
-    if (freq->Bphi_f >= roR[WAIT_2] && IWW_0 == 0)
-        BSC.CS0BCR.IWW = 1;
-    if (freq->Bphi_f >= roR[WAIT_6] && IWW_0 == 1)
-        BSC.CS0BCR.IWW = 2;
-    if (freq->Bphi_f >= roR[WAIT_12] && IWW_0 == 2)
-        BSC.CS0BCR.IWW = 3;
+    for (int i = 0; i < 3; i++)
+        if (freq->Bphi_f >= check[i] && CS0BCR->IWW == i)
+            CS0BCR->IWW++;
     if (best_rom_wait(freq->Bphi_f) > BSC.CS0WCR.WR)
         BSC.CS0WCR.WR = best_rom_wait(freq->Bphi_f);
 }
@@ -53,31 +52,25 @@ void up_roR_IWW()
 void down_roR_IWW()
 {
     cpg_compute_freq();
+    const i32 check[3] = {roR[WAIT_2], roR[WAIT_6], roR[WAIT_12]};
     const clock_frequency_t *freq = clock_freq();
     BSC.CS0WCR.WR = best_rom_wait(freq->Bphi_f);
-    u32 IWW_0 = BSC.CS0BCR.IWW;
-    if (freq->Bphi_f < roR[WAIT_2] && IWW_0 > 0)
-        BSC.CS0BCR.IWW = 0;
-    if (freq->Bphi_f < roR[WAIT_6] && IWW_0 > 1)
-        BSC.CS0BCR.IWW = 1;
-    if (freq->Bphi_f < roR[WAIT_12] && IWW_0 > 2)
-        BSC.CS0BCR.IWW = 2;
+    for (int i = 0; i < 3; i++)
+        if (freq->Bphi_f < check[i] && CS0BCR->IWW == i)
+            CS0BCR->IWW = i;
 }
 
 void up_BFC()
 {
     cpg_compute_freq();
+    const i32 check[3] = {roR[WAIT_2], roR[WAIT_6], roR[WAIT_12]};
     const clock_frequency_t *freq = clock_freq();
     if (freq->Bphi_f << 1 >= BUS_CLK_MAX)
         return;
     CPG.FRQCR.BFC--;
-    u32 IWW_0 = BSC.CS0BCR.IWW;
-    if (freq->Bphi_f >= roR[WAIT_2] && IWW_0 == 0)
-        BSC.CS0BCR.IWW = 1;
-    if (freq->Bphi_f >= roR[WAIT_6] && IWW_0 == 1)
-        BSC.CS0BCR.IWW = 2;
-    if (freq->Bphi_f >= roR[WAIT_12] && IWW_0 == 2)
-        BSC.CS0BCR.IWW = 3;
+    for (int i = 0; i < 3; i++)
+        if (freq->Bphi_f >= check[i] && CS0BCR->IWW == i)
+            CS0BCR->IWW++;
     BSC.CS0WCR.WR = best_rom_wait(freq->Bphi_f << 1);
 }
 

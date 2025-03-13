@@ -52,15 +52,14 @@ static int loop_write_test()
     row_print(13, 1, "RAM select: 0x%08x", write_area);
     row_print(14, 1, "Write Test");
 
-    u32 Bphi_f = 0;
-    const u8 PLL = PLL_x16, IFC = DIV_4, SFC = DIV_4, BFC = DIV_4, PFC = DIV_16;
-    
+    static const u8 PLL = PLL_x16, IFC = DIV_4, SFC = DIV_4, BFC = DIV_4, PFC = DIV_16;
     CPG.FRQCR.lword = (PLL << 24) + (IFC << 20) + (SFC << 12) + (BFC << 8) + PFC;
     struct cpg_overclock_setting s;
     cpg_get_overclock_setting(&s);
     cpg_set_overclock_setting(&s);
     
-    BSC.CS0WCR.WR = best_rom_wait(clock_freq()->Bphi_f) + 2;
+    u32 Bphi_f = clock_freq()->Bphi_f;
+    BSC.CS0WCR.WR = best_rom_wait(Bphi_f) + 2;
 
     for (int FLF = 1200; FLF < 2000; FLF += 2)
     {
