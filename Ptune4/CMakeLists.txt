@@ -19,6 +19,7 @@ set(SOURCES
   src/dhrystone.c
   src/whetstone.c
   src/settings.c
+  src/tick_count.s
   src/mem_read.s
   src/mem_write.s
   src/mem_bench.s

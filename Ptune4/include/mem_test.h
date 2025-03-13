@@ -7,3 +7,4 @@ void sdram_test();
 uint32_t *mem_read(volatile u32 *mem_area, volatile u32 *FLLFRQ_lword, int FLF, int n);
 uint32_t *mem_write(volatile u32 *mem_area, volatile u32 *FLLFRQ_lword, int FLF, int n);
 uint32_t mem_bench(u32 *mem_area, volatile bool *flag);
+uint32_t tick_count(volatile bool *flag);

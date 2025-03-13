@@ -23,14 +23,6 @@ int disable_bench_flag()
     return TIMER_STOP;
 }
 
-static u32 tick_count(volatile bool *bench_flag)
-{
-    u32 count = 0;
-    while (*bench_flag)
-        count++;
-    return count;
-}
-
 static u32 *ram_ad(int FLF, volatile u32 *RAM, int block_size)
 {
     u32 *ad = (u32 *)RAM;
