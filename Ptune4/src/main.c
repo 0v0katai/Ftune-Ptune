@@ -92,17 +92,26 @@ int main()
         for (int i = 0; i < 10; i++)
             row_print(i + 1, 38, "0x%08x", *(&(s.FLLFRQ) + i));
 
-        print_options(1, 1, option, select);
-        row_print(8, 2, "roR %d", rom_wait[BSC.CS0WCR.WR]);
-        row_print(9, 2, "CL %d", BSC.CS3WCR.A3CL + 1);
-
         const clock_frequency_t f = *clock_freq();
-        row_print(1, 7, "%d", f.FLL);
+        row_print(1, 7, "x%d", f.FLL);
         row_print(2, 7, "x%d", f.PLL);
         row_print(3, 7, "1/%d", f.Iphi_div);
         row_print(4, 7, "1/%d", f.Sphi_div);
         row_print(5, 7, "1/%d", f.Bphi_div);
         row_print(6, 7, "1/%d", f.Pphi_div);
+
+        print_options(1, 1, option, select);
+        row_print_color(3, 11, C_WHITE, f.Iphi_f > IFC_RED_ZONE ? C_RED : C_BLUE, "CPU", rom_wait[BSC.CS0WCR.WR]);
+        row_print_color(4, 11, C_WHITE, C_BLACK, "roR %d", rom_wait[BSC.CS0WCR.WR]);
+        row_print_color(5, 11, C_WHITE, C_BLACK, "CL %d", BSC.CS3WCR.A3CL + 1);
+
+#if defined CG20
+        row_print(8, 2, "[x]/[/]: +/- roR");
+        row_print(9, 2, "[+]/[-]: +/- raR");
+        row_print(10, 2, "[SHIFT] [+]/[-]: +/- raW");
+#elif defined CG50 || defined CG100
+        row_print(9, 2, "[x]/[/]: +/- roR");
+#endif
 
         u32 freq[6] = {f.FLL * 32768, f.FLL * f.PLL * 32768, f.Iphi_f, f.Sphi_f, f.Bphi_f, f.Pphi_f};
         static const u32 red_zone[6] = {FLL_RED_ZONE, PLL_RED_ZONE, IFC_RED_ZONE, SFC_RED_ZONE, BFC_RED_ZONE, PFC_RED_ZONE};
