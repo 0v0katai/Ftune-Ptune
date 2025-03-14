@@ -29,9 +29,9 @@ enum select_option
 
 static void about()
 {
-    row_print(9, 1, "Ptune4 v0.03");
-    row_print(10, 1, "Copyright (C) 2025 Sentaro21, CalcLoverHK");
-    row_print(11, 1, "This software is licensed under MIT/X11.");
+    row_print(10, 1, "Ptune4 v0.03");
+    row_print(11, 1, "Copyright (C) 2025 Sentaro21, CalcLoverHK");
+    row_print(12, 1, "This software is licensed under MIT/X11.");
 }
 
 void settings_menu()
@@ -56,7 +56,7 @@ void settings_menu()
         for (int i = 0; i < 5; i++)
         {
             row_print(i + 3, 1, "%s Clock Max:", option[i]);
-            row_print(i + 3, 25, "%6d", settings[i + 2] / 1000);
+            row_print(i + 3, 25, "%d", settings[i + 2] / 1000);
             row_print(i + 3, 33, "KHz");
         }
 
