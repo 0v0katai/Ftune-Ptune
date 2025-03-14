@@ -80,7 +80,7 @@ int main()
         print_preset(current_preset);
         fkey_menu(6, "Bench");
 
-        row_title("Ptune4 v0.03%42s", "[SETTINGS]   [VARS]: BSC menu");
+        row_title("Ptune4 v0.04%42s", "[SETTINGS]   [VARS]: BSC menu");
         row_print(1, 29, "FLLFRQ:");
         row_print(2, 29, "FRQCR:");
         for (int i = 0; i < 8; i++)
