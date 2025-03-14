@@ -38,12 +38,12 @@ void settings_menu()
 {
     key_event_t key;
     i8 select = 0;
-    const char *option[] = {"PLL", "CPU", "SHW", "Bus", "I/O"};
-    const i32 settings_def[] =
+    static const char *option[] = {"PLL", "CPU", "SHW", "Bus", "I/O"};
+    static const i32 settings_def[] =
         {ROM_MARGIN_DEF, RAM_MARGIN_DEF, PLL_CLK_MAX_DEF, IFC_CLK_MAX_DEF, SFC_CLK_MAX_DEF, BFC_CLK_MAX_DEF, PFC_CLK_MAX_DEF};
-    const i32 settings_max[] =
+    static const i32 settings_max[] =
         {ROM_MARGIN_MAX, RAM_MARGIN_MAX, PLL_MAX, CPU_MAX, SHW_MAX, BUS_MAX, IO_MAX};
-    const i8 select_max = SELECT_PFC + 1;
+    static const i8 select_max = SELECT_PFC + 1;
 
     while (true)
     {

@@ -93,8 +93,8 @@ void run_benchmark()
     
     for (int i = 0; i < 3; i++)
     {
-        const char *mem[] = {"ROM:", "RAM:", "I/O:"};
-        const u32 address[] = {0xa0010000, 0xa8010000, 0xa4150000};
+        static const char *mem[] = {"ROM:", "RAM:", "I/O:"};
+        static const u32 address[] = {0xa0010000, 0xa8010000, 0xa4150000};
         bench_flag = true;
         timer_start(timer_configure(TIMER_TMU, 50000, GINT_CALL(disable_bench_flag)));
         row_print(11, 14 + i * 12, "%s %d", mem[i], mem_bench((u32 *)address[i], &bench_flag));

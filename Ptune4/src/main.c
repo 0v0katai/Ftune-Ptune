@@ -58,8 +58,8 @@ int main()
     key_event_t key;
     u8 select = SELECT_FLL;
     bool benchmark = false;
-    const char *option[] = {"FLL:", "PLL:", "IFC:", "SFC:", "BFC:", "PFC:", 0};
-    const u8 rom_wait[] = {0, 1, 2, 3, 4, 5, 6, 8, 10, 12, 14, 18, 24};
+    static const char *option[] = {"FLL:", "PLL:", "IFC:", "SFC:", "BFC:", "PFC:", 0};
+    static const u8 rom_wait[] = {0, 1, 2, 3, 4, 5, 6, 8, 10, 12, 14, 18, 24};
 
 #ifdef ENABLE_FP
     __printf_enable_fp();
@@ -71,7 +71,7 @@ int main()
 
     do
     {
-        struct cpg_overclock_setting s;
+        static struct cpg_overclock_setting s;
         cpg_get_overclock_setting(&s);
         cpg_set_overclock_setting(&s);
 
@@ -80,14 +80,14 @@ int main()
         print_preset(current_preset);
         fkey_menu(6, "Bench");
 
-        row_title("Ptune4 v0.03 (fx-CG100/Graph Math+)");
+        row_title("Ptune4 v0.03%42s", "[SETTINGS]   [VARS]: BSC menu");
         row_print(1, 29, "FLLFRQ:");
         row_print(2, 29, "FRQCR:");
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < 8; i++)
         {
             static const char *csn_name[] = {"0", "2", "3", "5a"};
-            row_print(i + 3, 29, "CS%sBCR:", csn_name[i]);
-            row_print(i + 7, 29, "CS%sWCR:", csn_name[i]);
+            static const char reg_name[] = {'B', 'W'};
+            row_print(i + 3, 29, "CS%s%cCR:", csn_name[i % 4], reg_name[i >= 4]);
         }
         for (int i = 0; i < 10; i++)
             row_print(i + 1, 38, "0x%08x", *(&(s.FLLFRQ) + i));
