@@ -49,12 +49,12 @@ static void print_preset(int current)
 }
 
 int main()
-{   
+{
 #ifdef ENABLE_GDB
     gdb_start_on_exception();
     __asm__("trapa #42");
 #endif
-    
+
     key_event_t key;
     u8 select = SELECT_FLL;
     bool benchmark = false;
@@ -105,16 +105,44 @@ int main()
         row_print(6, 7, "1/%d", f.Pphi_div);
 
         u32 freq[6] = {f.FLL * 32768, f.FLL * f.PLL * 32768, f.Iphi_f, f.Sphi_f, f.Bphi_f, f.Pphi_f};
+        static const u32 red_zone[6] = {FLL_RED_ZONE, PLL_RED_ZONE, IFC_RED_ZONE, SFC_RED_ZONE, BFC_RED_ZONE, PFC_RED_ZONE};
 #ifdef ENABLE_FP
         for (int i = 0; i < 6; i++)
-            row_print(i + 1, 12, "(%3.2f MHz)", freq[i] / 1e6);
+        {
+            row_print_color(i + 1, 17, freq[i] > red_zone[i] ? C_RED : C_BLACK, C_WHITE, "%3.2f", freq[i] / 1e6);
+            row_print(i + 1, 24, "MHz");
+        }
 #else
         for (int i = 0; i < 6; i++)
-            row_print(i + 1, 16, "(%d KHz)", freq[i] / 1000);
+        {
+            row_print_color(i + 1, 17, freq[i] > red_zone[i] ? C_RED : C_BLACK, C_WHITE, "%d", freq[i] / 1000);
+            row_print(i + 1, 24, "KHz");
+        }
 #endif
 
         if (benchmark)
             run_benchmark();
+        else
+        {
+            static const char *description[] = {"FLL", "PLL", "CPU core", "SuperHyway", "Memory bus", "I/O bus"};
+            static const char *type[] = {"multiplier", "frequency ratio"};
+            char buffer[8];
+            switch (select)
+            {
+            case SELECT_FLL:
+                sprintf(buffer, "x1023");
+                break;
+            case SELECT_PLL:
+                sprintf(buffer, "x32");
+                break;
+            default:
+                sprintf(buffer, "%d MHz", settings[select] / 1000000);
+                break;
+            }
+            row_print(12, 2, "%s %s", description[select], type[select >= SELECT_IFC]);
+            row_print(12, 34, "(Up to %s)", buffer);
+            row_highlight(12);
+        }
 
         dupdate();
         key = getkey();

@@ -24,4 +24,11 @@ extern i32 settings[];
 #define BUS_MAX 200 * 1000000
 #define IO_MAX 60 * 1000000
 
+#define FLL_RED_ZONE 17 * 1000000
+#define PLL_RED_ZONE 750 * 1000000
+#define IFC_RED_ZONE 250 * 1000000
+#define SFC_RED_ZONE 150 * 1000000
+#define BFC_RED_ZONE 100 * 1000000
+#define PFC_RED_ZONE 48 * 1000000
+
 void settings_menu();
