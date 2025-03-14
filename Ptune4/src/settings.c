@@ -73,6 +73,7 @@ void settings_menu()
         key = getkey();
 
         i32 modify = 0;
+        bool scale = false;
         switch (key.key)
         {
         case KEY_UP:
@@ -82,13 +83,19 @@ void settings_menu()
             select = (select + 1) % select_max;
             break;
 
+        case KEY_F1:
+        case KEY_PLUS:
+            scale = true;
+            __attribute__((fallthrough));
+        case KEY_RIGHT:
+            modify++;
+            break;
+        case KEY_F2:
         case KEY_MINUS:
+            scale = true;
+            __attribute__((fallthrough));
         case KEY_LEFT:
             modify--;
-            break;
-        case KEY_RIGHT:
-        case KEY_PLUS:
-            modify++;
             break;
 
         case KEY_F5:
@@ -108,9 +115,9 @@ void settings_menu()
 
         if (select >= SELECT_PLL)
         {
-            if (key.key == KEY_MINUS || key.key == KEY_PLUS)
-                modify *= 10;
             modify *= 100 * 1000;
+            if (scale)
+                modify *= 10;
         }
         settings[select] += modify;
         if (settings[select] > settings_max[select])
