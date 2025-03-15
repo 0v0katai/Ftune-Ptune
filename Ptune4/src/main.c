@@ -135,21 +135,11 @@ int main()
         {
             static const char *description[] = {"FLL", "PLL", "CPU core", "SuperHyway", "Memory bus", "I/O bus"};
             static const char *type[] = {"multiplier", "frequency ratio"};
-            char buffer[8];
-            switch (select)
-            {
-            case SELECT_FLL:
-                sprintf(buffer, "x1023");
-                break;
-            case SELECT_PLL:
-                sprintf(buffer, "x32");
-                break;
-            default:
-                sprintf(buffer, "%d MHz", settings[select] / 1000000);
-                break;
-            }
             row_print(12, 2, "%s %s", description[select], type[select >= SELECT_IFC]);
-            row_print(12, 34, "(Up to %s)", buffer);
+            if (select == SELECT_FLL)
+                row_print(12, 34, "(Up to x1023)");
+            else
+                row_print(12, 34, "(Up to %d MHz)", settings[select + 1] / 1000000);
             row_highlight(12);
         }
 
