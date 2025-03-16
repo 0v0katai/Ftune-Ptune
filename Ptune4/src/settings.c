@@ -3,6 +3,7 @@
 #include <util.h>
 
 #include "settings.h"
+#include "config.h"
 #include "validate.h"
 #include "mem_test.h"
 
