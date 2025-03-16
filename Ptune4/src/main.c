@@ -285,7 +285,7 @@ int main()
                 auto_down_PFC();
                 break;
             case SELECT_PLL:
-                if (f.PLL == 32)
+                if (f.PLL == 64)
                     break;
                 CPG.FRQCR.STC++;
                 if (exceed_limit())
