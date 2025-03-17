@@ -11,6 +11,12 @@ include(GenerateHH2Bin)
 include(Fxconv)
 find_package(Gint 2.11 REQUIRED)
 find_package(LibProf 2.1 REQUIRED)
+find_package(Git REQUIRED)
+
+string(SUBSTRING ${PTUNE4_VERSION} 1 4 VERSTR)
+execute_process(COMMAND "${GIT_EXECUTABLE}" rev-parse HEAD
+  OUTPUT_VARIABLE COMMIT_ID OUTPUT_STRIP_TRAILING_WHITESPACE)
+string(SUBSTRING ${COMMIT_ID} 0 7 COMMIT_ID_SHORT)
 
 set(SOURCES
   src/main.c
@@ -39,9 +45,11 @@ set(ASSETS_cg
 
 fxconv_declare_assets(${ASSETS} ${ASSETS_fx} ${ASSETS_cg} WITH_METADATA)
 
+configure_file(include/config.h.in include/config.h)
 add_executable(Ptune4 ${SOURCES} ${ASSETS} ${ASSETS_${FXSDK_PLATFORM}})
 target_include_directories(Ptune4 PRIVATE
-  "${CMAKE_CURRENT_SOURCE_DIR}/include")
+  "${CMAKE_CURRENT_SOURCE_DIR}/include"
+  "${CMAKE_CURRENT_BINARY_DIR}/include")
 target_compile_options(Ptune4 PRIVATE -Wall -Wextra -Os -g -flto)
 target_link_options(Ptune4 PRIVATE -flto=auto -Wl,-Map=map -Wl,--print-memory-usage)
 target_link_libraries(Ptune4 Gint::Gint LibProf::LibProf)

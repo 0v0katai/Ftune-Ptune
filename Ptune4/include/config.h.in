@@ -1,3 +1,5 @@
+#define VERSION "Ptune4 v@VERSTR@ (@@COMMIT_ID_SHORT@)" 
+
 /* Platform toggles */
 
 // #define MONO_SH3    /* All SH3 monochrome calculators */
