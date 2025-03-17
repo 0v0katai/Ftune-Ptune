@@ -100,17 +100,21 @@ int main()
         row_print(5, 7, "1/%d", f.Bphi_div);
         row_print(6, 7, "1/%d", f.Pphi_div);
 
+        static const int trc_wait[4] = {3, 4, 6, 9};
         print_options(1, 1, option, select);
         row_print_color(3, 11, C_WHITE, f.Iphi_f > IFC_RED_ZONE ? C_RED : C_BLUE, "CPU", rom_wait[BSC.CS0WCR.WR]);
         row_print_color(4, 11, C_WHITE, C_BLACK, "roR %d", rom_wait[BSC.CS0WCR.WR]);
         row_print_color(5, 11, C_WHITE, C_BLACK, "CL %d", BSC.CS3WCR.A3CL + 1);
+        row_print_color(6, 11, C_WHITE, C_BLACK, "TRC %d", trc_wait[BSC.CS3WCR.TRC]);
 
 #if defined CG20
         row_print(8, 2, "[x]/[/]: +/- roR");
         row_print(9, 2, "[+]/[-]: +/- raR");
-        row_print(10, 2, "[SHIFT] [+]/[-]: +/- raW");
+        row_print(10, 2, "[SHIFT][+]/[-]: +/- raW");
 #elif defined CG50 || defined CG100
-        row_print(9, 2, "[x]/[/]: +/- roR");
+        row_print(8, 2, "[x][/]: +/- roR");
+        row_print(9, 2, "[+][-]: +/- CL");
+        row_print(10, 2, "[SHIFT][+][-]: +/- TRC");
 #endif
 
         u32 freq[6] = {f.FLL * 32768, f.FLL * f.PLL * 32768, f.Iphi_f, f.Sphi_f, f.Bphi_f, f.Pphi_f};
@@ -184,6 +188,24 @@ int main()
             if (BSC.CS0WCR.WR > best_rom_wait(f.Bphi_f))
                 BSC.CS0WCR.WR--;
             break;
+        case KEY_PLUS:
+            if (key.shift && BSC.CS3WCR.TRC < 3)
+            {
+                BSC.CS3WCR.TRC++;
+                break;
+            }
+            if (BSC.CS3WCR.A3CL != 2)
+                update_SDMR(++BSC.CS3WCR.A3CL);
+            break;
+        case KEY_MINUS:
+            if (key.shift && BSC.CS3WCR.TRC > 0)
+            {
+                BSC.CS3WCR.TRC--;
+                break;
+            }
+            if (BSC.CS3WCR.A3CL != 1)
+                update_SDMR(--BSC.CS3WCR.A3CL);
+            break;
 
         case KEY_MENU:
             if (!key.shift)
@@ -200,7 +222,7 @@ int main()
             switch (select)
             {
             case SELECT_FLL:
-                if (CPG.FLLFRQ.FLF == 450)
+                if (f.FLL == 225)
                     break;
                 CPG.FLLFRQ.FLF -= 2;
                 down_roR_IWW();

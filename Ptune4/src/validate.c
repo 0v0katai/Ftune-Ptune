@@ -5,6 +5,7 @@
 
 #include "settings.h"
 #include "validate.h"
+#include "bsc.h"
 
 #define CS2WCR_DEFAULT WAIT_2
 #define CS0WCR_DEFAULT WAIT_3
@@ -103,4 +104,12 @@ void auto_down_PFC()
     if (freq->Pphi_div == 64)
         return;
     CPG.FRQCR.P1FC++;
+}
+
+void update_SDMR(u8 value)
+{
+    if (value == 1)
+        *SH7305_SDMR3_CL2 = 0;
+    else
+        *SH7305_SDMR3_CL3 = 0;
 }

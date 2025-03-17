@@ -85,12 +85,7 @@ static void bsc_modify(select_option select, i8 modify)
                 return;
             wcr_addr->lword = (wcr_addr->lword & ~(0b11 << mask)) | (check << mask);
             if (select.REG == SELECT_A3CL)
-            {
-                if (check == 1)
-                    *SH7305_SDMR3_CL2 = 0;
-                else
-                    *SH7305_SDMR3_CL3 = 0;
-            }
+                update_SDMR(check);
             return;
         }
         static const u8 max[4] = {7, 3, 3, WAIT_24};
