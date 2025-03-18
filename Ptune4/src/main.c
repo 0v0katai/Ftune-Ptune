@@ -194,8 +194,7 @@ int main()
                 BSC.CS3WCR.TRC++;
                 break;
             }
-            if (BSC.CS3WCR.A3CL != 2)
-                update_SDMR(++BSC.CS3WCR.A3CL);
+            modify_A3CL(CL3);
             break;
         case KEY_MINUS:
             if (key.shift && BSC.CS3WCR.TRC > 0)
@@ -203,8 +202,7 @@ int main()
                 BSC.CS3WCR.TRC--;
                 break;
             }
-            if (BSC.CS3WCR.A3CL != 1)
-                update_SDMR(--BSC.CS3WCR.A3CL);
+            modify_A3CL(CL2);
             break;
 
         case KEY_MENU:

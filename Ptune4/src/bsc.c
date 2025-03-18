@@ -80,12 +80,14 @@ static void bsc_modify(select_option select, i8 modify)
         {
             const u8 mask = 13 - select.REG * 3 - (select.REG >= SELECT_TRWL);
             const i8 check = ((wcr_addr->lword >> mask) & 0b11) + modify;
-            const bool A3CL = select.REG == SELECT_A3CL;
-            if (check < 0 + A3CL || check > 3 - A3CL)
+            if (select.REG == SELECT_A3CL)
+            {
+                modify_A3CL(check);
+                return;
+            }
+            if (check < 0 || check > 3)
                 return;
             wcr_addr->lword = (wcr_addr->lword & ~(0b11 << mask)) | (check << mask);
-            if (select.REG == SELECT_A3CL)
-                update_SDMR(check);
             return;
         }
         static const u8 max[4] = {7, 3, 3, WAIT_24};

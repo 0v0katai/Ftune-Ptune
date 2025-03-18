@@ -39,5 +39,5 @@ void up_BFC();
 void up_PFC();
 void auto_up_PFC();
 void auto_down_PFC();
-void update_SDMR(u8 value);
+void modify_A3CL(u8 value);
 bool exceed_limit();

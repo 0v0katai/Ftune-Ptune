@@ -106,8 +106,11 @@ void auto_down_PFC()
     CPG.FRQCR.P1FC++;
 }
 
-void update_SDMR(u8 value)
+void modify_A3CL(u8 value)
 {
+    if (value != CL2 && value != CL3)
+        return;
+    BSC.CS3WCR.A3CL = value;
     if (value == 1)
         *SH7305_SDMR3_CL2 = 0;
     else
