@@ -70,21 +70,21 @@ static u32 loop_write_test(u32 FLF_start, u32 TRC)
                     FLF_max--;
                     continue;
                 }
-                row_clear(9);
+                row_clear(2);
                 Bphi_f = clock_freq()->Bphi_f;
-                row_print(9, 1, "Trial (%d/100)", trial);
-                row_print_color(9, 16, C_BLUE, C_WHITE, "%d KHz", Bphi_f / 1000);
+                row_print(2, 1, "Trial (%d/100)", trial);
+                row_print_color(2, 16, C_RED, C_WHITE, "%d KHz", Bphi_f / 1000);
                 dupdate();
             }
-            row_clear(9);
+            row_clear(2);
             attained = true;
         }
 
         static const int trc_wait[4] = {3, 4, 6, 9};
         Bphi_f = clock_freq()->Bphi_f;
-        row_clear(4+TRC);
-        row_print(4+TRC, 1, "Write (TRC=%d):", trc_wait[TRC]);
-        row_print_color(4+TRC, 16, C_BLUE, C_WHITE, "%d KHz", Bphi_f / 1000);
+        row_clear(4 + TRC);
+        row_print(4 + TRC, 1, "Write (TRC=%d):", trc_wait[TRC]);
+        row_print_color(4 + TRC, 16, C_BLUE, C_WHITE, "%d KHz", Bphi_f / 1000);
         dupdate();
     }
 
@@ -104,8 +104,7 @@ void sdram_test()
     cpg_set_overclock_setting(&s0);
 
     BUS_CLK_MAX = Bphi_max[s0.CS3WCR & 0b11];
-    static const int trc_wait[4] = {3, 4, 6, 9};
-    row_print(12, 1, "Current TRC value: %d", trc_wait[s0.CS3WCR & 0b11]);
+    row_highlight(4 + (s0.CS3WCR & 0b11));
     row_print(13, 1, "Bus Clock Max set: %d KHz", BUS_CLK_MAX / 1000);
     row_print(14, 1, "Press any key to exit...");
 
