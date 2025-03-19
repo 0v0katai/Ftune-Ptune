@@ -1,5 +1,5 @@
 #define FLF_x810 0x432a
-#define PLL_x16 0xf
+#define PLL_x24 0x17
 
 void run_benchmark();
 int disable_bench_flag();
