@@ -150,6 +150,14 @@ int main()
         dupdate();
         key = getkey();
 
+        static const u8 divs_ratio[3][3] =
+        {
+            {2, 0, 0},
+            {8, 4, 0},
+            {16, 8, 8}
+        };
+        u8 divs[4] = {f.Iphi_div, f.Sphi_div, f.Bphi_div, f.Pphi_div};
+        bool update = false;
         switch (key.key)
         {
         case KEY_F1:
@@ -217,82 +225,41 @@ int main()
             break;
 
         case KEY_LEFT:
-            switch (select)
+            update = true;
+            if (select == SELECT_FLL)
             {
-            case SELECT_FLL:
                 if (f.FLL == 225)
                     break;
                 CPG.FLLFRQ.FLF -= 2;
                 down_roR_IWW();
                 auto_up_PFC();
-                break;
-            case SELECT_PLL:
+            }
+            else if (select == SELECT_PLL)
+            {
                 if (f.PLL == 1)
                     break;
                 CPG.FRQCR.STC--;
                 down_roR_IWW();
                 auto_up_PFC();
-                break;
-            case SELECT_IFC:
-                if (f.Iphi_div == 64)
+            }
+            else
+            {
+                const u8 check = select - 2;
+                if (divs[check] == 64)
                     break;
-                if (f.Iphi_div == f.Pphi_div)
-                    CPG.FRQCR.P1FC++;
-                if (f.Iphi_div == f.Bphi_div)
-                {
-                    CPG.FRQCR.BFC++;
-                    down_roR_IWW();
-                }
-                if (f.Iphi_div == f.Sphi_div)
-                    CPG.FRQCR.SFC++;
-                CPG.FRQCR.IFC++;
-                break;
-            case SELECT_SFC:
-                if (f.Sphi_div == 64)
-                    break;
-                if (f.Sphi_div == f.Pphi_div)
-                    CPG.FRQCR.P1FC++;
-                if (f.Sphi_div == f.Bphi_div)
-                {
-                    CPG.FRQCR.BFC++;
-                    down_roR_IWW();
-                }
-                CPG.FRQCR.SFC++;
-                if (f.Sphi_div / f.Iphi_div >= 2)
-                    CPG.FRQCR.IFC++;
-                break;
-            case SELECT_BFC:
-                if (f.Bphi_div == 64)
-                    break;
-                if (f.Bphi_div == f.Pphi_div)
-                    CPG.FRQCR.P1FC++;
-                CPG.FRQCR.BFC++;
-                down_roR_IWW();
-                if (f.Bphi_div / f.Sphi_div >= 4)
-                    CPG.FRQCR.SFC++;
-                if (f.Bphi_div / f.Iphi_div >= 8)
-                    CPG.FRQCR.IFC++;
-                break;
-            case SELECT_PFC:
-                if (f.Pphi_div == 64)
-                    break;
-                CPG.FRQCR.P1FC++;
-                if (f.Pphi_div / f.Bphi_div >= 8)
-                {
-                    CPG.FRQCR.BFC++;
-                    down_roR_IWW();
-                }
-                if (f.Pphi_div / f.Sphi_div >= 8)
-                    CPG.FRQCR.SFC++;
-                if (f.Pphi_div / f.Iphi_div >= 16)
-                    CPG.FRQCR.IFC++;
-                break;
+                for (int i = check + 1; i <= 3; i++)
+                    if (divs[check] == divs[i])
+                        divs[i] <<= 1;
+                divs[check] <<= 1;
+                for (int i = check - 1; i >= 0; i--)
+                    if (divs[check] / divs[i] > divs_ratio[check - 1][i])
+                        divs[i] <<= 1; 
             }
             break;
         case KEY_RIGHT:
-            switch (select)
+            update = true;
+            if (select == SELECT_FLL)
             {
-            case SELECT_FLL:
                 if (f.FLL == 1023)
                     break;
                 CPG.FLLFRQ.FLF += 2;
@@ -303,8 +270,9 @@ int main()
                 }
                 up_roR_IWW();
                 auto_down_PFC();
-                break;
-            case SELECT_PLL:
+            }
+            else if (select == SELECT_PLL)
+            {
                 if (f.PLL == 64)
                     break;
                 CPG.FRQCR.STC++;
@@ -315,71 +283,40 @@ int main()
                 }
                 up_roR_IWW();
                 auto_down_PFC();
-                break;
-            case SELECT_IFC:
-                if (f.Iphi_div == 2)
+            }
+            else
+            {
+                const u8 check = select - 2;
+                if (divs[check] == 2)
                     break;
-                if (f.Iphi_f << 1 > CPU_CLK_MAX)
+                const i32 fs[4] = {f.Iphi_f, f.Sphi_f, f.Bphi_f, f.Pphi_f};
+                if ((fs[check] << 1) > settings[check + 3])
                     break;
-                if (f.Iphi_div > f.Sphi_div)
-                    break;
-                CPG.FRQCR.IFC--;
-                if (f.Iphi_div < f.Sphi_div)
-                    CPG.FRQCR.SFC--;
-                if (f.Bphi_div / f.Iphi_div >= 8)
-                    up_BFC();
-                if (f.Pphi_div / f.Iphi_div >= 16)
-                    up_PFC();
-                break;
-            case SELECT_SFC:
-                if (f.Sphi_div == 2)
-                    break;
-                if (f.Sphi_f << 1 > SHW_CLK_MAX)
-                    break;
-                if (f.Sphi_div < f.Iphi_div)
-                    break;
-                if (f.Sphi_div == f.Iphi_div)
-                    CPG.FRQCR.IFC--;
-                CPG.FRQCR.SFC--;
-                if (f.Bphi_div / f.Sphi_div >= 4)
-                    up_BFC();
-                if (f.Pphi_div / f.Sphi_div >= 8)
-                    up_PFC();
-                break;
-            case SELECT_BFC:
-                if (f.Bphi_div == 2)
-                    break;
-                if (f.Bphi_f << 1 > BUS_CLK_MAX)
-                    break;
-                if (f.Bphi_div == f.Sphi_div)
-                {
-                    if (f.Bphi_div == f.Iphi_div)
-                        CPG.FRQCR.IFC--;
-                    CPG.FRQCR.SFC--;
-                }
-                up_BFC();
-                if (f.Pphi_div / f.Bphi_div >= 8)
-                    up_PFC();
-                break;
-            case SELECT_PFC:
-                if (f.Pphi_div == 2)
-                    break;
-                if (f.Pphi_f << 1 > IO_CLK_MAX)
-                    break;
-                if (f.Pphi_div == f.Bphi_div)
-                {
-                    if (f.Pphi_div == f.Sphi_div)
-                    {
-                        if (f.Pphi_div == f.Iphi_div)
-                            CPG.FRQCR.IFC--;
-                        CPG.FRQCR.SFC--;
-                    }
-                    up_BFC();
-                }
-                CPG.FRQCR.P1FC--;
-                break;
+                for (int i = check - 1; i >= 0; i--)
+                    if (divs[check] == divs[i])
+                        divs[i] >>= 1;
+                divs[check] >>= 1;
+                for (int i = check + 1; i <= 3; i++)
+                    if (divs[i] / divs[check] > divs_ratio[i - 1][check])
+                        divs[i] >>= 1;
             }
             break;
+        }
+        if (update)
+        {
+            u32 new_FRQCR = CPG.FRQCR.lword & 0xFF000000;
+            for (int i = 0; i < 4; i++)
+            {
+                static const u8 field[4] = {20, 12, 8, 0};
+                u8 j = 0;
+                while ((divs[i] >>= 1) != 2)
+                {
+                    divs[i] >>= 1;
+                    j++;
+                }
+                new_FRQCR += j << field[i];
+            }
+            CPG.FRQCR.lword = new_FRQCR;
         }
     } while (key.key != KEY_EXIT);
     return 1;
