@@ -66,8 +66,9 @@ static u32 loop_write_test(u32 FLF_start, u32 TRC)
             {
                 if (ram_ad(FLF_max, write_area, WRITE_N))
                 {
-                    trial = 1;
+                    trial = 0;
                     FLF_max--;
+                    continue;
                 }
                 row_clear(9);
                 Bphi_f = clock_freq()->Bphi_f;
