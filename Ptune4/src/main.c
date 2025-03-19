@@ -231,16 +231,14 @@ int main()
                 if (f.FLL == 225)
                     break;
                 CPG.FLLFRQ.FLF -= 2;
-                down_roR_IWW();
-                auto_up_PFC();
+                divs[SELECT_PFC - 2] >>= auto_up_PFC();
             }
             else if (select == SELECT_PLL)
             {
                 if (f.PLL == 1)
                     break;
                 CPG.FRQCR.STC--;
-                down_roR_IWW();
-                auto_up_PFC();
+                divs[SELECT_PFC - 2] >>= auto_up_PFC();
             }
             else
             {
@@ -268,8 +266,7 @@ int main()
                     CPG.FLLFRQ.FLF -= 2;
                     break;
                 }
-                up_roR_IWW();
-                auto_down_PFC();
+                divs[SELECT_PFC - 2] <<= auto_down_PFC();
             }
             else if (select == SELECT_PLL)
             {
@@ -281,8 +278,7 @@ int main()
                     CPG.FRQCR.STC--;
                     break;
                 }
-                up_roR_IWW();
-                auto_down_PFC();
+                divs[SELECT_PFC - 2] <<= auto_down_PFC();
             }
             else
             {
@@ -304,19 +300,15 @@ int main()
         }
         if (update)
         {
-            u32 new_FRQCR = CPG.FRQCR.lword & 0xFF000000;
+            CPG.FRQCR.lword &= 0xFF000000;
             for (int i = 0; i < 4; i++)
             {
                 static const u8 field[4] = {20, 12, 8, 0};
-                u8 j = 0;
-                while ((divs[i] >>= 1) != 2)
-                {
-                    divs[i] >>= 1;
-                    j++;
-                }
-                new_FRQCR += j << field[i];
+                while ((divs[i] >>= 1) != 1)
+                    CPG.FRQCR.lword += 1 << field[i];
             }
-            CPG.FRQCR.lword = new_FRQCR;
+            cpg_compute_freq();
+            BSC.CS0WCR.WR = best_rom_wait(clock_freq()->Bphi_f);
         }
     } while (key.key != KEY_EXIT);
     return 1;

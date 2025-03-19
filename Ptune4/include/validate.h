@@ -32,12 +32,8 @@ enum roR_table
 };
 
 unsigned int best_rom_wait(i32 Bphi_f);
-void init_roR(i32 *roR_data);
-void up_roR_IWW();
-void down_roR_IWW();
-void up_BFC();
-void up_PFC();
-void auto_up_PFC();
-void auto_down_PFC();
+void init_roR();
+bool auto_up_PFC();
+bool auto_down_PFC();
 void modify_A3CL(u8 value);
 bool exceed_limit();
