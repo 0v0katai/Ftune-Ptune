@@ -16,6 +16,7 @@
 #define WRITE_N 2000
 
 bool bench_flag;
+u32 Bphi_max[4];
 
 int disable_bench_flag()
 {
@@ -36,59 +37,68 @@ static u32 *ram_ad(int FLF, volatile u32 *RAM, int block_size)
     return ad;
 }
 
-static u32 loop_write_test(u32 FLF_start, u32 TRC)
+static void print_Bphi_max(u32 Bphi_f, u8 TRC)
+{
+    static const int trc_wait[4] = {3, 4, 6, 9};
+    row_clear(4 + TRC);
+    row_print(4 + TRC, 1, "Write (TRC=%d):", trc_wait[TRC]);
+    row_print_color(4 + TRC, 16, C_BLUE, C_WHITE, "%d KHz", Bphi_f / 1000);
+}
+
+static void ram_write_test()
 {
     u32 temp[WRITE_N+1];
     u32 *write_area = (u32 *)(((u32)&temp & 0x0FFFFFFF) | 0xA0000000);
 
     row_print(1, 1, "RAM select: 0x%08x", write_area);
-
-    static const u8 PLL = PLL_x24, IFC = DIV_4, SFC = DIV_4, BFC = DIV_4, PFC = DIV_32;
-    CPG.FRQCR.lword = (PLL << 24) + (IFC << 20) + (SFC << 12) + (BFC << 8) + PFC;
     struct cpg_overclock_setting s;
     cpg_get_overclock_setting(&s);
+    static const u8 PLL = PLL_x24, IFC = DIV_4, SFC = DIV_4, BFC = DIV_4, PFC = DIV_32;
+    s.FRQCR = (PLL << 24) + (IFC << 20) + (SFC << 12) + (BFC << 8) + PFC;
     cpg_set_overclock_setting(&s);
-    BSC.CS3WCR.TRC = TRC;
     
-    u32 Bphi_f = clock_freq()->Bphi_f;
-    BSC.CS0WCR.WR = best_rom_wait(Bphi_f) + 2;
-
-    bool attained = false;
-    for (int FLF = FLF_start; FLF < 2048; FLF += 2)
+    BSC.CS0WCR.WR = 0b1011;
+    int FLF_max = 600;
+    for (int TRC = 0; TRC <= 3; TRC++)
     {
-        if (attained)
-            break;
- 
-        if (ram_ad(FLF, write_area, WRITE_N))
+        bool attained = false;
+        BSC.CS3WCR.TRC = TRC;
+        for (int FLF = FLF_max; FLF < 2048; FLF += 2)
         {
-            int FLF_max = FLF;
-            for (int trial = 1; trial <= 100; trial++)
+            if (attained)
+                break;
+            if (ram_ad(FLF, write_area, WRITE_N))
             {
-                if (ram_ad(FLF_max, write_area, WRITE_N))
+                FLF_max = FLF;
+                u32 Bphi_f;
+                for (int trial = 1; trial <= 100; trial++)
                 {
-                    trial = 0;
-                    FLF_max--;
-                    continue;
+                    if (ram_ad(FLF_max, write_area, WRITE_N))
+                    {
+                        trial = 0;
+                        FLF_max -= 2;
+                        continue;
+                    }
+                    Bphi_f = clock_freq()->Bphi_f;
+                    row_print(2, 1, "Trial (%d/100)", trial);
+                    row_print_color(2, 16, C_RED, C_WHITE, "%d KHz", Bphi_f / 1000);
+                    dupdate();
+                    row_clear(2);
                 }
-                row_clear(2);
-                Bphi_f = clock_freq()->Bphi_f;
-                row_print(2, 1, "Trial (%d/100)", trial);
-                row_print_color(2, 16, C_RED, C_WHITE, "%d KHz", Bphi_f / 1000);
-                dupdate();
+                attained = true;
+                if (Bphi_max[TRC - 1] > Bphi_f)
+                {
+                    Bphi_max[TRC - 1] = Bphi_f;
+                    print_Bphi_max(Bphi_f, TRC - 1);
+                }
+                Bphi_max[TRC] = Bphi_f;
             }
-            row_clear(2);
-            attained = true;
+            print_Bphi_max(clock_freq()->Bphi_f, TRC);
+            dupdate();
         }
-
-        static const int trc_wait[4] = {3, 4, 6, 9};
-        Bphi_f = clock_freq()->Bphi_f;
-        row_clear(4 + TRC);
-        row_print(4 + TRC, 1, "Write (TRC=%d):", trc_wait[TRC]);
-        row_print_color(4 + TRC, 16, C_BLUE, C_WHITE, "%d KHz", Bphi_f / 1000);
-        dupdate();
     }
-
-    return Bphi_f * (100ull - RAM_MARGIN) / 100;
+    for (int i = 0; i < 4; i++)
+        Bphi_max[i] = Bphi_max[i] * (100ull - RAM_MARGIN) / 100;
 }
 
 void sdram_test()
@@ -98,9 +108,7 @@ void sdram_test()
 
     struct cpg_overclock_setting s0;
     cpg_get_overclock_setting(&s0);
-    u32 Bphi_max[4];
-    for (int TRC = 0; TRC < 4; TRC++)
-        Bphi_max[TRC] = loop_write_test(600 + TRC * 150, TRC);
+    ram_write_test();
     cpg_set_overclock_setting(&s0);
 
     BUS_CLK_MAX = Bphi_max[s0.CS3WCR & 0b11];
