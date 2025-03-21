@@ -27,10 +27,9 @@ int disable_bench_flag()
 static u32 *ram_ad(int FLF, volatile u32 *RAM, int block_size)
 {
     u32 *ad = (u32 *)RAM;
-    cpu_atomic_start();
     CPG.FLLFRQ.FLF = FLF;
     cpg_compute_freq();
-    BSC.CS0WCR.WR = best_rom_wait(clock_freq()->Bphi_f * (100ull - RAM_MARGIN) / 100) + 1;
+    cpu_atomic_start();
     if (*RAM == *RAM)
         ad = mem_write(RAM, &CPG.FLLFRQ.lword, FLF_x810, block_size);
     cpu_atomic_end();
@@ -55,18 +54,15 @@ static void ram_write_test()
     cpg_get_overclock_setting(&s);
     static const u8 PLL = PLL_x24, IFC = DIV_4, SFC = DIV_4, BFC = DIV_4, PFC = DIV_32;
     s.FRQCR = (PLL << 24) + (IFC << 20) + (SFC << 12) + (BFC << 8) + PFC;
+    s.CS0WCR = (s.CS0WCR & ~(0b1111 << 7)) | (WAIT_18 << 7);
     cpg_set_overclock_setting(&s);
     
-    BSC.CS0WCR.WR = 0b1011;
     int FLF_max = 600;
     for (int TRC = 0; TRC <= 3; TRC++)
     {
-        bool attained = false;
         BSC.CS3WCR.TRC = TRC;
         for (int FLF = FLF_max; FLF < 2048; FLF += 2)
         {
-            if (attained)
-                break;
             if (ram_ad(FLF, write_area, WRITE_N))
             {
                 FLF_max = FLF;
@@ -85,13 +81,13 @@ static void ram_write_test()
                     dupdate();
                     row_clear(2);
                 }
-                attained = true;
                 if (Bphi_max[TRC - 1] > Bphi_f)
                 {
                     Bphi_max[TRC - 1] = Bphi_f;
                     print_Bphi_max(Bphi_f, TRC - 1);
                 }
                 Bphi_max[TRC] = Bphi_f;
+                FLF = 2048;
             }
             print_Bphi_max(clock_freq()->Bphi_f, TRC);
             dupdate();
