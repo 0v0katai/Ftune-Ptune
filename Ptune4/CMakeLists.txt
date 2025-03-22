@@ -30,6 +30,7 @@ set(SOURCES
   src/mem_write.s
   src/mem_bench.s
   src/mem_test.c
+  src/bench.c
   src/bsc.c
 )
 # Shared assets, fx-9860G-only assets and fx-CG-50-only assets

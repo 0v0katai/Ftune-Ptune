@@ -18,6 +18,7 @@
 #include "settings.h"
 #include "bsc.h"
 #include "config.h"
+#include "bench.h"
 
 i32 roR[] =
     {
