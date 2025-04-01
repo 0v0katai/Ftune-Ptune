@@ -21,9 +21,15 @@
 #define RAM_MARGIN_DEF 5
 #define PLL_CLK_MAX_DEF 800 * 1000000
 #define IFC_CLK_MAX_DEF 275 * 1000000
+#if defined CG20
+#define SFC_CLK_MAX_DEF 180 * 1000000
+#define BFC_CLK_MAX_DEF 134 * 1000000
+#define PFC_CLK_MAX_DEF  24 * 1000000
+#elif defined CG50 || defined CG100
 #define SFC_CLK_MAX_DEF 150 * 1000000
 #define BFC_CLK_MAX_DEF 100 * 1000000
 #define PFC_CLK_MAX_DEF  50 * 1000000
+#endif
 
 #define ROM_MARGIN_MAX 15
 #define RAM_MARGIN_MAX 15
@@ -31,11 +37,20 @@
 #define CPU_MAX 350 * 1000000
 #define SHW_MAX 200 * 1000000
 #define BUS_MAX 200 * 1000000
+#if defined CG20
+#define IO_MAX 45 * 1000000
+#elif defined CG50 || defined CG100
 #define IO_MAX 60 * 1000000
+#endif
 
 #define FLL_RED_ZONE 17 * 1000000
 #define PLL_RED_ZONE 750 * 1000000
 #define IFC_RED_ZONE 250 * 1000000
 #define SFC_RED_ZONE 150 * 1000000
+#if defined CG20
+#define BFC_RED_ZONE 120 * 1000000
+#define PFC_RED_ZONE 25 * 1000000
+#elif defined CG50 || defined CG100
 #define BFC_RED_ZONE 100 * 1000000
 #define PFC_RED_ZONE 48 * 1000000
+#endif

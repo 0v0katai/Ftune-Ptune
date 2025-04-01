@@ -106,7 +106,11 @@ void settings_menu()
 
         case KEY_F6:
         case KEY_PAGEUP:
+#if defined CG20
+            // sram_test();
+#elif defined CG50 || defined CG100
             sdram_test();
+#endif
             break;
 
         case KEY_EXIT:

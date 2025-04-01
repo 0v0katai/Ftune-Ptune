@@ -60,7 +60,7 @@ int main()
     u8 select = SELECT_FLL;
     bool benchmark = false;
     static const char *option[] = {"FLL:", "PLL:", "IFC:", "SFC:", "BFC:", "PFC:", 0};
-    static const u8 rom_wait[] = {0, 1, 2, 3, 4, 5, 6, 8, 10, 12, 14, 18, 24};
+    static const u8 mem_wait[] = {0, 1, 2, 3, 4, 5, 6, 8, 10, 12, 14, 18, 24};
 
 #ifdef ENABLE_FP
     __printf_enable_fp();
@@ -101,12 +101,20 @@ int main()
         row_print(5, 7, "1/%d", f.Bphi_div);
         row_print(6, 7, "1/%d", f.Pphi_div);
 
-        static const int trc_wait[4] = {3, 4, 6, 9};
         print_options(1, 1, option, select);
-        row_print_color(3, 11, C_WHITE, f.Iphi_f > IFC_RED_ZONE ? C_RED : C_BLUE, "CPU", rom_wait[BSC.CS0WCR.WR]);
-        row_print_color(4, 11, C_WHITE, C_BLACK, "roR %d", rom_wait[BSC.CS0WCR.WR]);
+        row_print_color(3, 11, C_WHITE, f.Iphi_f > IFC_RED_ZONE ? C_RED : C_BLUE, "CPU");
+        row_print_color(4, 11, C_WHITE, C_BLACK, "roR %d", mem_wait[BSC.CS0WCR.WR]);
+#if defined CG20
+        row_print_color(5, 11, C_WHITE, C_BLACK, "raR %d", mem_wait[BSC.CS2WCR.WR]);
+        if (BSC.CS2WCR.WW)
+            row_print_color(6, 11, C_WHITE, C_BLACK, "raW %d", BSC.CS2WCR.WW - 1);
+        else
+            row_print_color(6, 11, C_WHITE, C_BLACK, "raW =R");
+#elif defined CG50 || defined CG100
+        static const int trc_wait[4] = {3, 4, 6, 9};
         row_print_color(5, 11, C_WHITE, C_BLACK, "CL %d", BSC.CS3WCR.A3CL + 1);
         row_print_color(6, 11, C_WHITE, C_BLACK, "TRC %d", trc_wait[BSC.CS3WCR.TRC]);
+#endif
 
 #if defined CG20
         row_print(8, 2, "[x]/[/]: +/- roR");
@@ -198,20 +206,38 @@ int main()
                 BSC.CS0WCR.WR--;
             break;
         case KEY_PLUS:
+#if defined CG20
+            if (key.shift && BSC.CS2WCR.WW < WAIT_6 + 1)
+            {
+                BSC.CS2WCR.WW++;
+                break;
+            }
+            BSC.CS2WCR.WR++;
+#elif defined CG50 || defined CG100
             if (key.shift && BSC.CS3WCR.TRC < 3)
             {
                 BSC.CS3WCR.TRC++;
                 break;
             }
             modify_A3CL(CL3);
+#endif
             break;
         case KEY_MINUS:
+#if defined CG20
+            if (key.shift && BSC.CS2WCR.WW > 0)
+            {
+                BSC.CS2WCR.WW--;
+                break;
+            }
+            BSC.CS2WCR.WR--;
+#elif defined CG50 || defined CG100
             if (key.shift && BSC.CS3WCR.TRC > 0)
             {
                 BSC.CS3WCR.TRC--;
                 break;
             }
             modify_A3CL(CL2);
+#endif
             break;
 
         case KEY_MENU:

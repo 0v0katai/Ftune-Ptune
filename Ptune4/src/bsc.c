@@ -3,6 +3,7 @@
 #include "bsc.h"
 #include "validate.h"
 #include "util.h"
+#include "config.h"
 
 static const char *csn_name[] = {"0", "2", "3", "4", "5A", "5B", "6A", "6B"};
 
@@ -39,6 +40,7 @@ static void print_csnwcr(select_option select)
         const u8 highlight = i == select.CSn ? select.REG : -1;
         row_print(0 + row, 2 + column, "CS%sWCR", csn_name[i]);
         row_print(1 + row, 2 + column, "%08x", wcr_addr->lword);
+#if defined CG50 || defined CG100
         if (i == SELECT_CS3WCR)
         {
             static const char *cs3wcr_reg_name[] = {"TRP", "TRCD", "A3CL", "TRWL", "TRC", 0};
@@ -50,6 +52,8 @@ static void print_csnwcr(select_option select)
             row_print(6, 32, "%d", trc_wait[wcr_addr->lword & 0b11]);
             continue;
         }
+#endif
+
         print_options(2 + row, 1 + column, csnwcr_reg_name, highlight);
         if (wcr_addr->WW)
             row_print(2 + row, 7 + column, "%d", wcr_addr->WW - 1);
@@ -76,6 +80,7 @@ static void bsc_modify(select_option select, i8 modify)
     else
     {
         sh7305_bsc_CSnWCR_06A6B_t *wcr_addr = &BSC.CS0WCR + select.CSn;
+#if defined CG50 || defined CG100
         if (select.CSn == SELECT_CS3WCR)
         {
             const u8 mask = 13 - select.REG * 3 - (select.REG >= SELECT_TRWL);
@@ -90,6 +95,7 @@ static void bsc_modify(select_option select, i8 modify)
             wcr_addr->lword = (wcr_addr->lword & ~(0b11 << mask)) | (check << mask);
             return;
         }
+#endif
         static const u8 max[4] = {7, 3, 3, WAIT_24};
         static const u8 mask[4] = {16, 11, 0, 7};
         static const u8 field[4] = {0b111, 0b11, 0b11, 0b1111};
@@ -167,7 +173,11 @@ void bsc_menu()
         case KEY_EXIT:
             return;
         }
+#if defined CG20
+        if (select.MODE == SELECT_WCR && select.REG == SELECT_IWRRS)
+#elif defined CG50 || defined CG100
         if (select.MODE == SELECT_WCR && select.CSn != SELECT_CS3WCR && select.REG == SELECT_TRC)
+#endif
             select.REG--;
         if (select.byte == 0b01000000)
             select.REG++;
