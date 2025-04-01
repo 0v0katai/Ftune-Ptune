@@ -193,22 +193,26 @@ int main()
         case KEY_F3:
         case KEY_F4:
         case KEY_F5:
+#if defined CG50 || defined CG100
             if (key.shift)
             {
                 fxcg50_100_expt_f5_preset();
                 break;
             }
+#endif
             clock_set_speed(key.key - KEY_F1 + 1);
             break;
         case KEY_PREVTAB:
             clock_set_speed(abs(current_preset - 1));
             break;
         case KEY_NEXTTAB:
+#if defined CG50 || defined CG100
             if (key.shift)
             {
                 fxcg50_100_expt_f5_preset();
                 break;
             }
+#endif
             clock_set_speed(current_preset % 5 + 1);
             break;
 
