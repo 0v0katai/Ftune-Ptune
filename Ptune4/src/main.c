@@ -11,6 +11,9 @@
 #include <gint/mpu/bsc.h>
 #include <gint/gdb.h>
 
+#include <gint/usb.h>
+#include <gint/usb-ff-bulk.h>
+
 #include "util.h"
 #include "validate.h"
 #include "mem_test.h"
@@ -187,6 +190,24 @@ int main()
         case KEY_PAGEUP:
             benchmark = !benchmark;
             break;
+
+#if defined ENABLE_USB
+        case KEY_OPTN:
+            if (!usb_is_open())
+            {
+                usb_interface_t const *interfaces[] = {&usb_ff_bulk, NULL};
+                usb_open(interfaces, GINT_CALL_NULL);
+                usb_open_wait();
+            }
+            else
+                usb_close();
+            break;
+        case KEY_EXP:
+        case KEY_7:
+            if (key.shift && usb_is_open())
+                usb_fxlink_screenshot(true);
+            break;
+#endif
 
         case KEY_UP:
             if (select)

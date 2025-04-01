@@ -14,6 +14,7 @@
 // #define ENABLE_GDB
 #define ENABLE_DHRY
 // #define ENABLE_WHET
+#define ENABLE_USB
 
 /* Settings defaults */
 
