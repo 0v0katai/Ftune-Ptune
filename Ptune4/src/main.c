@@ -52,6 +52,22 @@ static void print_preset(int current)
     }
 }
 
+static void fxcg50_100_expt_f5_preset()
+{
+    static struct cpg_overclock_setting const settings_fxcg50_100_expt_f5 =
+        { .FLLFRQ   = 0x00004000 + 900,
+          .FRQCR    = 0x1F001103,
+          .CS0BCR   = 0x46D80400,
+          .CS2BCR   = 0x36DA3400,
+          .CS3BCR   = 0x04904400,
+          .CS5aBCR  = 0x17DF0400,
+          .CS0WCR   = 0x000004C0,
+          .CS2WCR   = 0x000003C0,
+          .CS3WCR   = 0x000024D2,
+          .CS5aWCR  = 0x000103C0 };
+    cpg_set_overclock_setting(&settings_fxcg50_100_expt_f5);
+}
+
 int main()
 {
 #ifdef ENABLE_GDB
@@ -177,12 +193,22 @@ int main()
         case KEY_F3:
         case KEY_F4:
         case KEY_F5:
+            if (key.shift)
+            {
+                fxcg50_100_expt_f5_preset();
+                break;
+            }
             clock_set_speed(key.key - KEY_F1 + 1);
             break;
         case KEY_PREVTAB:
             clock_set_speed(abs(current_preset - 1));
             break;
         case KEY_NEXTTAB:
+            if (key.shift)
+            {
+                fxcg50_100_expt_f5_preset();
+                break;
+            }
             clock_set_speed(current_preset % 5 + 1);
             break;
 
