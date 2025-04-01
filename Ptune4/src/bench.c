@@ -8,6 +8,10 @@
 #include "config.h"
 #include "bench.h"
 
+#ifdef ENABLE_AZUR
+#include <azur/gint/render.h>
+#endif
+
 bool bench_flag;
 
 static int disable_bench_flag()
@@ -35,13 +39,32 @@ void run_benchmark()
         row_print(11, 14 + i * 12, "%s %d", mem[i], mem_bench((u32 *)address[i], &bench_flag));
     }
     row_highlight(11);
-    
-    const u32 time_dupdate = prof_exec(dupdate());
-#ifdef ENABLE_FP
-    row_print(12, 2, "dupdate(): %d us (%3.2f FPS)", time_dupdate, 1000000.0f / time_dupdate);
-#else
-    row_print(12, 2, "dupdate(): %d us (%d FPS)", time_dupdate, 1000000 / time_dupdate);
+#ifdef ENABLE_AZUR
+    const u32 time_azrp_update = prof_exec(azrp_update());
+    row_print(12, 26, " azrp: %d us "
+    #ifdef ENABLE_FP
+        "(%3.2f FPS)",
+        time_azrp_update,
+        1000000.0f / time_azrp_update
+    #else
+        "(%d FPS)",
+        time_azrp_update,
+        1000000 / time_azrp_update
+    #endif
+    );
 #endif
+    const u32 time_dupdate = prof_exec(dupdate());
+    row_print(12, 2, "dupdate: %d us "
+    #ifdef ENABLE_FP
+        "(%3.2f FPS)",
+        time_dupdate,
+        1000000.0f / time_dupdate
+    #else
+        "(%d FPS)",
+        time_dupdate,
+        1000000 / time_dupdate
+    #endif
+    );
     row_highlight(12);
 
 #ifdef ENABLE_DHRY

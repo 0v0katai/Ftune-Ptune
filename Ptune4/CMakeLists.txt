@@ -11,6 +11,7 @@ include(GenerateHH2Bin)
 include(Fxconv)
 find_package(Gint 2.11 REQUIRED)
 find_package(LibProf 2.1 REQUIRED)
+find_package(Azur 0.1)
 find_package(Git REQUIRED)
 
 string(SUBSTRING ${PTUNE4_VERSION} 1 4 VERSTR)
@@ -53,7 +54,7 @@ target_include_directories(Ptune4 PRIVATE
   "${CMAKE_CURRENT_BINARY_DIR}/include")
 target_compile_options(Ptune4 PRIVATE -Wall -Wextra -Os -g -flto)
 target_link_options(Ptune4 PRIVATE -flto=auto -Wl,-Map=map -Wl,--print-memory-usage)
-target_link_libraries(Ptune4 Gint::Gint LibProf::LibProf)
+target_link_libraries(Ptune4 Gint::Gint LibProf::LibProf Azur::Azur)
 
 if("${FXSDK_PLATFORM_LONG}" STREQUAL fx9860G)
   generate_g1a(TARGET Ptune4 VERSION ${PTUNE4_VERSION} OUTPUT "Ptune4.g1a"
