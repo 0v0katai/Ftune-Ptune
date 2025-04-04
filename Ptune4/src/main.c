@@ -52,6 +52,7 @@ static void print_preset(int current)
     }
 }
 
+#if defined CG50 || defined CG100
 static void fxcg50_100_expt_f5_preset()
 {
     static struct cpg_overclock_setting const settings_fxcg50_100_expt_f5 =
@@ -67,6 +68,7 @@ static void fxcg50_100_expt_f5_preset()
           .CS5aWCR  = 0x000103C0 };
     cpg_set_overclock_setting(&settings_fxcg50_100_expt_f5);
 }
+#endif
 
 int main()
 {
@@ -105,12 +107,12 @@ int main()
         row_print(2, 29, "FRQCR:");
         for (int i = 0; i < 8; i++)
         {
-            static const char *csn_name[] = {"0", "2", "3", "5a"};
+            static const char *csn_name[] = {"0", "2", "3", "5A"};
             static const char reg_name[] = {'B', 'W'};
             row_print(i + 3, 29, "CS%s%cCR:", csn_name[i % 4], reg_name[i >= 4]);
         }
         for (int i = 0; i < 10; i++)
-            row_print(i + 1, 38, "0x%08x", *(&(s.FLLFRQ) + i));
+            row_print(i + 1, 38, "0x%08X", *(&(s.FLLFRQ) + i));
 
         const clock_frequency_t f = *clock_freq();
         row_print(1, 7, "x%d", f.FLL);

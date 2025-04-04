@@ -208,9 +208,9 @@ void fkey_menu(int position, char const *text)
 	dline(x + w - 1, y + 13, x + w - 2, y + 14, C_WHITE);
 }
 
-void msg_box(int size, int center_position, char const *text)
+void msg_box(int row, int size)
 {
-
+	drect_border(3, ROW_Y + ROW_H * (row - 1) - 1, DWIDTH - 4, ROW_Y + ROW_H * (row + size - 1) - 1, C_WHITE, 2, C_BLACK);
 }
 
 void print_options(int row, int x, const char *option[], u8 select)

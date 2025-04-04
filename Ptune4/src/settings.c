@@ -47,9 +47,12 @@ enum select_option
 
 static void about()
 {
-    row_print(11, 1, VERSION);
-    row_print(12, 1, "Copyright (C) 2025 Sentaro21, CalcLoverHK");
-    row_print(13, 1, "This software is licensed under MIT/X11.");
+    msg_box(5, 5);
+    row_print(6, 3, VERSION);
+    row_print(7, 3, "Copyright (C) 2025 Sentaro21, CalcLoverHK");
+    row_print(8, 3, "This software is licensed under MIT/X11.");
+    dupdate();
+    getkey();
 }
 
 void settings_menu()
@@ -62,7 +65,7 @@ void settings_menu()
         {ROM_MARGIN_DEF, RAM_MARGIN_DEF, PLL_CLK_MAX_DEF, IFC_CLK_MAX_DEF, SFC_CLK_MAX_DEF,
          BFC_CLK_MAX_TRC3_DEF, BFC_CLK_MAX_TRC4_DEF, BFC_CLK_MAX_TRC6_DEF, BFC_CLK_MAX_TRC9_DEF, PFC_CLK_MAX_DEF};
     static const i32 settings_max[] =
-         {ROM_MARGIN_MAX, RAM_MARGIN_MAX, PLL_MAX, CPU_MAX, SHW_MAX, BUS_MAX, BUS_MAX, BUS_MAX, BUS_MAX, IO_MAX};
+        {ROM_MARGIN_MAX, RAM_MARGIN_MAX, PLL_MAX, CPU_MAX, SHW_MAX, BUS_MAX, BUS_MAX, BUS_MAX, BUS_MAX, IO_MAX};
 #else
     static const char *option[] = {"PLL", "CPU", "SHW", "Bus", "I/O"};
     static const i32 settings_def[] =
@@ -82,29 +85,28 @@ void settings_menu()
         row_print(2, 1, "RAM Margin");
         row_print(2, 25, "%d%%", RAM_MARGIN);
 #if defined CG50 || defined CG100
-        for (int i = 0; i < 8; i++)
+        for (int i = 0; i < 4; i++)
         {
-            row_print(i + 3, 1, "%s Clock Max", option[i]);
             static const int trc_wait[4] = {3, 4, 6, 9};
-            if (i >= 3 && i <= 6)
-                row_print(i + 3, 16, "TRC=%d", trc_wait[i - 3]);
+            row_print(i + 6, 15, "(TRC=%d)", trc_wait[i]);
+        }
+        for (int i = 0; i < 8; i++)
 #else
         for (int i = 0; i < 5; i++)
+#endif
         {
             row_print(i + 3, 1, "%s Clock Max", option[i]);
-#endif
             row_print(i + 3, 25, "%d", settings[i + 2] / 1000);
             row_print(i + 3, 33, "KHz");
         }
 
         row_highlight(select + 1);
 
-        about();
-
         fkey_action(1, "+");
         fkey_action(2, "-");
-        fkey_action(5, "Init");
-        fkey_button(6, "RAM");
+        fkey_action(3, "Init");
+        fkey_button(5, "Test");
+        fkey_button(6, "About");
 
         dupdate();
         key = getkey();
@@ -134,19 +136,23 @@ void settings_menu()
         case KEY_LEFT:
             modify--;
             break;
-
-        case KEY_F5:
-        case KEY_NEXTTAB:
+        case KEY_F3:
+        case KEY_PREVTAB:
             settings[select] = settings_def[select];
             break;
 
+        case KEY_F5:
+        case KEY_NEXTTAB:
+        #if defined CG20
+                // sram_test();
+        #elif defined CG50 || defined CG100
+                sdram_test();
+        #endif
+                break;
+
         case KEY_F6:
         case KEY_PAGEUP:
-#if defined CG20
-            // sram_test();
-#elif defined CG50 || defined CG100
-            sdram_test();
-#endif
+            about();
             break;
 
         case KEY_EXIT:

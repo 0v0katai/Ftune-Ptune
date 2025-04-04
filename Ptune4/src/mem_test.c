@@ -41,7 +41,7 @@ static void ram_write_test()
     u32 temp[WRITE_N];
     u32 *write_area = (u32 *)(((u32)&temp & 0x0FFFFFFF) | 0xA0000000);
 
-    row_print(1, 1, "RAM select: 0x%08x", write_area);
+    row_print(1, 1, "RAM select: 0x%08X", write_area);
     struct cpg_overclock_setting s;
     cpg_get_overclock_setting(&s);
     static const u8 PLL = PLL_x24, IFC = DIV_4, SFC = DIV_4, BFC = DIV_4, PFC = DIV_32;

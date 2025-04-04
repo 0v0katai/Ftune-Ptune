@@ -17,7 +17,7 @@ static void print_csnbcr(select_option select)
         const u8 column = (i % 4) * 12;
         const u8 row = (i >= SELECT_CS5ABCR) * 7;
         row_print(0 + row, 2 + column, "CS%sBCR", csn_name[i]);
-        row_print(1 + row, 2 + column, "%08x", bcr_addr->lword);
+        row_print(1 + row, 2 + column, "%08X", bcr_addr->lword);
         print_options(2 + row, 1 + column, bcr_reg_name, i == select.CSn ? select.REG : -1);
         for (int j = 0; j < 5; j++)
         {
@@ -39,7 +39,7 @@ static void print_csnwcr(select_option select)
         const u8 row = (i >= SELECT_CS5AWCR) * 7;
         const u8 highlight = i == select.CSn ? select.REG : -1;
         row_print(0 + row, 2 + column, "CS%sWCR", csn_name[i]);
-        row_print(1 + row, 2 + column, "%08x", wcr_addr->lword);
+        row_print(1 + row, 2 + column, "%08X", wcr_addr->lword);
 #if defined CG50 || defined CG100
         if (i == SELECT_CS3WCR)
         {
