@@ -6,6 +6,7 @@
 #include "settings.h"
 #include "validate.h"
 #include "bsc.h"
+#include "config.h"
 
 #define CS2WCR_DEFAULT WAIT_2
 #define CS0WCR_DEFAULT WAIT_3
@@ -24,7 +25,12 @@ bool exceed_limit()
     const clock_frequency_t *freq = clock_freq();
     return (freq->FLL * freq->PLL * 32768 > PLL_CLK_MAX) ||
            (freq->Iphi_f > CPU_CLK_MAX) || (freq->Sphi_f > SHW_CLK_MAX) ||
-           (freq->Bphi_f > BUS_CLK_MAX) || (freq->Pphi_f > IO_CLK_MAX && freq->Pphi_div == 64);
+#if defined CG50 || defined CG100
+           (freq->Bphi_f > BUS_CLK_MAX(BSC.CS3WCR.TRC)) ||
+#else
+            (freq->Bphi_f > BUS_CLK_MAX) ||
+#endif
+           (freq->Pphi_f > IO_CLK_MAX && freq->Pphi_div == 64);
 }
 
 unsigned int best_rom_wait(i32 Bphi_f)
