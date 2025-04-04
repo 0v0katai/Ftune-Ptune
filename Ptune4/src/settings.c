@@ -50,7 +50,7 @@ static void about()
     msg_box(5, 5);
     row_print(6, 3, VERSION);
     row_print(7, 3, "Copyright (C) 2025 Sentaro21, CalcLoverHK");
-    row_print(8, 3, "This software is licensed under MIT/X11.");
+    row_print(8, 3, "This software is licensed under MIT/Expat.");
     dupdate();
     getkey();
 }
