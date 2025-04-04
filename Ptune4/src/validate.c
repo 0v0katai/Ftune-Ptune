@@ -26,7 +26,7 @@ bool exceed_limit()
     return (freq->FLL * freq->PLL * 32768 > PLL_CLK_MAX) ||
            (freq->Iphi_f > CPU_CLK_MAX) || (freq->Sphi_f > SHW_CLK_MAX) ||
 #if defined CG50 || defined CG100
-           (freq->Bphi_f > BUS_CLK_MAX(BSC.CS3WCR.TRC)) ||
+           (freq->Bphi_f > BUS_CLK_MAX(BSC.CS3WCR.TRC) && BSC.CS3WCR.TRC == 3) ||
 #else
             (freq->Bphi_f > BUS_CLK_MAX) ||
 #endif
@@ -41,6 +41,17 @@ unsigned int best_rom_wait(i32 Bphi_f)
             break;
     return i + 1;
 }
+
+#if defined CG50 || defined CG100
+unsigned int best_TRC(i32 Bphi_f)
+{
+    int i;
+    for (i = 2; i >= 0; i--)
+        if (Bphi_f >= BUS_CLK_MAX(i))
+            break;
+    return i + 1;
+}
+#endif
 
 bool auto_up_PFC()
 {

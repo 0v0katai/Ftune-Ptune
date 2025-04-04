@@ -32,6 +32,7 @@ enum roR_table
 };
 
 unsigned int best_rom_wait(i32 Bphi_f);
+unsigned int best_TRC(i32 Bphi_f);
 void init_roR();
 bool auto_up_PFC();
 bool auto_down_PFC();

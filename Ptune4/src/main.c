@@ -298,10 +298,9 @@ int main()
             }
             BSC.CS2WCR.WR--;
 #elif defined CG50 || defined CG100
-            if (key.shift && BSC.CS3WCR.TRC > 0)
+            if (key.shift && BSC.CS3WCR.TRC > best_TRC(f.Bphi_f))
             {
-                if (BUS_CLK_MAX(BSC.CS3WCR.TRC - 1) > f.Bphi_f)
-                    BSC.CS3WCR.TRC--;
+                BSC.CS3WCR.TRC--;
                 break;
             }
             modify_A3CL(CL2);
@@ -386,7 +385,7 @@ int main()
 #else
                 const i32 limit[4] = {CPU_CLK_MAX, SHW_CLK_MAX, BUS_CLK_MAX, IO_CLK_MAX};
 #endif
-                if ((fs[check] << 1) > limit[check])
+                if ((fs[check] << 1) > limit[check] && check != SELECT_BFC - 2)
                     break;
                 for (int i = check - 1; i >= 0; i--)
                     if (divs[check] == divs[i])
@@ -408,7 +407,11 @@ int main()
                     CPG.FRQCR.lword += 1 << field[i];
             }
             cpg_compute_freq();
-            BSC.CS0WCR.WR = best_rom_wait(clock_freq()->Bphi_f);
+            const u32 Bphi_f = clock_freq()->Bphi_f;
+            BSC.CS0WCR.WR = best_rom_wait(Bphi_f);
+#if defined CG50 || defined CG100
+            BSC.CS3WCR.TRC = best_TRC(Bphi_f);
+#endif
         }
     } while (key.key != KEY_EXIT);
     return 1;
