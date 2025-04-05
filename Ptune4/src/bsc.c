@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <gint/display.h>
 #include <gint/clock.h>
 #include "bsc.h"
@@ -5,7 +6,18 @@
 #include "util.h"
 #include "config.h"
 
-static const char *csn_name[] = {"0", "2", "3", "4", "5A", "5B", "6A", "6B"};
+const char *csn_name[] = {"0", "2", "3", "4", "5A", "5B", "6A", "6B"};
+
+struct cpg_overclock_setting s_default;
+
+static void get_default_preset()
+{
+    static struct cpg_overclock_setting s_current;
+    cpg_get_overclock_setting(&s_current);
+    clock_set_speed(CLOCK_SPEED_DEFAULT);
+    cpg_get_overclock_setting(&s_default);
+    cpg_set_overclock_setting(&s_current);
+}
 
 static void print_csnbcr(select_option select)
 {
@@ -22,7 +34,11 @@ static void print_csnbcr(select_option select)
         for (int j = 0; j < 5; j++)
         {
             const u8 mask = 28 - j * 3;
-            row_print(2 + row + j, 9 + column, "%d", bcr_wait[(bcr_addr->lword >> mask) & 0b111]);
+            const u8 value = (bcr_addr->lword >> mask) & 0b111;
+            row_print_color(2 + row + j, 9 + column,
+                i <= SELECT_CS5ABCR && i != SELECT_CS4BCR &&
+                ((bcr_addr->lword ^ *(&s_default.CS0BCR + i - (i == SELECT_CS5ABCR))) >> mask) & 0b111
+                ? C_BLUE : C_BLACK, C_WHITE, "%d", bcr_wait[value]);
         }
     }
 }
@@ -44,24 +60,47 @@ static void print_csnwcr(select_option select)
         if (i == SELECT_CS3WCR)
         {
             static const char *cs3wcr_reg_name[] = {"TRP", "TRCD", "A3CL", "TRWL", "TRC", 0};
-            static const int trc_wait[4] = {3, 4, 6, 9};
             print_options(2, 25, cs3wcr_reg_name, highlight);
-            for (int i = 0; i < 3; i++)
-                row_print(2 + i, 32, "%d", wr_wait[((wcr_addr->lword >> (13 - i * 3)) & 0b11) + 1]);
-            row_print(5, 32, "%d", wr_wait[(wcr_addr->lword >> 3) & 0b11]);
-            row_print(6, 32, "%d", trc_wait[wcr_addr->lword & 0b11]);
+            for (int j = 0; j < 5; j++)
+            {
+                static const u8 trc_wait[4] = {3, 4, 6, 9};
+                const u8 mask = 13 - j * 3 - (j >= SELECT_TRWL);
+                u8 value = (wcr_addr->lword >> mask) & 0b11;
+                if (j == SELECT_TRC)
+                    value = trc_wait[value];
+                else if (j != SELECT_TRWL)
+                    value++;
+                row_print_color(2 + j, 32,
+                    ((wcr_addr->lword ^ s_default.CS3WCR) >> mask) & 0b11
+                    ? C_BLUE : C_BLACK, C_WHITE, "%d", value);
+            }
             continue;
         }
 #endif
-
         print_options(2 + row, 1 + column, csnwcr_reg_name, highlight);
-        if (wcr_addr->WW)
-            row_print(2 + row, 7 + column, "%d", wcr_addr->WW - 1);
-        else
-            row_print(2 + row, 7 + column, "=WR");
-        row_print(3 + row, 7 + column, "%d.5", wcr_addr->SW);
-        row_print(4 + row, 7 + column, "%d.5", wcr_addr->HW);
-        row_print(5 + row, 7 + column, "%d", wr_wait[wcr_addr->WR]);
+        static const u8 mask[4] = {16, 11, 0, 7};
+        static const u8 field[4] = {0b111, 0b11, 0b11, 0b1111};
+        for (int j = 0; j < 4; j++)
+        {
+            char str[4];
+            if (j == SELECT_WW)
+            {
+                if (wcr_addr->WW)
+                    sprintf(str, "%d", wcr_addr->WW - 1);
+                else
+                    sprintf(str, "=WR");
+            }
+            else if (j == SELECT_SW)
+                sprintf(str, "%d.5", wcr_addr->SW);
+            else if (j == SELECT_HW)
+                sprintf(str, "%d.5", wcr_addr->HW);
+            else
+                sprintf(str, "%d", wr_wait[wcr_addr->WR]);
+            row_print_color(2 + row + j, 7 + column,
+                i <= SELECT_CS5AWCR && i != SELECT_CS4WCR &&
+                ((wcr_addr->lword ^ *(&s_default.CS0WCR + i - (i == SELECT_CS5ABCR))) >> mask[j]) & field[j]
+                ? C_BLUE : C_BLACK, C_WHITE, str);
+        }
     }
 }
 
@@ -111,6 +150,7 @@ void bsc_menu()
     key_event_t key;
     select_option select;
     select.byte = 0;
+    get_default_preset();
 
     while (true)
     {
