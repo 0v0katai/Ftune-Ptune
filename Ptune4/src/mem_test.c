@@ -49,7 +49,7 @@ static void ram_write_test()
     s.CS0WCR = (s.CS0WCR & ~(0b1111 << 7)) | (WAIT_18 << 7);
     cpg_set_overclock_setting(&s);
     
-    int FLF_max = 600;
+    int FLF_max = 300;
     for (int TRC = 0; TRC <= 3; TRC++)
     {
         BSC.CS3WCR.TRC = TRC;
