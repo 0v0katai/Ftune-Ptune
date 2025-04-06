@@ -104,6 +104,11 @@ void sdram_test()
     cpg_set_overclock_setting(&s0);
 
     row_print(9, 1, "RAM margin: %d%%", RAM_MARGIN);
+    row_print(10, 1, "Current preset:");
+    if (clock_get_speed())  
+        row_print(10, 17, "F%d", clock_get_speed());
+    else
+        row_print(10, 17, "Custom");
     row_print_color(11, 1, C_RED, C_WHITE, "Warning! SDRAM test may cause system errors!");
     row_print_color(12, 1, C_RED, C_WHITE, "It's strongly advised to RESTART after the test.");
     row_print(14, 1, "Press any key to exit...");
