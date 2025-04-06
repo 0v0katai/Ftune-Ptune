@@ -25,20 +25,22 @@ static void print_csnbcr(select_option select)
     static const u8 bcr_wait[] = {0, 1, 2, 4, 6, 8, 10, 12};
     for (int i = 0; i < 8; i++)
     {
-        const sh7305_bsc_CSnBCR_t *bcr_addr = &BSC.CS0BCR + i;
+        const u32 bcr_lword = (&BSC.CS0BCR + i)->lword;
         const u8 column = (i % 4) * 12;
         const u8 row = (i >= SELECT_CS5ABCR) * 7;
         row_print(0 + row, 2 + column, "CS%sBCR", csn_name[i]);
-        row_print(1 + row, 2 + column, "%08X", bcr_addr->lword);
+        row_print(1 + row, 2 + column, "%08X", bcr_lword);
         print_options(2 + row, 1 + column, bcr_reg_name, i == select.CSn ? select.REG : -1);
         for (int j = 0; j < 5; j++)
         {
             const u8 mask = 28 - j * 3;
-            const u8 value = (bcr_addr->lword >> mask) & 0b111;
+            const u8 value = (bcr_lword >> mask) & 0b111;
+            const u32 s_select = *(&s_default.CS0BCR + i - (i == SELECT_CS5ABCR));
+            const i8 diff = value - ((s_select >> mask) & 0b111);
             row_print_color(2 + row + j, 9 + column,
-                i <= SELECT_CS5ABCR && i != SELECT_CS4BCR &&
-                ((bcr_addr->lword ^ *(&s_default.CS0BCR + i - (i == SELECT_CS5ABCR))) >> mask) & 0b111
-                ? C_BLUE : C_BLACK, C_WHITE, "%d", bcr_wait[value]);
+                i <= SELECT_CS5ABCR && i != SELECT_CS4BCR && diff
+                ? diff > 0 ? C_BLUE : C_RED
+                : C_BLACK, C_WHITE, "%d", bcr_wait[value]);
         }
     }
 }
@@ -50,12 +52,13 @@ static void print_csnwcr(select_option select)
 
     for (int i = 0; i < 8; i++)
     {
-        const sh7305_bsc_CSnWCR_06A6B_t *wcr_addr = &BSC.CS0WCR + i;
+        const u32 wcr_lword = (&BSC.CS0WCR + i)->lword;
         const u8 column = (i % 4) * 12;
         const u8 row = (i >= SELECT_CS5AWCR) * 7;
         const u8 highlight = i == select.CSn ? select.REG : -1;
+        const u32 s_select = *(&s_default.CS0WCR + i - (i == SELECT_CS5ABCR));
         row_print(0 + row, 2 + column, "CS%sWCR", csn_name[i]);
-        row_print(1 + row, 2 + column, "%08X", wcr_addr->lword);
+        row_print(1 + row, 2 + column, "%08X", wcr_lword);
 #if defined CG50 || defined CG100
         if (i == SELECT_CS3WCR)
         {
@@ -65,41 +68,39 @@ static void print_csnwcr(select_option select)
             {
                 static const u8 trc_wait[4] = {3, 4, 6, 9};
                 const u8 mask = 13 - j * 3 - (j >= SELECT_TRWL);
-                u8 value = (wcr_addr->lword >> mask) & 0b11;
-                if (j == SELECT_TRC)
-                    value = trc_wait[value];
-                else if (j != SELECT_TRWL)
-                    value++;
+                const u8 value = (wcr_lword >> mask) & 0b11;
+                const i8 diff = value - ((s_select >> mask) & 0b11);
                 row_print_color(2 + j, 32,
-                    ((wcr_addr->lword ^ s_default.CS3WCR) >> mask) & 0b11
-                    ? C_BLUE : C_BLACK, C_WHITE, "%d", value);
+                    diff > 0 ? C_BLUE : diff < 0 ? C_RED : C_BLACK, C_WHITE, "%d",
+                    j == SELECT_TRC ? trc_wait[value] : value + (j != SELECT_TRWL)
+                );
             }
             continue;
         }
 #endif
         print_options(2 + row, 1 + column, csnwcr_reg_name, highlight);
-        static const u8 mask[4] = {16, 11, 0, 7};
-        static const u8 field[4] = {0b111, 0b11, 0b11, 0b1111};
         for (int j = 0; j < 4; j++)
         {
+            static const u8 mask[4] = {16, 11, 0, 7};
+            static const u8 field[4] = {0b111, 0b11, 0b11, 0b1111};
+            const u8 value = (wcr_lword >> mask[j]) & field[j];
+            const i8 diff = value - ((s_select >> mask[j]) & field[j]);
             char str[4];
             if (j == SELECT_WW)
             {
-                if (wcr_addr->WW)
-                    sprintf(str, "%d", wcr_addr->WW - 1);
+                if (value)
+                    sprintf(str, "%d", value - 1);
                 else
                     sprintf(str, "=WR");
             }
-            else if (j == SELECT_SW)
-                sprintf(str, "%d.5", wcr_addr->SW);
-            else if (j == SELECT_HW)
-                sprintf(str, "%d.5", wcr_addr->HW);
+            else if (j == SELECT_WR)
+                sprintf(str, "%d", wr_wait[value]);
             else
-                sprintf(str, "%d", wr_wait[wcr_addr->WR]);
+                sprintf(str, "%d.5", value);
             row_print_color(2 + row + j, 7 + column,
-                i <= SELECT_CS5AWCR && i != SELECT_CS4WCR &&
-                ((wcr_addr->lword ^ *(&s_default.CS0WCR + i - (i == SELECT_CS5ABCR))) >> mask[j]) & field[j]
-                ? C_BLUE : C_BLACK, C_WHITE, str);
+                i <= SELECT_CS5AWCR && i != SELECT_CS4WCR && diff
+                ? diff > 0 ? C_BLUE : C_RED
+                : C_BLACK, C_WHITE, str);
         }
     }
 }
