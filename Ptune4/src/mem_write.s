@@ -28,7 +28,7 @@ RETW:
 	rts
 	nop
 
-.align 4
+.balign 4
 
 K5555:	.long	0x55555555
 KAAAA:	.long	0xAAAAAAAA

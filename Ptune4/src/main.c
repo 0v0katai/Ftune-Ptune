@@ -53,20 +53,40 @@ static void print_preset(int current)
 }
 
 #if defined CG50 || defined CG100
-static void fxcg50_100_expt_f5_preset()
+static void fxcg50_100_shift_f5_preset()
 {
-    static struct cpg_overclock_setting const settings_fxcg50_100_expt_f5 =
-        { .FLLFRQ   = 0x00004000 + 900,
-          .FRQCR    = 0x1F001103,
-          .CS0BCR   = 0x46D80400,
+    /* dupdate: 5633 μs/177 FPS, INT: 211264 Dhrystone/s */
+    static struct cpg_overclock_setting const settings_fxcg50_100_shift_f5 =
+        { .FLLFRQ   = 0x00004384,
+          .FRQCR    = 0x1F001103,   // PLL: x32, IFC: 1/2, SFC: 1/4, BFC: 1/4, PFC: 1/16
+          .CS0BCR   = 0x46DA0400,   // IWW: 6
           .CS2BCR   = 0x36DA3400,
-          .CS3BCR   = 0x04904400,
+          .CS3BCR   = 0x24924400,   // IWW: 2, IWRWD: 2, IWRWS: 2, IWRRD: 2, IWRRS: 2
           .CS5aBCR  = 0x17DF0400,
-          .CS0WCR   = 0x000004C0,
+          .CS0WCR   = 0x000004C0,   // WR: 12
           .CS2WCR   = 0x000003C0,
-          .CS3WCR   = 0x000024D2,
-          .CS5aWCR  = 0x000103C0 };
-    cpg_set_overclock_setting(&settings_fxcg50_100_expt_f5);
+          .CS3WCR   = 0x00004953,   // TRP: 3, TRCD: 3, A3CL: 3, TRC: 9
+          .CS5aWCR  = 0x000203C1
+        };
+    cpg_set_overclock_setting(&settings_fxcg50_100_shift_f5);
+}
+
+static void fxcg50_100_alpha_f5_preset()
+{
+    /* dupdate: 3896 μs/256 FPS, INT: 257122 Dhrystone/s */
+    static struct cpg_overclock_setting const settings_fxcg50_100_alpha_f5 =
+        { .FLLFRQ   = 0x00004384,
+          .FRQCR    = 0x1F001103,   // PLL: x32, IFC: 1/2, SFC: 1/4, BFC: 1/4, PFC: 1/16
+          .CS0BCR   = 0x46D80400,   // IWW: 6, IWRRS: 0
+          .CS2BCR   = 0x36DA3400,
+          .CS3BCR   = 0x24924400,   // IWW: 2, IWRWD: 2, IWRWS: 2, IWRRD: 2, IWRRS: 2
+          .CS5aBCR  = 0x17DF0400,
+          .CS0WCR   = 0x000004C0,   // WR: 12
+          .CS2WCR   = 0x000003C0,
+          .CS3WCR   = 0x000024D2,   // TRC: 6
+          .CS5aWCR  = 0x000103C0    // WW: 0, HW: 0.5
+        };
+    cpg_set_overclock_setting(&settings_fxcg50_100_alpha_f5);
 }
 #endif
 
@@ -211,28 +231,28 @@ int main()
         case KEY_F3:
         case KEY_F4:
         case KEY_F5:
-#if defined CG50 || defined CG100
+#ifdef CG50
             if (key.shift)
-            {
-                fxcg50_100_expt_f5_preset();
-                break;
-            }
+                fxcg50_100_shift_f5_preset();
+            else if (key.alpha)
+                fxcg50_100_alpha_f5_preset();
+            else
 #endif
             clock_set_speed(key.key - KEY_F1 + 1);
             break;
+#ifdef CG100
         case KEY_PREVTAB:
             clock_set_speed(abs(current_preset - 1));
             break;
         case KEY_NEXTTAB:
-#if defined CG50 || defined CG100
             if (key.shift)
-            {
-                fxcg50_100_expt_f5_preset();
-                break;
-            }
-#endif
-            clock_set_speed(current_preset % 5 + 1);
+                fxcg50_100_shift_f5_preset();
+            else if (key.alpha)
+                fxcg50_100_alpha_f5_preset();
+            else
+                clock_set_speed(current_preset % 5 + 1);
             break;
+#endif
 
         case KEY_F6:
         case KEY_PAGEUP:
