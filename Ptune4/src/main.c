@@ -4,7 +4,7 @@
 
 #include <gint/display.h>
 #include <gint/keyboard.h>
-
+#include <gint/gint.h>
 #include <gint/clock.h>
 #include <libprof.h>
 #include <gint/mpu/cpg.h>
@@ -109,6 +109,7 @@ int main()
 
     prof_init();
     cpg_set_overclock_permanent(true);
+    gint_setrestart(true);
     init_roR(roR);
 
     do
