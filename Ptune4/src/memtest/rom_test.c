@@ -9,14 +9,6 @@
 #include "util.h"
 #include "config.h"
 
-static u32 *rom_address(int FLF, int ROM_wait, volatile u32 *ROM, int block_size)
-{
-    CPG.FLLFRQ.FLF = FLF;
-    BSC.CS0WCR.WR = ROM_wait;
-    cpg_compute_freq();
-    return test_address(ROM, READ, block_size);
-}
-
 static void print_ROM_select(u32 *ROM_read_area)
 {
     row_clear(1);
@@ -36,7 +28,7 @@ static void rom_read_test()
     int FLF_max;
     for (int FLF = roR_default[ROM_wait] / 262144 * clock_freq()->Bphi_div; FLF < 2048; FLF += 2)
     {
-        if (rom_address(FLF, ROM_wait, ROM_read_area, READ_N))
+        if (rom_read_address(FLF, ROM_wait, ROM_read_area))
             break;
         FLF_max = FLF;
         print_ROM_select(ROM_read_area);
@@ -47,7 +39,7 @@ static void rom_read_test()
     u32 *pointer = ROM_BASE;
     for (int i = 0; i < 512; i++)
     {
-        if (rom_address(FLF_max, ROM_wait, pointer, READ_N))
+        if (rom_read_address(FLF_max, ROM_wait, pointer))
         {
             FLF_max -= 2;
             ROM_read_area = pointer;
@@ -69,7 +61,7 @@ static void rom_read_test()
 
         for (int FLF = roR_default[i] / (PLL_x6 + i * 2 + 1) / 4096; FLF < 2048; FLF += 2)
         {
-            if (rom_address(FLF, i, ROM_read_area, READ_N))
+            if (rom_read_address(FLF, i, ROM_read_area))
                 break;
             static const u8 mem_wait[] = {0, 1, 2, 3, 4, 5, 6, 8, 10, 12};
             const u32 Bphi_f = clock_freq()->Bphi_f;

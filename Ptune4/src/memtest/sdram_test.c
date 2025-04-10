@@ -9,13 +9,6 @@
 #include "util.h"
 #include "config.h"
 
-static u32 *ram_address(int FLF, volatile u32 *RAM, int block_size)
-{
-    CPG.FLLFRQ.FLF = FLF;
-    cpg_compute_freq();
-    return test_address(RAM, WRITE, block_size);
-}
-
 #if defined CG50 || defined CG100
 static void print_SDRAM_speed(u32 Bphi_f, u8 TRC)
 {
@@ -44,13 +37,13 @@ static void ram_write_test()
         BSC.CS3WCR.TRC = TRC;
         for (int FLF = FLF_max; FLF < 2048; FLF += 2)
         {
-            if (ram_address(FLF, write_area, WRITE_N))
+            if (sdram_write_address(FLF, write_area))
             {
                 FLF_max = FLF;
                 u32 Bphi_f;
                 for (int trial = 1; trial <= 100; trial++)
                 {
-                    if (ram_address(FLF_max, write_area, WRITE_N))
+                    if (sdram_write_address(FLF_max, write_area))
                     {
                         trial = 0;
                         FLF_max -= 2;
