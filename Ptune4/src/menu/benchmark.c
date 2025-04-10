@@ -6,12 +6,14 @@
 #include "whetstone.h"
 #include "util.h"
 #include "config.h"
-#include "bench.h"
+#include "menu.h"
 
 #ifdef ENABLE_AZUR
 #include <azur/gint/render.h>
 #endif
 
+u32 tick_count(volatile bool *flag);
+u32 mem_bench(u32 *mem_area, volatile bool *flag);
 bool bench_flag;
 
 static int disable_bench_flag()

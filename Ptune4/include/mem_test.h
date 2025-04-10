@@ -5,7 +5,10 @@
 #define READ_N 65536/4
 #define ROM_BASE (u32 *)0xA0000000
 
+enum TEST_MODE {READ, WRITE};
+
 void sdram_test();
 void rom_test();
-uint32_t *mem_read(volatile u32 *mem_area, volatile u32 *FLLFRQ_lword, int FLF, int n);
-uint32_t *mem_write(volatile u32 *mem_area, volatile u32 *FLLFRQ_lword, int FLF, int n);
+u32 *test_address(volatile u32 *address, bool mode, u32 block_size);
+uint32_t *mem_read(volatile u32 *address, volatile u32 *FLLFRQ_lword, int FLF, int n);
+uint32_t *mem_write(volatile u32 *address, volatile u32 *FLLFRQ_lword, int FLF, int n);

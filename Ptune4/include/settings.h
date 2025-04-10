@@ -14,5 +14,3 @@ extern i32 settings[];
 #define BUS_CLK_MAX settings[5]
 #endif
 #define IO_CLK_MAX settings[9]
-
-void settings_menu();

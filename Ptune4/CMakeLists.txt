@@ -21,18 +21,21 @@ string(SUBSTRING ${COMMIT_ID} 0 7 COMMIT_ID_SHORT)
 
 set(SOURCES
   src/main.c
-  src/util.c
   src/validate.c
-  src/dhrystone.c
-  src/whetstone.c
-  src/settings.c
-  src/tick_count.s
-  src/mem_read.s
-  src/mem_write.s
-  src/mem_bench.s
-  src/mem_test.c
-  src/bench.c
-  src/bsc.c
+  src/util.c
+  src/menu/express.c
+  src/menu/settings.c
+  src/menu/bsc.c
+  src/menu/benchmark.c
+  src/benchmark/dhrystone.c
+  src/benchmark/whetstone.c
+  src/benchmark/mem_bench.s
+  src/benchmark/tick_count.s
+  src/memtest/rom_test.c
+  src/memtest/sdram_test.c
+  src/memtest/test_address.c
+  src/memtest/mem_read.s
+  src/memtest/mem_write.s
 )
 # Shared assets, fx-9860G-only assets and fx-CG-50-only assets
 set(ASSETS
@@ -47,7 +50,7 @@ set(ASSETS_cg
 
 fxconv_declare_assets(${ASSETS} ${ASSETS_fx} ${ASSETS_cg} WITH_METADATA)
 
-configure_file(include/config.h.in include/config.h)
+configure_file(config.h.in include/config.h)
 add_executable(Ptune4 ${SOURCES} ${ASSETS} ${ASSETS_${FXSDK_PLATFORM}})
 target_include_directories(Ptune4 PRIVATE
   "${CMAKE_CURRENT_SOURCE_DIR}/include"
