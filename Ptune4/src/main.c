@@ -23,12 +23,6 @@
 #include "config.h"
 #include "bench.h"
 
-i32 roR[] =
-    {
-        roR_0, roR_1, roR_2, roR_3, roR_4,
-        roR_5, roR_6, roR_8, roR_10, roR_12,
-        roR_14, roR_18};
-
 enum select_option
 {
     SELECT_FLL,
@@ -110,7 +104,6 @@ int main()
     prof_init();
     cpg_set_overclock_permanent(true);
     gint_setrestart(true);
-    init_roR(roR);
 
     do
     {

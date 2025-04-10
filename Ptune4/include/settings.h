@@ -1,5 +1,6 @@
 #include "config.h"
 
+extern i32 roR[];
 extern i32 settings[];
 
 #define ROM_MARGIN settings[0]

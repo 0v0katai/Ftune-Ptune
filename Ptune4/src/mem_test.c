@@ -13,8 +13,6 @@
 #include "util.h"
 #include "config.h"
 
-#define WRITE_N 2000
-
 static u32 *ram_ad(int FLF, volatile u32 *RAM, int block_size)
 {
     u32 *ad = (u32 *)RAM;
@@ -28,7 +26,7 @@ static u32 *ram_ad(int FLF, volatile u32 *RAM, int block_size)
 }
 
 #if defined CG50 || defined CG100
-static void print_Bphi_max(u32 Bphi_f, u8 TRC)
+static void print_SDRAM_speed(u32 Bphi_f, u8 TRC)
 {
     static const int trc_wait[4] = {3, 4, 6, 9};
     row_clear(4 + TRC);
@@ -44,8 +42,8 @@ static void ram_write_test()
     row_print(1, 1, "RAM select: 0x%08X", write_area);
     struct cpg_overclock_setting s;
     cpg_get_overclock_setting(&s);
-    static const u8 PLL = PLL_x24, IFC = DIV_4, SFC = DIV_4, BFC = DIV_4, PFC = DIV_32;
-    s.FRQCR = (PLL << 24) + (IFC << 20) + (SFC << 12) + (BFC << 8) + PFC;
+    static const u8 IFC = DIV_4, SFC = DIV_4, BFC = DIV_4, PFC = DIV_32;
+    s.FRQCR = (PLL_x24 << 24) + (IFC << 20) + (SFC << 12) + (BFC << 8) + PFC;
     s.CS0WCR = (s.CS0WCR & ~(0b1111 << 7)) | (WAIT_18 << 7);
     cpg_set_overclock_setting(&s);
     
@@ -76,18 +74,18 @@ static void ram_write_test()
                 if (Bphi_max[TRC - 1] > Bphi_f)
                 {
                     Bphi_max[TRC - 1] = Bphi_f;
-                    print_Bphi_max(Bphi_f, TRC - 1);
+                    print_SDRAM_speed(Bphi_f, TRC - 1);
                 }
                 Bphi_max[TRC] = Bphi_f;
                 FLF = 2048;
             }
-            print_Bphi_max(clock_freq()->Bphi_f, TRC);
+            print_SDRAM_speed(clock_freq()->Bphi_f, TRC);
             dupdate();
         }
     }
     for (int i = 0; i < 4; i++)
     {
-        BUS_CLK_MAX(i) = Bphi_max[i] * (100ull - RAM_MARGIN) / 100;
+        BUS_CLK_MAX(i) = Bphi_max[i] / 100 * (100 - RAM_MARGIN) ;
         row_print(4 + i, 26, ">>");
         row_print_color(4 + i, 29, C_BLUE, C_WHITE, "%d KHz", BUS_CLK_MAX(i) / 1000);
     }
@@ -117,3 +115,101 @@ void sdram_test()
     getkey();
 }
 #endif
+
+static u32 *rom_ad(int FLF, int ROM_wait, volatile u32 *ROM, int block_size)
+{
+    u32 *ad = (u32 *)ROM;
+    CPG.FLLFRQ.FLF = FLF;
+    BSC.CS0WCR.WR = ROM_wait;
+    cpg_compute_freq();
+    cpu_atomic_start();
+    if (*ROM == *ROM)
+        ad = mem_read(ROM, &CPG.FLLFRQ.lword, FLF_x810, block_size);
+    cpu_atomic_end();
+    return ad;
+}
+
+static void print_ROM_select(u32 *ROM_read_area)
+{
+    row_clear(1);
+    row_print(1, 1, "ROM select: 0x%08X", ROM_read_area);
+}
+
+static void rom_read_test()
+{
+    u32 *ROM_read_area = ROM_BASE;
+    static const u32 roR_default[] =
+    { roR_0, roR_1, roR_2, roR_3, roR_4,
+      roR_5, roR_6, roR_8, roR_10, roR_12};
+
+    /* Slowest ROM read area search */
+    clock_set_speed(CLOCK_SPEED_DEFAULT);
+    const u8 ROM_wait = BSC.CS0WCR.WR;
+    int FLF_max;
+    for (int FLF = roR_default[ROM_wait] / 262144 * clock_freq()->Bphi_div; FLF < 2048; FLF += 2)
+    {
+        if (rom_ad(FLF, ROM_wait, ROM_read_area, READ_N))
+            break;
+        FLF_max = FLF;
+        print_ROM_select(ROM_read_area);
+        row_print(2, 1, "%d KHz", clock_freq()->Bphi_f / 1000);
+        dupdate();
+        row_clear(2);
+    }
+    u32 *pointer = ROM_BASE;
+    for (int i = 0; i < 512; i++)
+    {
+        if (rom_ad(FLF_max, ROM_wait, pointer, READ_N))
+        {
+            FLF_max -= 2;
+            ROM_read_area = pointer;
+            print_ROM_select(ROM_read_area);
+        }
+        row_print_color(1, 25, C_RED, C_WHITE, "0x%08X", pointer);
+        dupdate();
+        pointer += 0x10000/4;
+    }
+    
+    struct cpg_overclock_setting s;
+    cpg_get_overclock_setting(&s);
+    print_ROM_select(ROM_read_area);
+    for (int i = WAIT_0; i <= WAIT_12; i++)
+    {
+        static const u8 IFC = DIV_4, SFC = DIV_4, BFC = DIV_4, PFC = DIV_32;
+        s.FRQCR = ((PLL_x6 + i * 2) << 24) + (IFC << 20) + (SFC << 12) + (BFC << 8) + PFC;
+        cpg_set_overclock_setting(&s);
+
+        for (int FLF = roR_default[i] / (PLL_x6 + i * 2 + 1) / 4096; FLF < 2048; FLF += 2)
+        {
+            if (rom_ad(FLF, i, ROM_read_area, READ_N))
+                break;
+            static const u8 mem_wait[] = {0, 1, 2, 3, 4, 5, 6, 8, 10, 12};
+            const u32 Bphi_f = clock_freq()->Bphi_f;
+            row_clear(2 + i);
+            row_print(2 + i, 1, "roR_%d: %d KHz", mem_wait[i], Bphi_f / 1000);
+            roR[i] = Bphi_f;
+            dupdate();
+        }
+    }
+
+    /* Rough guess */
+    roR[WAIT_14] = (roR[WAIT_12] * 2 - roR[WAIT_10]) / 100 * 99;
+    roR[WAIT_18] = (roR[WAIT_14] * 2 - roR[WAIT_10]) / 100 * 95;
+}
+
+void rom_test()
+{
+    dclear(C_WHITE);
+    row_title("ROM Test");
+
+    struct cpg_overclock_setting s0;
+    cpg_get_overclock_setting(&s0);
+    rom_read_test();
+    cpg_set_overclock_setting(&s0);
+
+    row_print(13, 1, "ROM margin: %d%%", ROM_MARGIN);
+    row_print(14, 1, "Press any key to continue...");
+
+    dupdate();
+    getkey();
+}

@@ -13,12 +13,6 @@
 
 extern i32 roR[];
 
-void init_roR()
-{
-    for (int i = WAIT_0; i < WAIT_24; i++)
-        roR[i] = roR[i] * (100ull - ROM_MARGIN) / 100;
-}
-
 bool exceed_limit()
 {
     cpg_compute_freq();
@@ -37,7 +31,7 @@ unsigned int best_rom_wait(i32 Bphi_f)
 {
     int i;
     for (i = WAIT_18; i >= WAIT_0; i--)
-        if (Bphi_f >= roR[i])
+        if (Bphi_f >= roR[i] / 100 * (100 - ROM_MARGIN))
             break;
     return i + 1;
 }
