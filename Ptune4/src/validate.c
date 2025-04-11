@@ -70,7 +70,9 @@ void modify_A3CL(u8 value)
     if (value != CL2 && value != CL3)
         return;
     BSC.CS3WCR.A3CL = value;
-    if (value == 1)
+    for (int i = 0; i < 10; i++)
+        __asm__ volatile("nop");
+    if (value == CL2)
         *SH7305_SDMR3_CL2 = 0;
     else
         *SH7305_SDMR3_CL3 = 0;
