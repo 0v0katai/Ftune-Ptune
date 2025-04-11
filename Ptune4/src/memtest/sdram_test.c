@@ -28,7 +28,6 @@ static void ram_write_test()
     cpg_get_overclock_setting(&s);
     static const u8 IFC = DIV_4, SFC = DIV_4, BFC = DIV_4, PFC = DIV_32;
     s.FRQCR = (PLL_x24 << 24) + (IFC << 20) + (SFC << 12) + (BFC << 8) + PFC;
-    s.CS0WCR = (s.CS0WCR & ~(0b1111 << 7)) | (WAIT_18 << 7);
     cpg_set_overclock_setting(&s);
     
     int FLF_max = 300;
@@ -37,13 +36,13 @@ static void ram_write_test()
         BSC.CS3WCR.TRC = TRC;
         for (int FLF = FLF_max; FLF < 2048; FLF += 2)
         {
-            if (sdram_write_address(FLF, write_area))
+            if (write_address(FLF, write_area))
             {
                 FLF_max = FLF;
                 u32 Bphi_f;
                 for (int trial = 1; trial <= 100; trial++)
                 {
-                    if (sdram_write_address(FLF_max, write_area))
+                    if (write_address(FLF_max, write_area))
                     {
                         trial = 0;
                         FLF_max -= 2;
