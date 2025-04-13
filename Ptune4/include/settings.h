@@ -1,6 +1,7 @@
 #include "config.h"
 
 extern i32 roR[];
+extern u32 raW_TRC[];
 extern i32 settings[];
 
 #define ROM_MARGIN settings[0]

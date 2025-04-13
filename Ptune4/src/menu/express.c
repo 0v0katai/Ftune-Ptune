@@ -299,6 +299,9 @@ void express_menu()
         case KEY_VARS:
             bsc_menu();
             break;
+        case KEY_OPTN:
+            mem_data_menu();
+            break;
 
         case KEY_LEFT:
             update = true;

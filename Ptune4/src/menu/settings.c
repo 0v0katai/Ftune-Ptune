@@ -110,7 +110,6 @@ void settings_menu()
         fkey_action(1, "+");
         fkey_action(2, "-");
         fkey_action(3, "Init");
-        fkey_button(5, "Test");
         fkey_button(6, "About");
 
         dupdate();
@@ -144,16 +143,6 @@ void settings_menu()
         case KEY_F3:
         case KEY_PREVTAB:
             settings[select] = settings_def[select];
-            break;
-
-        case KEY_F5:
-        case KEY_NEXTTAB:
-            rom_test();
-        #if defined CG20
-            // sram_test();
-        #elif defined CG50 || defined CG100
-            sdram_test();
-        #endif
             break;
 
         case KEY_F6:

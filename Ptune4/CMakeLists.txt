@@ -27,6 +27,7 @@ set(SOURCES
   src/menu/settings.c
   src/menu/bsc.c
   src/menu/benchmark.c
+  src/menu/mem_data.c
   src/benchmark/dhrystone.c
   src/benchmark/whetstone.c
   src/benchmark/mem_bench.s
