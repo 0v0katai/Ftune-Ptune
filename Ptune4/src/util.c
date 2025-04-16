@@ -208,9 +208,46 @@ void fkey_menu(int position, char const *text)
 	dline(x + w - 1, y + 13, x + w - 2, y + 14, C_WHITE);
 }
 
-void msg_box(int row, int size)
+static void msg_box_frame(int row, int size, int color)
 {
-	drect_border(3, ROW_Y + ROW_H * (row - 1) - 1, DWIDTH - 4, ROW_Y + ROW_H * (row + size - 1) - 1, C_WHITE, 2, C_BLACK);
+	drect_border(3, ROW_Y + ROW_H * (row - 1) - 1,
+		DWIDTH - 4, ROW_Y + ROW_H * (row + size - 1) - 1,
+		C_WHITE, 2, color);
+	drect(3, ROW_Y + ROW_H * (row - 1) - 1,
+		DWIDTH - 4, ROW_Y + ROW_H * row - 1,
+		color);
+}
+
+void info_box(int row, int size, const char *title)
+{
+	msg_box_frame(row, size, C_BLACK);
+	row_print_color(row, 2, C_WHITE, C_BLACK, title);
+}
+
+void warning_box(int row, int size)
+{
+	msg_box_frame(row, size, C_RED);
+	row_print_color(row, 21, C_WHITE, C_RED, "WARNING");
+}
+
+bool yes_no(int row)
+{
+	row_print(row, 11, "%s %24s", "[F1]: Yes", "[F6]: No");
+	dupdate();
+
+	while (true)
+	{
+		switch (getkey().key)
+		{
+			case KEY_F1:
+			case KEY_EXE:
+			case KEY_OK:
+				return true;
+			case KEY_F6:
+			case KEY_EXIT:
+				return false;
+		}
+	}
 }
 
 void print_options(int row, int x, const char *option[], u8 select)

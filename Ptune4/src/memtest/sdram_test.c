@@ -15,16 +15,17 @@ u32 raW_TRC[4] = {raW_TRC_3, raW_TRC_4, raW_TRC_6, raW_TRC_9};
 static void print_SDRAM_speed(u32 Bphi_f, u8 TRC)
 {
     static const int trc_wait[4] = {3, 4, 6, 9};
-    row_clear(4 + TRC);
-    row_print(4 + TRC, 1, "Write (TRC=%d): %d KHz", trc_wait[TRC], Bphi_f / 1000);
+    row_clear(2 + TRC);
+    row_print(2 + TRC, 25, "TRC_%d", trc_wait[TRC]);
+    row_print(2 + TRC, 35, "%d KHz", Bphi_f / 1000);
 }
 
 static void ram_write_test()
 {
     u32 temp[WRITE_N];
-    u32 *write_area = (u32 *)(((u32)&temp & 0x0FFFFFFF) | 0xA0000000);
+    u32 *write_area = NON_CACHE(temp);
 
-    row_print(1, 1, "RAM select: 0x%08X", write_area);
+    row_print(14, 1, "RAM select: 0x%08X", write_area);
     struct cpg_overclock_setting s;
     cpg_get_overclock_setting(&s);
     static const u8 IFC = DIV_4, SFC = DIV_4, BFC = DIV_4, PFC = DIV_32;
@@ -50,10 +51,10 @@ static void ram_write_test()
                         continue;
                     }
                     Bphi_f = clock_freq()->Bphi_f;
-                    row_print(2, 1, "Trial (%d/100)", trial);
-                    row_print_color(2, 15, C_RED, C_WHITE, "%d KHz", Bphi_f / 1000);
+                    row_print(1, 25, "Trial %d", trial);
+                    row_print_color(1, 35, C_RED, C_WHITE, "%d KHz", Bphi_f / 1000);
                     dupdate();
-                    row_clear(2);
+                    row_clear(1);
                 }
                 if (raW_TRC[TRC - 1] > Bphi_f)
                 {
@@ -79,18 +80,5 @@ void sdram_test()
     cpg_get_overclock_setting(&s0);
     ram_write_test();
     cpg_set_overclock_setting(&s0);
-
-    row_print(9, 1, "RAM margin: %d%%", RAM_MARGIN);
-    row_print(10, 1, "Current preset:");
-    if (clock_get_speed())  
-        row_print(10, 17, "F%d", clock_get_speed());
-    else
-        row_print(10, 17, "Custom");
-    row_print_color(11, 1, C_RED, C_WHITE, "Warning! SDRAM test may cause system errors!");
-    row_print_color(12, 1, C_RED, C_WHITE, "It's strongly advised to RESTART after the test.");
-    row_print(14, 1, "Press any key to exit...");
-
-    dupdate();
-    getkey();
 }
 #endif

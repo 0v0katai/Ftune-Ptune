@@ -50,8 +50,8 @@ void mem_data_menu()
             fkey_button(2, "Margin");
         else
             fkey_action(2, "Margin");
-        fkey_menu(5, "RAM");
-        fkey_menu(6, "ROM");
+        fkey_menu(5, "ROM");
+        fkey_menu(6, "RAM");
 
         dupdate();
         key = getkey();
@@ -75,15 +75,25 @@ void mem_data_menu()
 
             case KEY_F5:
             case KEY_NEXTTAB:
-                #if defined CG50 || defined CG100
-                sdram_test();
-                #else
-                // sram_test();
-                #endif
+                rom_test();
                 break;
             case KEY_F6:
             case KEY_PAGEUP:
-                rom_test();
+                #if defined CG50 || defined CG100
+                warning_box(5, 6);
+                row_print_color(6, 2, C_RED, C_WHITE,
+                    "SDRAM test may cause system errors!");
+                row_print_color(7, 2, C_RED, C_WHITE,
+                    "It is highly recommended to press the RESTART");
+                row_print_color(8, 2, C_RED, C_WHITE,
+                    "button after this test is finished.");
+                row_print(9, 2,
+                    "Are you sure you want to continue?");
+                if (yes_no(10))
+                    sdram_test();
+                #else
+                // sram_test();
+                #endif
                 break;
         }
     }

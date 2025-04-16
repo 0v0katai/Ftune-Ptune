@@ -4,6 +4,7 @@
 #define WRITE_N 2000
 #define READ_N 65536/4
 #define ROM_BASE (u32 *)0xA0000000
+#define NON_CACHE(address) ((u32 *)(((u32)&(address) & 0x0FFFFFFF) | 0xA0000000))
 
 enum TEST_MODE {READ, WRITE};
 

@@ -94,7 +94,11 @@ void fkey_button(int position, char const *text);
 /* fkey_menu(): A rectangular F-key with the bottom right corner removed */
 void fkey_menu(int position, char const *text);
 
-void msg_box(int row, int size);
+void info_box(int row, int size, const char *title);
+
+void warning_box(int row, int size);
+
+bool yes_no(int row);
 
 void print_options(int row, int x, const char *option[], u8 select);
 

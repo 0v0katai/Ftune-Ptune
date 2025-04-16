@@ -18,8 +18,8 @@ i32 roR[] =
 
 static void print_ROM_select(u32 *ROM_read_area)
 {
-    row_clear(1);
-    row_print(1, 1, "ROM select: 0x%08X", ROM_read_area);
+    row_clear(14);
+    row_print(14, 1, "ROM select: 0x%08X", ROM_read_area);
 }
 
 static void rom_read_test()
@@ -40,9 +40,9 @@ static void rom_read_test()
             break;
         FLF_max = FLF;
         print_ROM_select(ROM_read_area);
-        row_print(2, 1, "%d KHz", clock_freq()->Bphi_f / 1000);
+        row_print(1, 1, "%d KHz", clock_freq()->Bphi_f / 1000);
         dupdate();
-        row_clear(2);
+        row_clear(1);
     }
     u32 *pointer = ROM_BASE;
     for (int i = 0; i < 512; i++)
@@ -51,10 +51,11 @@ static void rom_read_test()
         {
             FLF_max -= 2;
             ROM_read_area = pointer;
-            print_ROM_select(ROM_read_area);
         }
-        row_print_color(1, 25, C_RED, C_WHITE, "0x%08X", pointer);
+        print_ROM_select(ROM_read_area);
+        row_print_color(14, 25, C_RED, C_WHITE, "0x%08X", pointer);
         dupdate();
+        row_clear(14);
         pointer += 0x10000/4;
     }
 
@@ -71,7 +72,8 @@ static void rom_read_test()
             static const u8 mem_wait[] = {0, 1, 2, 3, 4, 5, 6, 8, 10, 12};
             const u32 Bphi_f = clock_freq()->Bphi_f;
             row_clear(2 + i);
-            row_print(2 + i, 1, "roR_%d: %d KHz", mem_wait[i], Bphi_f / 1000);
+            row_print(2 + i, 1, "roR_%d", mem_wait[i]);
+            row_print(2 + i, 11, "%d KHz", Bphi_f/ 1000);
             roR[i] = Bphi_f;
             dupdate();
         }
@@ -91,10 +93,4 @@ void rom_test()
     cpg_get_overclock_setting(&s0);
     rom_read_test();
     cpg_set_overclock_setting(&s0);
-
-    row_print(13, 1, "ROM margin: %d%%", ROM_MARGIN);
-    row_print(14, 1, "Press any key to continue...");
-
-    dupdate();
-    getkey();
 }
