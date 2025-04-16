@@ -11,6 +11,11 @@
 
 #define ROM_WAIT(CS0WCR) (((CS0WCR) >> 7) & 0b1111)
 
+i32 roR[] =
+    { roR_0, roR_1, roR_2, roR_3, roR_4,
+      roR_5, roR_6, roR_8, roR_10, roR_12,
+      roR_14, roR_18 };
+
 static void print_ROM_select(u32 *ROM_read_area)
 {
     row_clear(1);

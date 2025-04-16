@@ -10,7 +10,7 @@
 #include "config.h"
 
 #if defined CG50 || defined CG100
-u32 raW_TRC[4] = {BFC_CLK_MAX_TRC3_DEF, BFC_CLK_MAX_TRC4_DEF, BFC_CLK_MAX_TRC6_DEF, BFC_CLK_MAX_TRC9_DEF};
+u32 raW_TRC[4] = {raW_TRC_3, raW_TRC_4, raW_TRC_6, raW_TRC_9};
 
 static void print_SDRAM_speed(u32 Bphi_f, u8 TRC)
 {
@@ -67,12 +67,7 @@ static void ram_write_test()
             dupdate();
         }
     }
-    for (int i = 0; i < 4; i++)
-    {
-        BUS_CLK_MAX(i) = raW_TRC[i] / 100 * (100 - RAM_MARGIN);
-        row_print(4 + i, 26, ">>");
-        row_print_color(4 + i, 29, C_BLUE, C_WHITE, "%d KHz", BUS_CLK_MAX(i) / 1000);
-    }
+    BUS_CLK_MAX = raW_TRC[3] / 100 * (100 - RAM_MARGIN);
 }
 
 void sdram_test()

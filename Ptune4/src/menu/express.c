@@ -145,34 +145,20 @@ void express_menu()
         row_print(10, 2, "[SHIFT][+][-]: +/- TRC");
 #endif
 
-        u32 freq[6] = {f.FLL * 32768, f.FLL * f.PLL * 32768, f.Iphi_f, f.Sphi_f, f.Bphi_f, f.Pphi_f};
-#if defined CG20
-        static const u32 red_zone[6] = {FLL_RED_ZONE, PLL_RED_ZONE, IFC_RED_ZONE, SFC_RED_ZONE, BFC_RED_ZONE, PFC_RED_ZONE};
-#elif defined CG50 || defined CG100
-        static const u32 red_zone[6] = {FLL_RED_ZONE, PLL_RED_ZONE, IFC_RED_ZONE, SFC_RED_ZONE, 0, PFC_RED_ZONE};
-        static const u32 BFC_red_zone[4] =
-            {BFC_TRC3_RED_ZONE, BFC_TRC4_RED_ZONE, BFC_TRC6_RED_ZONE, BFC_TRC9_RED_ZONE};
-#endif
+        u32 freq[6] =
+            {f.FLL * 32768, f.FLL * f.PLL * 32768, f.Iphi_f, f.Sphi_f, f.Bphi_f, f.Pphi_f};
+        static const u32 red_zone[6] =
+            {FLL_RED_ZONE, PLL_RED_ZONE, IFC_RED_ZONE, SFC_RED_ZONE, BFC_RED_ZONE, PFC_RED_ZONE};
         for (int i = 0; i < 6; i++)
         {
 
     #ifdef ENABLE_FP
             row_print(i + 1, 24, "MHz");
-            row_print_color(i + 1, 17, freq[i] >
-            #if defined CG50 || defined CG100
-                (i == 4 ? BFC_red_zone[BSC.CS3WCR.TRC] : red_zone[i])
-            #else
-                red_zone[i]
-            #endif
+            row_print_color(i + 1, 17, freq[i] > red_zone[i]
                 ? C_RED : C_BLACK, C_WHITE, "%3.2f", freq[i] / 1e6);
     #else
             row_print(i + 1, 24, "KHz");
-            row_print_color(i + 1, 17, freq[i] >
-            #if defined CG50 || defined CG100
-                (i == 4 ? BFC_red_zone[BSC.CS3WCR.TRC] : red_zone[i])
-            #else
-                red_zone[i]
-            #endif
+            row_print_color(i + 1, 17, freq[i] > red_zone[i]
                 ? C_RED : C_BLACK, C_WHITE, "%d", freq[i] / 1000);
     #endif
         }
@@ -365,12 +351,8 @@ void express_menu()
                 if (divs[check] == 2)
                     break;
                 const i32 fs[4] = {f.Iphi_f, f.Sphi_f, f.Bphi_f, f.Pphi_f};
-#if defined CG50 || defined CG100
-                const i32 limit[4] = {CPU_CLK_MAX, SHW_CLK_MAX, BUS_CLK_MAX(BSC.CS3WCR.TRC), IO_CLK_MAX};
-#else
                 const i32 limit[4] = {CPU_CLK_MAX, SHW_CLK_MAX, BUS_CLK_MAX, IO_CLK_MAX};
-#endif
-                if ((fs[check] << 1) > limit[check] && check != SELECT_BFC - 2)
+                if ((fs[check] << 1) > limit[check])
                     break;
                 for (int i = check - 1; i >= 0; i--)
                     if (divs[check] == divs[i])
