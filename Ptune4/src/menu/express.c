@@ -100,7 +100,13 @@ void express_menu()
         print_preset(current_preset);
         fkey_menu(6, "Bench");
 
-        row_title(VERSION " [SETTINGS] [VARS]: BSC menu");
+        row_title(VERSION
+            #ifdef CG100
+            " SETTINGS / VARIABLE / TOOLS"
+            #else
+            " OPTN / VARS / SET UP"
+            #endif
+        );
         row_print(1, 29, "FLLFRQ:");
         row_print(2, 29, "FRQCR:");
         for (int i = 0; i < 8; i++)
