@@ -33,6 +33,7 @@ set(SOURCES
   src/benchmark/mem_bench.s
   src/benchmark/tick_count.s
   src/memtest/rom_test.c
+  src/memtest/sram_test.c
   src/memtest/sdram_test.c
   src/memtest/test_address.c
   src/memtest/mem_read.s

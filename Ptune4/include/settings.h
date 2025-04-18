@@ -1,7 +1,12 @@
 #include "config.h"
 
 extern i32 roR[];
-extern u32 raW_TRC[];
+#if !defined CG50 && !defined CG100
+    extern u32 raR[];
+    extern u32 raW[];
+#else
+    extern u32 raW_TRC[];
+#endif
 extern i32 settings[];
 
 #define ROM_MARGIN settings[0]

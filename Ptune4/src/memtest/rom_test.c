@@ -16,7 +16,7 @@ i32 roR[] =
       roR_5, roR_6, roR_8, roR_10, roR_12,
       roR_14, roR_18 };
 
-static void print_ROM_select(u32 *ROM_read_area)
+static void print_RAM_read_select(u32 *ROM_read_area)
 {
     row_clear(14);
     row_print(14, 1, "ROM select: 0x%08X", ROM_read_area);
@@ -39,7 +39,7 @@ static void rom_read_test()
         if (read_address(FLF, ROM_WAIT(s.CS0WCR), ROM_read_area))
             break;
         FLF_max = FLF;
-        print_ROM_select(ROM_read_area);
+        print_RAM_read_select(ROM_read_area);
         row_print(1, 1, "%d KHz", clock_freq()->Bphi_f / 1000);
         dupdate();
         row_clear(1);
@@ -52,20 +52,20 @@ static void rom_read_test()
             FLF_max -= 2;
             ROM_read_area = pointer;
         }
-        print_ROM_select(ROM_read_area);
+        print_RAM_read_select(ROM_read_area);
         row_print_color(14, 25, C_RED, C_WHITE, "0x%08X", pointer);
         dupdate();
         row_clear(14);
         pointer += 0x10000/4;
     }
 
-    print_ROM_select(ROM_read_area);
+    print_RAM_read_select(ROM_read_area);
     for (int i = WAIT_0; i <= WAIT_12; i++)
     {
         static const u8 IFC = DIV_4, SFC = DIV_4, BFC = DIV_4, PFC = DIV_32;
-        s.FRQCR = ((PLL_x6 + i * 2) << 24) + (IFC << 20) + (SFC << 12) + (BFC << 8) + PFC;
+        s.FRQCR = ((PLL(6) + i * 2) << 24) + (IFC << 20) + (SFC << 12) + (BFC << 8) + PFC;
         cpg_set_overclock_setting(&s);
-        for (int FLF = roR_default[i] / (PLL_x6 + i * 2 + 1) / 4096; FLF < 2048; FLF += 2)
+        for (int FLF = roR_default[i] / (PLL(6) + i * 2 + 1) / 4096; FLF < 2048; FLF += 2)
         {
             if (read_address(FLF, i, ROM_read_area))
                 break;
@@ -73,7 +73,7 @@ static void rom_read_test()
             const u32 Bphi_f = clock_freq()->Bphi_f;
             row_clear(2 + i);
             row_print(2 + i, 1, "roR_%d", mem_wait[i]);
-            row_print(2 + i, 11, "%d KHz", Bphi_f/ 1000);
+            row_print(2 + i, 11, "%d KHz", Bphi_f / 1000);
             roR[i] = Bphi_f;
             dupdate();
         }

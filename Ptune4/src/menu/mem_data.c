@@ -20,7 +20,13 @@ void mem_data_menu()
         roR_5, roR_6, roR_8, roR_10, roR_12,
         roR_14, roR_18
     };
+    #if !defined CG50 && !defined CG100
+    bool mode = READ;
+    static const u32 raR_default[] = {raR_0, raR_1, raR_2, raR_3, raR_4, raR_5, raR_6, raR_8};
+    static const u32 raW_default[] = {raW_0, raW_1, raW_2, raW_3, raW_4, raW_5, raW_6};
+    #else
     static const u32 raW_TRC_default[] = {raW_TRC_3, raW_TRC_4, raW_TRC_6, raW_TRC_9};
+    #endif
 
     while (true)
     {
@@ -36,6 +42,7 @@ void mem_data_menu()
                 ? roR[i] / 100 * (100 - ROM_MARGIN) / 1000
                 : roR[i] / 1000);
         }
+        #if defined CG50 || defined CG100
         for (int i = 0; i < 4; i++)
         {
             static const u8 trc_wait[] = {3, 4, 6, 9};
@@ -44,12 +51,36 @@ void mem_data_menu()
                 ? raW_TRC[i] / 100 * (100 - RAM_MARGIN) / 1000
                 : raW_TRC[i] / 1000);
         }
+        #else
+        if (mode == READ)
+            for (int i = WAIT_0; i <= WAIT_8; i++)
+            {
+                row_print(i + 2, 25, "raR_%d", i == WAIT_8 ? 8 : i);
+                row_print_color(i + 2, 35, margin ? C_BLUE : C_BLACK, C_WHITE, "%d KHz", margin
+                    ? raR[i] / 100 * (100 - RAM_MARGIN) / 1000
+                    : raR[i] / 1000);
+            }
+        else
+            for (int i = WAIT_0; i <= WAIT_6; i++)
+            {
+                row_print(i + 2, 25, "raW_%d", i);
+                row_print_color(i + 2, 35, margin ? C_BLUE : C_BLACK, C_WHITE, "%d KHz", margin
+                    ? raW[i] / 100 * (100 - RAM_MARGIN) / 1000
+                    : raW[i] / 1000);
+            }
+        #endif
 
         fkey_action(1, "Reset");
         if (margin)
             fkey_button(2, "Margin");
         else
             fkey_action(2, "Margin");
+        #if !defined CG50 && !defined CG100
+        if (mode)
+            fkey_button(3, "Write");
+        else
+            fkey_button(3, "Read");
+        #endif
         fkey_menu(5, "ROM");
         fkey_menu(6, "RAM");
 
@@ -62,16 +93,29 @@ void mem_data_menu()
             
             case KEY_F1:
             case KEY_ON:
-                for (int i = 0; i < 12; i++)
+                for (int i = WAIT_0; i <= WAIT_18; i++)
                     roR[i] = roR_default[i];
+                #if !defined CG50 && !defined CG100
+                for (int i = WAIT_0; i <= WAIT_8; i++)
+                    raR[i] = raR_default[i];
+                for (int i = WAIT_0; i <= WAIT_6; i++)
+                    raW[i] = raW_default[i];
+                #else
                 for (int i = 0; i < 4; i++)
                     raW_TRC[i] = raW_TRC_default[i];
+                #endif
                 break;
             
             case KEY_F2:
             case KEY_HOME:
                 margin = !margin;
                 break;
+            
+            #if !defined CG50 && !defined CG100
+            case KEY_F3:
+                mode = !mode;
+                break;
+            #endif
 
             case KEY_F5:
             case KEY_NEXTTAB:
@@ -92,7 +136,7 @@ void mem_data_menu()
                 if (yes_no(10))
                     sdram_test();
                 #else
-                // sram_test();
+                sram_test();
                 #endif
                 break;
         }

@@ -242,12 +242,13 @@ void express_menu()
             break;
         case KEY_PLUS:
 #if defined CG20
-            if (key.shift && BSC.CS2WCR.WW < WAIT_6 + 1)
+            if (key.shift)
             {
-                BSC.CS2WCR.WW++;
+                BSC.CS2WCR.WW = (BSC.CS2WCR.WW + 1) % (WAIT_6 + 2);
                 break;
             }
-            BSC.CS2WCR.WR++;
+            if (BSC.CS0WCR.WR < WAIT_24)
+                BSC.CS2WCR.WR++;
 #elif defined CG50 || defined CG100
             if (key.shift && BSC.CS3WCR.TRC < 3)
             {
@@ -259,12 +260,18 @@ void express_menu()
             break;
         case KEY_MINUS:
 #if defined CG20
-            if (key.shift && BSC.CS2WCR.WW > 0)
+            if (key.shift)
             {
-                BSC.CS2WCR.WW--;
+                if (BSC.CS2WCR.WW > best_ram_write(f.Bphi_f))
+                    BSC.CS2WCR.WW--;
+                else if (BSC.CS2WCR.WW == best_ram_write(f.Bphi_f))
+                    BSC.CS2WCR.WW = 0;
+                else
+                    BSC.CS2WCR.WW = best_ram_write(f.Bphi_f);
                 break;
             }
-            BSC.CS2WCR.WR--;
+            if (BSC.CS2WCR.WR > best_ram_read(f.Bphi_f))
+                BSC.CS2WCR.WR--;
 #elif defined CG50 || defined CG100
             if (key.shift && BSC.CS3WCR.TRC > best_TRC(f.Bphi_f))
             {
@@ -376,9 +383,12 @@ void express_menu()
             cpg_compute_freq();
             const u32 Bphi_f = clock_freq()->Bphi_f;
             BSC.CS0WCR.WR = best_rom_wait(Bphi_f);
-#if defined CG50 || defined CG100
+            #if defined CG50 || defined CG100
             BSC.CS3WCR.TRC = best_TRC(Bphi_f);
-#endif
+            #else
+            BSC.CS2WCR.WR = best_ram_read(Bphi_f);
+            BSC.CS2WCR.WW = best_ram_write(Bphi_f);
+            #endif
         }
     } while (key.key != KEY_EXIT);
     return;

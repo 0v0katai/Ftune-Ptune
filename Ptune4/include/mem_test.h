@@ -1,13 +1,14 @@
 #define FLF_x810 0x432a
-#define PLL_x6 0x05
-#define PLL_x24 0x17
+#define PLL(a) ((a) - 1)
 #define WRITE_N 2000
 #define READ_N 65536/4
 #define ROM_BASE (u32 *)0xA0000000
+#define SRAM_BASE (u32 *)0xA8000000
 #define NON_CACHE(address) ((u32 *)(((u32)&(address) & 0x0FFFFFFF) | 0xA0000000))
 
 enum TEST_MODE {READ, WRITE};
 
+void sram_test();
 void sdram_test();
 void rom_test();
 u32 *read_address(int FLF, u8 ROM_wait, volatile u32 *address);

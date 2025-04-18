@@ -40,6 +40,24 @@ unsigned int best_TRC(i32 Bphi_f)
             break;
     return i + 1;
 }
+#else
+unsigned int best_ram_read(i32 Bphi_f)
+{
+    int i;
+    for (i = WAIT_8; i >= WAIT_0; i--)
+        if (Bphi_f >= raR[i] / 100 * (100 - RAM_MARGIN))
+            break;
+    return i + 1;
+}
+
+unsigned int best_ram_write(i32 Bphi_f)
+{
+    int i;
+    for (i = WAIT_6; i >= WAIT_0; i--)
+        if (Bphi_f >= raW[i] / 100 * (100 - RAM_MARGIN))
+            break;
+    return i + 2;
+}
 #endif
 
 bool auto_up_PFC()

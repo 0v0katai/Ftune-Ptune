@@ -29,7 +29,7 @@ static void ram_write_test()
     struct cpg_overclock_setting s;
     cpg_get_overclock_setting(&s);
     static const u8 IFC = DIV_4, SFC = DIV_4, BFC = DIV_4, PFC = DIV_32;
-    s.FRQCR = (PLL_x24 << 24) + (IFC << 20) + (SFC << 12) + (BFC << 8) + PFC;
+    s.FRQCR = (PLL(24) << 24) + (IFC << 20) + (SFC << 12) + (BFC << 8) + PFC;
     cpg_set_overclock_setting(&s);
     
     int FLF_max = 300;
