@@ -30,10 +30,10 @@ enum select_option
 
 static void about()
 {
-    msg_box(5, 5);
-    row_print(6, 3, VERSION);
-    row_print(7, 3, "Copyright (C) 2025 Sentaro21, CalcLoverHK");
-    row_print(8, 3, "This software is licensed under MIT/Expat.");
+    info_box(5, 4, "About");
+    row_print(6, 2, VERSION);
+    row_print(7, 2, "Copyright (C) 2025 Sentaro21, CalcLoverHK");
+    row_print(8, 2, "This software is licensed under MIT/Expat.");
     dupdate();
     getkey();
 }
