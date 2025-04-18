@@ -232,7 +232,7 @@ void warning_box(int row, int size)
 
 bool yes_no(int row)
 {
-	row_print(row, 11, "%s %24s", "[F1]: Yes", "[F6]: No");
+	row_print(row, 11, "%s %20s", "[F1]/[OK]: Yes", "[F6]/[BACK]: No");
 	dupdate();
 
 	while (true)
