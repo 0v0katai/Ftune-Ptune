@@ -71,16 +71,16 @@ void mem_data_menu()
         #endif
 
         fkey_action(1, "Reset");
-        if (margin)
-            fkey_button(2, "Margin");
-        else
-            fkey_action(2, "Margin");
         #if !defined CG50 && !defined CG100
         if (mode)
-            fkey_button(3, "Write");
+            fkey_button(2, "Write");
         else
-            fkey_button(3, "Read");
+            fkey_button(2, "Read");
         #endif
+        if (margin)
+            fkey_button(3, "Margin");
+        else
+            fkey_action(3, "Margin");
         fkey_menu(5, "ROM");
         fkey_menu(6, "RAM");
 
@@ -105,17 +105,17 @@ void mem_data_menu()
                     raW_TRC[i] = raW_TRC_default[i];
                 #endif
                 break;
-            
-            case KEY_F2:
-            case KEY_HOME:
-                margin = !margin;
-                break;
-            
+
             #if !defined CG50 && !defined CG100
-            case KEY_F3:
+            case KEY_F2:
                 mode = !mode;
                 break;
             #endif
+
+            case KEY_F3:
+            case KEY_PREVTAB:
+                margin = !margin;
+                break;
 
             case KEY_F5:
             case KEY_NEXTTAB:
