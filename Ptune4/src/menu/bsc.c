@@ -118,6 +118,8 @@ static void bsc_modify(select_option select, i8 modify)
     else
     {
         sh7305_bsc_CSnWCR_06A6B_t *wcr_addr = &BSC.CS0WCR + select.CSn;
+        u8 min = 0;
+        const i32 Bphi_f = clock_freq()->Bphi_f;
         if (select.CSn == SELECT_CS3WCR)
         {
             const u8 mask = 13 - select.REG * 3 - (select.REG >= SELECT_TRWL);
@@ -127,7 +129,10 @@ static void bsc_modify(select_option select, i8 modify)
                 modify_A3CL(check);
                 return;
             }
-            if (check < 0 || check > 3)
+            #if defined CG50 || defined CG100
+            min = best_TRC(Bphi_f);
+            #endif
+            if (check < min || check > 3)
                 return;
             wcr_addr->lword = (wcr_addr->lword & ~(0b11 << mask)) | (check << mask);
             return;
@@ -136,7 +141,15 @@ static void bsc_modify(select_option select, i8 modify)
         static const u8 mask[4] = {16, 11, 0, 7};
         static const u8 field[4] = {0b111, 0b11, 0b11, 0b1111};
         const i8 check = ((wcr_addr->lword >> mask[select.REG]) & field[select.REG]) + modify;
-        const u8 min = select.CSn == SELECT_CS0WCR && select.REG == SELECT_WR ? best_rom_wait(clock_freq()->Bphi_f) : 0;
+        #if !defined CG50 && !defined CG100
+        if (select.CSn == SELECT_CS2WCR)
+        {
+            if (select.REG == SELECT_WR)
+                min = best_ram_read(Bphi_f);
+            else if (select.REG == SELECT_WW)
+                min = best_ram_write(Bphi_f);
+        }
+        #endif
         if (check >= min && check <= max[select.REG])
             wcr_addr->lword = (wcr_addr->lword & ~(field[select.REG] << mask[select.REG])) | (check << mask[select.REG]);
     }
