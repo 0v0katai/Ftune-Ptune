@@ -59,7 +59,6 @@ static void print_csnwcr(select_option select)
         const u32 s_select = *(&s_default.CS0WCR + i - (i == SELECT_CS5ABCR));
         row_print(0 + row, 2 + column, "CS%sWCR", csn_name[i]);
         row_print(1 + row, 2 + column, "%08X", wcr_lword);
-#if defined CG50 || defined CG100
         if (i == SELECT_CS3WCR)
         {
             static const char *cs3wcr_reg_name[] = {"TRP", "TRCD", "A3CL", "TRWL", "TRC", 0};
@@ -77,7 +76,6 @@ static void print_csnwcr(select_option select)
             }
             continue;
         }
-#endif
         print_options(2 + row, 1 + column, csnwcr_reg_name, highlight);
         for (int j = 0; j < 4; j++)
         {
@@ -120,7 +118,6 @@ static void bsc_modify(select_option select, i8 modify)
     else
     {
         sh7305_bsc_CSnWCR_06A6B_t *wcr_addr = &BSC.CS0WCR + select.CSn;
-#if defined CG50 || defined CG100
         if (select.CSn == SELECT_CS3WCR)
         {
             const u8 mask = 13 - select.REG * 3 - (select.REG >= SELECT_TRWL);
@@ -135,7 +132,6 @@ static void bsc_modify(select_option select, i8 modify)
             wcr_addr->lword = (wcr_addr->lword & ~(0b11 << mask)) | (check << mask);
             return;
         }
-#endif
         static const u8 max[4] = {7, 3, 3, WAIT_24};
         static const u8 mask[4] = {16, 11, 0, 7};
         static const u8 field[4] = {0b111, 0b11, 0b11, 0b1111};
@@ -214,11 +210,7 @@ void bsc_menu()
         case KEY_EXIT:
             return;
         }
-#if defined CG20
-        if (select.MODE == SELECT_WCR && select.REG == SELECT_IWRRS)
-#elif defined CG50 || defined CG100
         if (select.MODE == SELECT_WCR && select.CSn != SELECT_CS3WCR && select.REG == SELECT_TRC)
-#endif
             select.REG--;
         if (select.byte == 0b01000000)
             select.REG++;
