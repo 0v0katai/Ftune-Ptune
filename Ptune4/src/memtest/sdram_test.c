@@ -35,15 +35,16 @@ static void ram_write_test()
     int FLF_max = 300;
     for (int TRC = 0; TRC <= 3; TRC++)
     {
-        BSC.CS3WCR.TRC = TRC;
         for (int FLF = FLF_max; FLF < 2048; FLF += 2)
         {
+            BSC.CS3WCR.TRC = TRC;
             if (write_address(FLF, write_area))
             {
                 FLF_max = FLF;
                 u32 Bphi_f;
                 for (int trial = 1; trial <= 100; trial++)
                 {
+                    BSC.CS3WCR.TRC = TRC;
                     if (write_address(FLF_max, write_area))
                     {
                         trial = 0;

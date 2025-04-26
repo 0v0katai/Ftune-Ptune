@@ -29,12 +29,12 @@ static void ram_read_test()
     /* Slowest RAM read area search */
     struct cpg_overclock_setting s;
     clock_set_speed(CLOCK_SPEED_DEFAULT);
-    BSC.CS2WCR.WW = WAIT_6;
     cpg_get_overclock_setting(&s);
     int FLF_max;
-    for (int FLF = 900; FLF < 2048; FLF += 2)
+    for (int FLF = RAM_SEARCH_FLF_START; FLF < 2048; FLF += 2)
     {
-        if (read_address(FLF, WAIT_18, RAM_read_area))
+        BSC.CS2WCR.WR = RAM_WAIT(s.CS2WCR);
+        if (read_address(FLF, RAM_read_area))
             break;
         FLF_max = FLF;
         print_RAM_read_select(RAM_read_area);
@@ -45,7 +45,8 @@ static void ram_read_test()
     u32 *pointer = SRAM_BASE;
     for (int i = 0; i < 124; i++)
     {
-        if (read_address(FLF_max, WAIT_18, RAM_read_area))
+        BSC.CS2WCR.WR = RAM_WAIT(s.CS2WCR);
+        if (read_address(FLF_max, RAM_read_area))
         {
             FLF_max -= 2;
             RAM_read_area = pointer;
@@ -63,10 +64,10 @@ static void ram_read_test()
         static const u8 IFC = DIV_4, SFC = DIV_4, BFC = DIV_4, PFC = DIV_32;
         s.FRQCR = ((PLL(8) + i * 3) << 24) + (IFC << 20) + (SFC << 12) + (BFC << 8) + PFC;
         cpg_set_overclock_setting(&s);
-        BSC.CS2WCR.WR = i;
         for (int FLF = raR_default[i] / (PLL(8) + i * 3 + 1) / 4096; FLF < 2048; FLF += 2)
         {
-            if (read_address(FLF, WAIT_18, RAM_read_area))
+            BSC.CS2WCR.WR = i;
+            if (read_address(FLF, RAM_read_area))
                 break;
             static const u8 mem_wait[] = {0, 1, 2, 3, 4, 5, 6, 8};
             const u32 Bphi_f = clock_freq()->Bphi_f;
@@ -99,9 +100,9 @@ static void ram_write_test()
         static const u8 IFC = DIV_4, SFC = DIV_4, BFC = DIV_4, PFC = DIV_32;
         s.FRQCR = ((PLL(8) + i * 3) << 24) + (IFC << 20) + (SFC << 12) + (BFC << 8) + PFC;
         cpg_set_overclock_setting(&s);
-        BSC.CS2WCR.WW = i + 1;
         for (int FLF = raW_default[i] / (PLL(8) + i * 3 + 1) / 4096; FLF < 2048; FLF += 2)
         {
+            BSC.CS2WCR.WW = i + 1;
             if (write_address(FLF, write_area))
                 break;
             const u32 Bphi_f = clock_freq()->Bphi_f;
