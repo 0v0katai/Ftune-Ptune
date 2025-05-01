@@ -130,11 +130,11 @@ static void bsc_modify(select_option select, i8 modify)
                 return;
             }
             #if defined CG50 || defined CG100
-            min = best_TRC(Bphi_f);
+            if (select.REG == SELECT_TRC)
+                min = best_TRC(Bphi_f);
             #endif
-            if (check < min || check > 3)
-                return;
-            wcr_addr->lword = (wcr_addr->lword & ~(0b11 << mask)) | (check << mask);
+            if (check >= min && check <= 3)
+                wcr_addr->lword = (wcr_addr->lword & ~(0b11 << mask)) | (check << mask);
             return;
         }
         static const u8 max[4] = {7, 3, 3, WAIT_24};
