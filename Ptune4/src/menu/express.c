@@ -86,6 +86,7 @@ void express_menu()
     key_event_t key;
     u8 select = SELECT_FLL;
     bool benchmark = false;
+    bool update = false;
     static const char *option[] = {"FLL:", "PLL:", "IFC:", "SFC:", "BFC:", "PFC:", 0};
     static const u8 mem_wait[] = {0, 1, 2, 3, 4, 5, 6, 8, 10, 12, 14, 18, 24};
 
@@ -94,6 +95,8 @@ void express_menu()
         static struct cpg_overclock_setting s;
         cpg_get_overclock_setting(&s);
         cpg_set_overclock_setting(&s);
+        if (update)
+            BSC.CS0WCR.WR = best_rom_wait(clock_freq()->Bphi_f);
 
         u8 current_preset = clock_get_speed();
         dclear(C_WHITE);
@@ -193,7 +196,7 @@ void express_menu()
             {16, 8, 8}
         };
         u8 divs[4] = {f.Iphi_div, f.Sphi_div, f.Bphi_div, f.Pphi_div};
-        bool update = false;
+        update = false;
         switch (key.key)
         {
         case KEY_F1:
@@ -388,7 +391,9 @@ void express_menu()
             }
             cpg_compute_freq();
             const u32 Bphi_f = clock_freq()->Bphi_f;
-            BSC.CS0WCR.WR = best_rom_wait(Bphi_f);
+            const u8 new_CS0WCR_WR = best_rom_wait(Bphi_f);
+            if (new_CS0WCR_WR > BSC.CS0WCR.WR)
+                BSC.CS0WCR.WR = new_CS0WCR_WR;
             #if defined CG50 || defined CG100
             BSC.CS3WCR.TRC = best_TRC(Bphi_f);
             #else
