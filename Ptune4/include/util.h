@@ -88,11 +88,17 @@ void scrollbar_px(int view_top, int view_bottom, int range_min, int range_max,
 /* fkey_action(): A black-on-white F-key */
 void fkey_action(int position, char const *text);
 
+void tab_action(int start, int end, char const *format, ...);
+
 /* fkey_button(): A rectangular F-key */
 void fkey_button(int position, char const *text);
 
+void tab_menu(int start, int end, char const *format, ...);
+
 /* fkey_menu(): A rectangular F-key with the bottom right corner removed */
 void fkey_menu(int position, char const *text);
+
+void tab_clear(int start, int end);
 
 void info_box(int row, int size, const char *title);
 

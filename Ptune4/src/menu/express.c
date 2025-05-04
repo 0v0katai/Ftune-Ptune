@@ -32,6 +32,13 @@ enum select_option
 
 static void print_preset(int current)
 {
+    #ifdef CG100
+    fkey_action(1, "Default");
+    if (current == CLOCK_SPEED_UNKNOWN)
+        tab_menu(2, 5, "Current preset: Custom");
+    else
+        tab_menu(2, 5, "Current preset: F%d", current);
+    #else
     char string[3];
     for (int i = 1; i <= 5; i++)
     {
@@ -41,6 +48,7 @@ static void print_preset(int current)
         else
             fkey_action(i, string);
     }
+    #endif
 }
 
 #if defined CG50 || defined CG100
@@ -78,6 +86,43 @@ static void fxcg50_100_alpha_f5_preset()
           .CS5aWCR  = 0x000103C0    // WW: 0, HW: 0.5
         };
     cpg_set_overclock_setting(&settings_fxcg50_100_alpha_f5);
+}
+#endif
+
+#ifdef CG100
+static void cg100_getkey(key_event_t key)
+{
+    if (key.key == KEY_ON)
+        clock_set_speed(CLOCK_SPEED_DEFAULT);
+    if (key.key == KEY_NEXTTAB && key.shift)
+        fxcg50_100_shift_f5_preset();
+    else if (key.key == KEY_NEXTTAB && key.alpha)
+        fxcg50_100_alpha_f5_preset();
+    else if (key.key == KEY_PREVTAB || key.key == KEY_NEXTTAB)
+    {
+        u8 select_preset = CLOCK_SPEED_DEFAULT - 1;
+        while (true)
+        {
+            tab_clear(2, 5);
+            tab_action(2, 5, "%-10sSet preset: F%d%10s", "|<-", select_preset + 1, "->|");
+            dupdate();
+            switch (getkey().key)
+            {
+                case KEY_PREVTAB:
+                    select_preset = (select_preset - 1 + CLOCK_SPEED_F5) % CLOCK_SPEED_F5;
+                    break;
+                case KEY_NEXTTAB:
+                    select_preset = (select_preset + 1) % CLOCK_SPEED_F5;
+                    break;
+                case KEY_OK:
+                case KEY_EXE:
+                    clock_set_speed(select_preset + 1);
+                    __attribute__((fallthrough));
+                case KEY_BACK:
+                    return;
+            }  
+        }
+    }
 }
 #endif
 
@@ -199,34 +244,22 @@ void express_menu()
         update = false;
         switch (key.key)
         {
-        case KEY_F1:
-        case KEY_F2:
-        case KEY_F3:
-        case KEY_F4:
-        case KEY_F5:
-#ifdef CG50
+            #ifndef CG100
+            case KEY_F1:
+            case KEY_F2:
+            case KEY_F3:
+            case KEY_F4:
+            case KEY_F5:
+            # ifdef CG50
             if (key.shift)
                 fxcg50_100_shift_f5_preset();
             else if (key.alpha)
                 fxcg50_100_alpha_f5_preset();
             else
-#endif
+            # endif
             clock_set_speed(key.key - KEY_F1 + 1);
             break;
-#ifdef CG100
-        case KEY_PREVTAB:
-            clock_set_speed(abs(current_preset - 1));
-            break;
-        case KEY_NEXTTAB:
-            if (key.shift)
-                fxcg50_100_shift_f5_preset();
-            else if (key.alpha)
-                fxcg50_100_alpha_f5_preset();
-            else
-                clock_set_speed(current_preset % 5 + 1);
-            break;
-#endif
-
+            #endif
         case KEY_F6:
         case KEY_PAGEUP:
             benchmark = !benchmark;
@@ -380,6 +413,9 @@ void express_menu()
             }
             break;
         }
+        #ifdef CG100
+        cg100_getkey(key);
+        #endif
         if (update)
         {
             CPG.FRQCR.lword &= 0xFF000000;
