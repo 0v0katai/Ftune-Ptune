@@ -1,11 +1,13 @@
 #include <fxlibc/printf.h>
 #include <gint/gint.h>
+#include <gint/hardware.h>
 #include <gint/clock.h>
 #include <gint/gdb.h>
 #include <gint/keyboard.h>
 #include <gint/usb.h>
 #include <gint/usb-ff-bulk.h>
 #include <libprof.h>
+#include <stdlib.h>
 
 #include "config.h"
 #include "menu.h"
@@ -53,6 +55,15 @@ int main()
     #ifdef ENABLE_FP
     __printf_enable_fp();
     #endif
+
+    #ifdef CG20
+    if (gint[HWCALC] != HWCALC_PRIZM)
+    #elif defined CG50
+    if (gint[HWCALC] != HWCALC_FXCG50)
+    #elif defined CG100
+    if (gint[HWCALC] != HWCALC_FXCG100)
+    #endif
+        abort();
 
     prof_init();
     cpg_set_overclock_permanent(true);
