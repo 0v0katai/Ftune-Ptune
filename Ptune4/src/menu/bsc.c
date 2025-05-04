@@ -174,9 +174,22 @@ void bsc_menu()
         row_highlight(0);
         row_highlight(7);
 
+        #ifndef CG100
         fkey_action(1, "+");
         fkey_action(2, "-");
-        fkey_menu(5, "BCR/WCR");
+        fkey_menu(6, "BCR/WCR");
+        #else
+        if (select.MODE == SELECT_BCR)
+        {
+            tab_menu(1, 3, "BCR");
+            tab_action(4, 6, "WCR");
+        }
+        else
+        {
+            tab_action(1, 3, "BCR");
+            tab_menu(4, 6, "WCR");
+        }
+        #endif
 
         dupdate();
         key = getkey();
@@ -191,9 +204,9 @@ void bsc_menu()
         case KEY_MINUS:
             bsc_modify(select, -1);
             break;
-        case KEY_F5:
+        case KEY_F6:
+        case KEY_PREVTAB:
         case KEY_NEXTTAB:
-        case KEY_VARS:
             select.MODE = !select.MODE;
             break;
         case KEY_LEFT:
