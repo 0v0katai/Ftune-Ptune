@@ -5,7 +5,6 @@
 
 #include "settings.h"
 #include "validate.h"
-#include "bsc.h"
 #include "config.h"
 
 #define CS2WCR_DEFAULT WAIT_2
@@ -76,17 +75,4 @@ bool auto_down_PFC()
     if (freq->Pphi_f < IO_CLK_MAX || freq->Pphi_div == 64)
         return false;
     return true;
-}
-
-void modify_A3CL(u8 value)
-{
-    if (value != CL2 && value != CL3)
-        return;
-    BSC.CS3WCR.A3CL = value;
-    for (int i = 0; i < 10; i++)
-        __asm__ volatile("nop");
-    if (value == CL2)
-        *SH7305_SDMR3_CL2 = 0;
-    else
-        *SH7305_SDMR3_CL3 = 0;
 }

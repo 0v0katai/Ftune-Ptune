@@ -32,6 +32,13 @@ static void help_info()
 }
 #endif
 
+BSC_option const CS0WCR_WR_ptr = { .CSn = SELECT_CS0, .MODE = SELECT_WCR, .REG = SELECT_WR };
+BSC_option const CS0WCR_WW_ptr = { .CSn = SELECT_CS0, .MODE = SELECT_WCR, .REG = SELECT_WW };
+BSC_option const CS2WCR_WR_ptr = { .CSn = SELECT_CS2, .MODE = SELECT_WCR, .REG = SELECT_WR };
+BSC_option const CS2WCR_WW_ptr = { .CSn = SELECT_CS2, .MODE = SELECT_WCR, .REG = SELECT_WW };
+BSC_option const CS3WCR_CL_ptr = { .CSn = SELECT_CS3, .MODE = SELECT_WCR, .REG = SELECT_A3CL };
+BSC_option const CS3WCR_TRC_ptr = { .CSn = SELECT_CS3, .MODE = SELECT_WCR, .REG = SELECT_TRC };
+
 const char *csn_name[] = {"0", "2", "3", "4", "5A", "5B", "6A", "6B"};
 
 struct cpg_overclock_setting s_default;
@@ -45,91 +52,104 @@ static void get_default_preset()
     cpg_set_overclock_setting(&s_current);
 }
 
-static void print_csnbcr(select_option select)
+static void print_csnbcr(BSC_option select)
 {
     static const char *bcr_reg_name[] = {"IWW", "IWRWD", "IWRWS", "IWRRD", "IWRRS", 0};
     static const u8 bcr_wait[] = {0, 1, 2, 4, 6, 8, 10, 12};
-    for (int i = 0; i < 8; i++)
+    for (int CSn = 0; CSn < 8; CSn++)
     {
-        const u32 bcr_lword = (&BSC.CS0BCR + i)->lword;
-        const u8 column = (i % 4) * 12;
-        const u8 row = (i >= SELECT_CS5ABCR) * 7;
-        row_print(0 + row, 2 + column, "CS%sBCR", csn_name[i]);
+        const u32 bcr_lword = (&BSC.CS0BCR + CSn)->lword;
+        const u8 column = (CSn % 4) * 12;
+        const u8 row = (CSn >= SELECT_CS5A) * 7;
+        row_print(0 + row, 2 + column, "CS%sBCR", csn_name[CSn]);
         row_print(1 + row, 2 + column, "%08X", bcr_lword);
-        print_options(2 + row, 1 + column, bcr_reg_name, i == select.CSn ? select.REG : -1);
-        for (int j = 0; j < 5; j++)
+        print_options(2 + row, 1 + column, bcr_reg_name, CSn == select.CSn ? select.REG : -1);
+        for (int REG = 0; REG < 5; REG++)
         {
-            const u8 mask = 28 - j * 3;
+            const u8 mask = 28 - REG * 3;
             const u8 value = (bcr_lword >> mask) & 0b111;
-            const u32 s_select = *(&s_default.CS0BCR + i - (i == SELECT_CS5ABCR));
+            const u32 s_select = *(&s_default.CS0BCR + CSn - (CSn == SELECT_CS5A));
             const i8 diff = value - ((s_select >> mask) & 0b111);
-            row_print_color(2 + row + j, 9 + column,
-                i <= SELECT_CS5ABCR && i != SELECT_CS4BCR && diff
+            row_print_color(2 + row + REG, 9 + column,
+                CSn <= SELECT_CS5A && CSn != SELECT_CS4 && diff
                 ? diff > 0 ? C_BLUE : C_RED
                 : C_BLACK, C_WHITE, "%d", bcr_wait[value]);
         }
     }
 }
 
-static void print_csnwcr(select_option select)
+static void print_csnwcr(BSC_option select)
 {
     static const char *csnwcr_reg_name[] = {"WW", "SW", "HW", "WR", 0};
     static const u8 wr_wait[] = {0, 1, 2, 3, 4, 5, 6, 8, 10, 12, 14, 18, 24};
 
-    for (int i = 0; i < 8; i++)
+    for (int CSn = 0; CSn < 8; CSn++)
     {
-        const u32 wcr_lword = (&BSC.CS0WCR + i)->lword;
-        const u8 column = (i % 4) * 12;
-        const u8 row = (i >= SELECT_CS5AWCR) * 7;
-        const u8 highlight = i == select.CSn ? select.REG : -1;
-        const u32 s_select = *(&s_default.CS0WCR + i - (i == SELECT_CS5ABCR));
-        row_print(0 + row, 2 + column, "CS%sWCR", csn_name[i]);
+        const u32 wcr_lword = (&BSC.CS0WCR + CSn)->lword;
+        const u8 column = (CSn % 4) * 12;
+        const u8 row = (CSn >= SELECT_CS5A) * 7;
+        const u8 highlight = CSn == select.CSn ? select.REG : -1;
+        const u32 s_select = *(&s_default.CS0WCR + CSn - (CSn == SELECT_CS5A));
+        row_print(0 + row, 2 + column, "CS%sWCR", csn_name[CSn]);
         row_print(1 + row, 2 + column, "%08X", wcr_lword);
-        if (i == SELECT_CS3WCR)
+        if (CSn == SELECT_CS3)
         {
             static const char *cs3wcr_reg_name[] = {"TRP", "TRCD", "A3CL", "TRWL", "TRC", 0};
             print_options(2, 25, cs3wcr_reg_name, highlight);
-            for (int j = 0; j < 5; j++)
+            for (int REG = 0; REG < 5; REG++)
             {
                 static const u8 trc_wait[4] = {3, 4, 6, 9};
-                const u8 mask = 13 - j * 3 - (j >= SELECT_TRWL);
+                const u8 mask = 13 - REG * 3 - (REG >= SELECT_TRWL);
                 const u8 value = (wcr_lword >> mask) & 0b11;
                 const i8 diff = value - ((s_select >> mask) & 0b11);
-                row_print_color(2 + j, 32,
+                row_print_color(2 + REG, 32,
                     diff > 0 ? C_BLUE : diff < 0 ? C_RED : C_BLACK, C_WHITE, "%d",
-                    j == SELECT_TRC ? trc_wait[value] : value + (j != SELECT_TRWL)
+                    REG == SELECT_TRC ? trc_wait[value] : value + (REG != SELECT_TRWL)
                 );
             }
             continue;
         }
         print_options(2 + row, 1 + column, csnwcr_reg_name, highlight);
-        for (int j = 0; j < 4; j++)
+        for (int REG = 0; REG < 4; REG++)
         {
             static const u8 mask[4] = {16, 11, 0, 7};
             static const u8 field[4] = {0b111, 0b11, 0b11, 0b1111};
-            const u8 value = (wcr_lword >> mask[j]) & field[j];
-            const i8 diff = value - ((s_select >> mask[j]) & field[j]);
+            const u8 value = (wcr_lword >> mask[REG]) & field[REG];
+            const i8 diff = value - ((s_select >> mask[REG]) & field[REG]);
             char str[4];
-            if (j == SELECT_WW)
+            if (REG == SELECT_WW)
             {
                 if (value)
                     sprintf(str, "%d", value - 1);
                 else
                     sprintf(str, "=WR");
             }
-            else if (j == SELECT_WR)
+            else if (REG == SELECT_WR)
                 sprintf(str, "%d", wr_wait[value]);
             else
                 sprintf(str, "%d.5", value);
-            row_print_color(2 + row + j, 7 + column,
-                i <= SELECT_CS5AWCR && i != SELECT_CS4WCR && diff
+            row_print_color(2 + row + REG, 7 + column,
+                CSn <= SELECT_CS5A && CSn != SELECT_CS4 && diff
                 ? diff > 0 ? C_BLUE : C_RED
                 : C_BLACK, C_WHITE, str);
         }
     }
 }
 
-static void bsc_modify(select_option select, i8 modify)
+static void modify_A3CL(u8 value)
+{
+    if (value != CL2 && value != CL3)
+        return;
+    BSC.CS3WCR.A3CL = value;
+    for (int i = 0; i < 10; i++)
+        __asm__ volatile("nop");
+    if (value == CL2)
+        *SH7305_SDMR3_CL2 = 0;
+    else
+        *SH7305_SDMR3_CL3 = 0;
+}
+
+void bsc_modify(BSC_option select, i8 modify)
 {
     if (select.MODE == SELECT_BCR)
     {
@@ -146,7 +166,7 @@ static void bsc_modify(select_option select, i8 modify)
         sh7305_bsc_CSnWCR_06A6B_t *wcr_addr = &BSC.CS0WCR + select.CSn;
         u8 min = 0;
         const i32 Bphi_f = clock_freq()->Bphi_f;
-        if (select.CSn == SELECT_CS3WCR)
+        if (select.CSn == SELECT_CS3)
         {
             const u8 mask = 13 - select.REG * 3 - (select.REG >= SELECT_TRWL);
             const i8 check = ((wcr_addr->lword >> mask) & 0b11) + modify;
@@ -166,15 +186,20 @@ static void bsc_modify(select_option select, i8 modify)
         static const u8 max[4] = {7, 3, 3, WAIT_24};
         static const u8 mask[4] = {16, 11, 0, 7};
         static const u8 field[4] = {0b111, 0b11, 0b11, 0b1111};
-        const i8 check = ((wcr_addr->lword >> mask[select.REG]) & field[select.REG]) + modify;
+        i8 check = ((wcr_addr->lword >> mask[select.REG]) & field[select.REG]) + modify;
+        if (select.byte == CS0WCR_WR_ptr.byte)
+            min = best_rom_wait(Bphi_f);
         #if !defined CG50 && !defined CG100
-        if (select.CSn == SELECT_CS2WCR)
+        else if (select.byte == CS2WCR_WW_ptr.byte)
         {
-            if (select.REG == SELECT_WR)
-                min = best_ram_read(Bphi_f);
-            else if (select.REG == SELECT_WW)
-                min = best_ram_write(Bphi_f);
+            u8 best_wait = best_ram_write(Bphi_f);
+            if (((wcr_addr->lword >> mask[select.REG]) & field[select.REG]) == 0)
+                check = best_wait;
+            else if (check < best_wait || check > WAIT_6 + 1)
+                check = 0;
         }
+        else if (select.byte == CS2WCR_WR_ptr.byte)
+            min = best_ram_read(Bphi_f);
         #endif
         if (check >= min && check <= max[select.REG])
             wcr_addr->lword = (wcr_addr->lword & ~(field[select.REG] << mask[select.REG])) | (check << mask[select.REG]);
@@ -184,7 +209,7 @@ static void bsc_modify(select_option select, i8 modify)
 void bsc_menu()
 {
     key_event_t key;
-    select_option select;
+    BSC_option select;
     select.byte = 0;
     #ifdef ENABLE_HELP
     set_help_function(help_info);
@@ -225,49 +250,63 @@ void bsc_menu()
 
         switch (key.key)
         {
-        case KEY_F1:
-        case KEY_PLUS:
-            bsc_modify(select, 1);
-            break;
-        case KEY_F2:
-        case KEY_MINUS:
-            bsc_modify(select, -1);
-            break;
-        case KEY_F6:
-        case KEY_PREVTAB:
-        case KEY_NEXTTAB:
-            select.MODE = !select.MODE;
-            break;
-        case KEY_LEFT:
-            if (select.CSn)
-                select.CSn--;
-            break;
-        case KEY_RIGHT:
-            if (select.CSn < SELECT_CS6BBCR)
-                select.CSn++;
-            break;
-        case KEY_UP:
-            if (select.REG)
-                select.REG--;
-            break;
-        case KEY_DOWN:
-            if (select.REG < SELECT_IWRRS)
-                select.REG++;
-            break;
-        case KEY_PAGEUP:
-            if (select.CSn >= SELECT_CS5ABCR)
-                select.CSn -= 4;
-            break;
-        case KEY_PAGEDOWN:
-            if (select.CSn <= SELECT_CS4BCR)
-                select.CSn += 4;
-            break;
-        case KEY_EXIT:
-            return;
+            #ifndef CG100
+            case KEY_F1:
+            #endif
+            case KEY_PLUS:
+                bsc_modify(select, 1);
+                break;
+            
+            #ifndef CG100
+            case KEY_F2:
+            #endif
+            case KEY_MINUS:
+                bsc_modify(select, -1);
+                break;
+
+            #ifdef CG100
+            case KEY_PREVTAB:
+            case KEY_NEXTTAB:
+            #else
+            case KEY_F6:
+            #endif
+                select.MODE = !select.MODE;
+                break;
+
+            case KEY_LEFT:
+                if (select.CSn)
+                    select.CSn--;
+                break;
+            case KEY_RIGHT:
+                if (select.CSn < SELECT_CS6B)
+                    select.CSn++;
+                break;
+            case KEY_UP:
+                if (select.REG)
+                    select.REG--;
+                break;
+            case KEY_DOWN:
+                if (select.REG < SELECT_IWRRS)
+                    select.REG++;
+                break;
+            
+            #ifdef CG100
+            case KEY_PAGEUP:
+                if (select.CSn >= SELECT_CS5A)
+                    select.CSn -= 4;
+                break;
+            case KEY_PAGEDOWN:
+                if (select.CSn <= SELECT_CS4)
+                    select.CSn += 4;
+                break;
+            #endif
+
+            case KEY_EXIT:
+                return;
         }
-        if (select.MODE == SELECT_WCR && select.CSn != SELECT_CS3WCR && select.REG == SELECT_TRC)
+        if (select.MODE == SELECT_WCR && select.CSn != SELECT_CS3 && select.REG == SELECT_TRC)
             select.REG--;
-        if (select.byte == 0b01000000)
+        if (select.byte == CS0WCR_WW_ptr.byte)
             select.REG++;
     }
 }

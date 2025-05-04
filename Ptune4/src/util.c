@@ -6,8 +6,8 @@
 #include <gint/config.h>
 
 #include <util.h>
-
 #include <stdio.h>
+#include "config.h"
 
 /* Short-shorthand for calling out vsprintf() */
 #define shortprint(str, format) {	\
@@ -291,22 +291,36 @@ void warning_box(int row, int size)
 
 bool yes_no(int row)
 {
-	row_print(row, 11, "%s %20s", "[F1]/[OK]: Yes", "[F6]/[BACK]: No");
+	#ifdef CG100
+	row_print(row, 11, "%s %25s", "[OK]: Yes", "[BACK]: No");
 	dupdate();
-
+	while (true)
+	{
+		switch (getkey().key)
+		{
+			case KEY_OK:
+			case KEY_EXE:
+				return true;
+			case KEY_BACK:
+				return false;
+		}
+	}
+	#else
+	row_print(row, 11, "%s %25s", "[F1]: Yes", "[F6]: No");
+	dupdate();
 	while (true)
 	{
 		switch (getkey().key)
 		{
 			case KEY_F1:
 			case KEY_EXE:
-			case KEY_OK:
 				return true;
 			case KEY_F6:
 			case KEY_EXIT:
 				return false;
 		}
 	}
+	#endif
 }
 
 void print_options(int row, int x, const char *option[], u8 select)

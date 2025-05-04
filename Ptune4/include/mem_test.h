@@ -1,4 +1,4 @@
-#include <config.h>
+#include "config.h"
 
 #define FLF_x810 0x432a
 #define PLL(a) ((a) - 1)

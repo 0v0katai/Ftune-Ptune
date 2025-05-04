@@ -122,12 +122,12 @@ void mem_data_menu()
         dupdate();
         key = getkey();
         switch (key.key)
-        {
-            case KEY_EXIT:
-                return;
-            
-            case KEY_F1:
+        { 
+            #ifdef CG100
             case KEY_ON:
+            #else
+            case KEY_F1:
+            #endif
                 for (int i = WAIT_0; i <= WAIT_18; i++)
                     roR[i] = roR_default[i];
                 #if !defined CG50 && !defined CG100
@@ -147,17 +147,27 @@ void mem_data_menu()
                 break;
             #endif
 
-            case KEY_F3:
+            #ifdef CG100
             case KEY_PREVTAB:
+            #else
+            case KEY_F3:
+            #endif
                 margin = !margin;
                 break;
 
-            case KEY_F5:
+            #ifdef CG100
             case KEY_NEXTTAB:
+            #else
+            case KEY_F5:
+            #endif
                 rom_test();
                 break;
-            case KEY_F6:
+            
+            #ifdef CG100
             case KEY_PAGEUP:
+            #else
+            case KEY_F6:
+            #endif
                 #if defined CG50 || defined CG100
                 warning_box(5, 6);
                 row_print_color(6, 2, C_RED, C_WHITE,
@@ -174,6 +184,9 @@ void mem_data_menu()
                 sram_test();
                 #endif
                 break;
+            
+            case KEY_EXIT:
+                return;
         }
     }
 }

@@ -215,17 +215,17 @@ void express_menu()
         print_options(1, 1, option, select);
         row_print_color(3, 11, C_WHITE, f.Iphi_f > IFC_RED_ZONE ? C_RED : C_BLUE, "CPU");
         row_print_color(4, 11, C_WHITE, C_BLACK, "roR %d", mem_wait[BSC.CS0WCR.WR]);
-#if defined CG20
+        #if defined CG20
         row_print_color(5, 11, C_WHITE, C_BLACK, "raR %d", mem_wait[BSC.CS2WCR.WR]);
         if (BSC.CS2WCR.WW)
             row_print_color(6, 11, C_WHITE, C_BLACK, "raW %d", BSC.CS2WCR.WW - 1);
         else
             row_print_color(6, 11, C_WHITE, C_BLACK, "raW =R");
-#elif defined CG50 || defined CG100
+        #elif defined CG50 || defined CG100
         static const int trc_wait[4] = {3, 4, 6, 9};
         row_print_color(5, 11, C_WHITE, C_BLACK, "CL %d", BSC.CS3WCR.A3CL + 1);
         row_print_color(6, 11, C_WHITE, C_BLACK, "TRC %d", trc_wait[BSC.CS3WCR.TRC]);
-#endif
+        #endif
 
         #ifdef ENABLE_USB
         if (usb_is_open())
@@ -254,16 +254,15 @@ void express_menu()
             {FLL_RED_ZONE, PLL_RED_ZONE, IFC_RED_ZONE, SFC_RED_ZONE, BFC_RED_ZONE, PFC_RED_ZONE};
         for (int i = 0; i < 6; i++)
         {
-
-    #ifdef ENABLE_FP
+            #ifdef ENABLE_FP
             row_print(i + 1, 24, "MHz");
             row_print_color(i + 1, 17, freq[i] > red_zone[i]
                 ? C_RED : C_BLACK, C_WHITE, "%3.2f", freq[i] / 1e6);
-    #else
+            #else
             row_print(i + 1, 24, "KHz");
             row_print_color(i + 1, 17, freq[i] > red_zone[i]
                 ? C_RED : C_BLACK, C_WHITE, "%d", freq[i] / 1000);
-    #endif
+            #endif
         }
 
         if (benchmark)
@@ -309,158 +308,127 @@ void express_menu()
             clock_set_speed(key.key - KEY_F1 + 1);
             break;
             #endif
-        case KEY_F6:
-        case KEY_PAGEUP:
-            benchmark = !benchmark;
-            break;
 
-        case KEY_UP:
-            if (select)
-                select--;
-            break;
-        case KEY_DOWN:
-            if (select < SELECT_PFC)
-                select++;
-            break;
+            #ifdef CG100
+            case KEY_PAGEUP:
+            #else
+            case KEY_F6:
+            #endif
+                benchmark = !benchmark;
+                break;
 
-        case KEY_MUL:
-            if (BSC.CS0WCR.WR < WAIT_24)
-                BSC.CS0WCR.WR++;
-            break;
-        case KEY_DIV:
-            if (BSC.CS0WCR.WR > best_rom_wait(f.Bphi_f))
-                BSC.CS0WCR.WR--;
-            break;
-        case KEY_PLUS:
-#if defined CG20
-            if (key.shift)
-            {
-                BSC.CS2WCR.WW = (BSC.CS2WCR.WW + 1) % (WAIT_6 + 2);
+            case KEY_UP:
+                if (select)
+                    select--;
                 break;
-            }
-            if (BSC.CS0WCR.WR < WAIT_24)
-                BSC.CS2WCR.WR++;
-#elif defined CG50 || defined CG100
-            if (key.shift && BSC.CS3WCR.TRC < 3)
-            {
-                BSC.CS3WCR.TRC++;
+            case KEY_DOWN:
+                if (select < SELECT_PFC)
+                    select++;
                 break;
-            }
-            modify_A3CL(CL3);
-#endif
-            break;
-        case KEY_MINUS:
-#if defined CG20
-            if (key.shift)
-            {
-                if (BSC.CS2WCR.WW > best_ram_write(f.Bphi_f))
-                    BSC.CS2WCR.WW--;
-                else if (BSC.CS2WCR.WW == best_ram_write(f.Bphi_f))
-                    BSC.CS2WCR.WW = 0;
-                else
-                    BSC.CS2WCR.WW = best_ram_write(f.Bphi_f);
-                break;
-            }
-            if (BSC.CS2WCR.WR > best_ram_read(f.Bphi_f))
-                BSC.CS2WCR.WR--;
-#elif defined CG50 || defined CG100
-            if (key.shift && BSC.CS3WCR.TRC > best_TRC(f.Bphi_f))
-            {
-                BSC.CS3WCR.TRC--;
-                break;
-            }
-            modify_A3CL(CL2);
-#endif
-            break;
 
-        case KEY_MENU:
-            if (!key.shift)
+            case KEY_MUL:
+            case KEY_DIV:
+                bsc_modify(CS0WCR_WR_ptr, key.key == KEY_MUL ? 1 : -1);
                 break;
-            __attribute__((fallthrough));
-        case KEY_SETTINGS:
-            settings_menu();
-            break;
-        case KEY_VARS:
-            bsc_menu();
-            break;
-        case KEY_OPTN:
-            mem_data_menu();
-            break;
+            case KEY_PLUS:
+            case KEY_MINUS:
+                #if defined CG50 || defined CG100
+                bsc_modify(key.shift ? CS3WCR_TRC_ptr : CS3WCR_CL_ptr, key.key == KEY_PLUS ? 1 : -1);
+                #else
+                bsc_modify(key.shift ? CS2WCR_WW_ptr : CS2WCR_WR_ptr, key.key == KEY_PLUS ? 1 : -1);
+                #endif
+                break;
 
-        case KEY_LEFT:
-            update = true;
-            if (select == SELECT_FLL)
-            {
-                if (f.FLL == 225)
+            #ifdef CG100
+            case KEY_SETTINGS:
+            #else
+            case KEY_MENU:
+                if (!key.shift)
                     break;
-                CPG.FLLFRQ.FLF -= 2;
-                divs[SELECT_PFC - 2] >>= auto_up_PFC();
-            }
-            else if (select == SELECT_PLL)
-            {
-                if (f.PLL == 1)
-                    break;
-                CPG.FRQCR.STC--;
-                divs[SELECT_PFC - 2] >>= auto_up_PFC();
-            }
-            else
-            {
-                const u8 check = select - 2;
-                if (divs[check] == 64)
-                    break;
-                for (int i = check + 1; i <= 3; i++)
-                    if (divs[check] == divs[i])
-                        divs[i] <<= 1;
-                divs[check] <<= 1;
-                for (int i = check - 1; i >= 0; i--)
-                    if (divs[check] / divs[i] > divs_ratio[check - 1][i])
-                        divs[i] <<= 1; 
-            }
-            break;
-        case KEY_RIGHT:
-            update = true;
-            if (select == SELECT_FLL)
-            {
-                if (f.FLL == 1023)
-                    break;
-                CPG.FLLFRQ.FLF += 2;
-                if (exceed_limit())
+            #endif
+                settings_menu();
+                break;
+            case KEY_VARS:
+                bsc_menu();
+                break;
+            case KEY_OPTN:
+                mem_data_menu();
+                break;
+
+            case KEY_LEFT:
+                update = true;
+                if (select == SELECT_FLL)
                 {
+                    if (f.FLL == 225)
+                        break;
                     CPG.FLLFRQ.FLF -= 2;
-                    break;
+                    divs[SELECT_PFC - 2] >>= auto_up_PFC();
                 }
-                divs[SELECT_PFC - 2] <<= auto_down_PFC();
-            }
-            else if (select == SELECT_PLL)
-            {
-                if (f.PLL == 64)
-                    break;
-                CPG.FRQCR.STC++;
-                if (exceed_limit())
+                else if (select == SELECT_PLL)
                 {
+                    if (f.PLL == 1)
+                        break;
                     CPG.FRQCR.STC--;
-                    break;
+                    divs[SELECT_PFC - 2] >>= auto_up_PFC();
                 }
-                divs[SELECT_PFC - 2] <<= auto_down_PFC();
-            }
-            else
-            {
-                const u8 check = select - 2;
-                if (divs[check] == 2)
-                    break;
-                const i32 fs[4] = {f.Iphi_f, f.Sphi_f, f.Bphi_f, f.Pphi_f};
-                const i32 limit[4] = {CPU_CLK_MAX, SHW_CLK_MAX, BUS_CLK_MAX, IO_CLK_MAX};
-                if ((fs[check] << 1) > limit[check])
-                    break;
-                for (int i = check - 1; i >= 0; i--)
-                    if (divs[check] == divs[i])
-                        divs[i] >>= 1;
-                divs[check] >>= 1;
-                for (int i = check + 1; i <= 3; i++)
-                    if (divs[i] / divs[check] > divs_ratio[i - 1][check])
-                        divs[i] >>= 1;
-            }
-            break;
+                else
+                {
+                    const u8 check = select - 2;
+                    if (divs[check] == 64)
+                        break;
+                    for (int i = check + 1; i <= 3; i++)
+                        if (divs[check] == divs[i])
+                            divs[i] <<= 1;
+                    divs[check] <<= 1;
+                    for (int i = check - 1; i >= 0; i--)
+                        if (divs[check] / divs[i] > divs_ratio[check - 1][i])
+                            divs[i] <<= 1; 
+                }
+                break;
+            case KEY_RIGHT:
+                update = true;
+                if (select == SELECT_FLL)
+                {
+                    if (f.FLL == 1023)
+                        break;
+                    CPG.FLLFRQ.FLF += 2;
+                    if (exceed_limit())
+                    {
+                        CPG.FLLFRQ.FLF -= 2;
+                        break;
+                    }
+                    divs[SELECT_PFC - 2] <<= auto_down_PFC();
+                }
+                else if (select == SELECT_PLL)
+                {
+                    if (f.PLL == 64)
+                        break;
+                    CPG.FRQCR.STC++;
+                    if (exceed_limit())
+                    {
+                        CPG.FRQCR.STC--;
+                        break;
+                    }
+                    divs[SELECT_PFC - 2] <<= auto_down_PFC();
+                }
+                else
+                {
+                    const u8 check = select - 2;
+                    if (divs[check] == 2)
+                        break;
+                    const i32 fs[4] = {f.Iphi_f, f.Sphi_f, f.Bphi_f, f.Pphi_f};
+                    const i32 limit[4] = {CPU_CLK_MAX, SHW_CLK_MAX, BUS_CLK_MAX, IO_CLK_MAX};
+                    if ((fs[check] << 1) > limit[check])
+                        break;
+                    for (int i = check - 1; i >= 0; i--)
+                        if (divs[check] == divs[i])
+                            divs[i] >>= 1;
+                    divs[check] >>= 1;
+                    for (int i = check + 1; i <= 3; i++)
+                        if (divs[i] / divs[check] > divs_ratio[i - 1][check])
+                            divs[i] >>= 1;
+                }
+                break;
         }
         #ifdef CG100
         cg100_getkey(key);

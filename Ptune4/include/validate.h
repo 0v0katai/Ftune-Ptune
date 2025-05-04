@@ -21,5 +21,4 @@ unsigned int best_ram_write(i32 Bphi_f);
 unsigned int best_TRC(i32 Bphi_f);
 bool auto_up_PFC();
 bool auto_down_PFC();
-void modify_A3CL(u8 value);
 bool exceed_limit();

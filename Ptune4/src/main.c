@@ -14,21 +14,30 @@
 static bool global_getkey(key_event_t key)
 {
     #ifdef ENABLE_USB
-    if (key.shift && (key.key == KEY_EXP || key.key == KEY_7))
-    {
-        if (usb_is_open())
-            usb_fxlink_screenshot(true);
-        else
+    if (key.shift)
+        #ifdef CG100
+        if (key.key == KEY_EXP)
+        #else
+        if (key.key == KEY_7)
+        #endif
         {
-            usb_interface_t const *interfaces[] = {&usb_ff_bulk, NULL};
-            usb_open(interfaces, GINT_CALL_NULL);
-            usb_open_wait();
+            if (usb_is_open())
+                usb_fxlink_screenshot(true);
+            else
+            {
+                usb_interface_t const *interfaces[] = {&usb_ff_bulk, NULL};
+                usb_open(interfaces, GINT_CALL_NULL);
+                usb_open_wait();
+            }
+            return true;
         }
-        return true;
-    }
     #endif
     #ifdef ENABLE_HELP
-    if ((key.shift && key.key == KEY_4) || key.key == KEY_CATALOG)
+    # ifdef CG100
+    if (key.key == KEY_CATALOG)
+    # else
+    if (key.shift && key.key == KEY_4)
+    # endif
         call_help_function();
     #endif
     return false;

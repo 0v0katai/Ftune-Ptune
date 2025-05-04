@@ -6,27 +6,25 @@
 #define CL2 1
 #define CL3 2
 
-enum select_bwcr_option
+enum CSn_option
 {
-    SELECT_CS0BCR = 0,
-    SELECT_CS2BCR,
-    SELECT_CS3BCR,
-    SELECT_CS4BCR,
-    SELECT_CS5ABCR,
-    SELECT_CS5BBCR,
-    SELECT_CS6ABCR,
-    SELECT_CS6BBCR,
-    SELECT_CS0WCR = 0,
-    SELECT_CS2WCR,
-    SELECT_CS3WCR,
-    SELECT_CS4WCR,
-    SELECT_CS5AWCR,
-    SELECT_CS5BWCR,
-    SELECT_CS6AWCR,
-    SELECT_CS6BWCR
+    SELECT_CS0,
+    SELECT_CS2,
+    SELECT_CS3,
+    SELECT_CS4,
+    SELECT_CS5A,
+    SELECT_CS5B,
+    SELECT_CS6A,
+    SELECT_CS6B
 };
 
-enum select_csnbcr_reg_option
+enum MODE_option
+{
+    SELECT_BCR,
+    SELECT_WCR
+};
+
+enum BCR_REG_option
 {
     SELECT_IWW,
     SELECT_IWRWD,
@@ -35,7 +33,7 @@ enum select_csnbcr_reg_option
     SELECT_IWRRS
 };
 
-enum select_csnwcr_reg_option
+enum CSnWCR_REG_option
 {
     SELECT_WW,
     SELECT_SW,
@@ -43,7 +41,7 @@ enum select_csnwcr_reg_option
     SELECT_WR
 };
 
-enum select_cs3wcr_reg_option
+enum CS3WCR_REG_option
 {
     SELECT_TRP,
     SELECT_TRCD,
@@ -52,14 +50,16 @@ enum select_cs3wcr_reg_option
     SELECT_TRC
 };
 
-enum select_mode_option
-{
-    SELECT_BCR,
-    SELECT_WCR
-};
-
-typedef byte_union(select_option,
+typedef byte_union(BSC_option,
                    u8 : 1;
                    u8 MODE : 1;
                    u8 CSn : 3;
                    u8 REG : 3;);
+
+extern BSC_option const CS0WCR_WR_ptr;
+extern BSC_option const CS2WCR_WR_ptr;
+extern BSC_option const CS2WCR_WW_ptr;
+extern BSC_option const CS3WCR_CL_ptr;
+extern BSC_option const CS3WCR_TRC_ptr;
+
+void bsc_modify(BSC_option select, i8 modify);

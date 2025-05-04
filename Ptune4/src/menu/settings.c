@@ -111,41 +111,50 @@ void settings_menu()
         bool scale = false;
         switch (key.key)
         {
-        case KEY_UP:
-            select = select ? select - 1 : select_max - 1;
-            break;
-        case KEY_DOWN:
-            select = (select + 1) % select_max;
-            break;
+            case KEY_UP:
+                select = (select + select_max - 1) % select_max;
+                break;
+            case KEY_DOWN:
+                select = (select + 1) % select_max;
+                break;
 
-        case KEY_F1:
-        case KEY_ON:
-            settings[select] = settings_def[select];
-            break;
+            #ifdef CG100
+            case KEY_ON:
+            #else
+            case KEY_F1:
+            #endif
+                settings[select] = settings_def[select];
+                break;
 
-        case KEY_F2:
-        case KEY_PLUS:
-            scale = true;
-            __attribute__((fallthrough));
-        case KEY_RIGHT:
-            modify++;
-            break;
-        case KEY_F3:
-        case KEY_MINUS:
-            scale = true;
-            __attribute__((fallthrough));
-        case KEY_LEFT:
-            modify--;
-            break;
+            #ifndef CG100
+            case KEY_F2:
+            #endif
+            case KEY_PLUS:
+                scale = true;
+                __attribute__((fallthrough));
+            case KEY_RIGHT:
+                modify++;
+                break;
+            #ifndef CG100
+            case KEY_F3:
+            #endif
+            case KEY_MINUS:
+                scale = true;
+                __attribute__((fallthrough));
+            case KEY_LEFT:
+                modify--;
+                break;
 
-        case KEY_F6:
-        case KEY_PAGEUP:
-            about();
-            break;
+            #ifdef CG100
+            case KEY_PAGEUP:
+            #else
+            case KEY_F6:
+            #endif
+                about();
+                break;
 
-        case KEY_EXIT:
-        case KEY_SETTINGS:
-            return;
+            case KEY_EXIT:
+                return;
         }
 
         if (select >= SELECT_PLL)
