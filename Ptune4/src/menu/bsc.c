@@ -6,6 +6,32 @@
 #include "util.h"
 #include "config.h"
 
+#ifdef ENABLE_HELP
+static void help_info()
+{
+    #ifdef CG100
+    info_box(3, 9, "HELP");
+    row_print(4, 2, "[+]: Increase option value");
+    row_print(5, 2, "[-]: Decrease option value");
+    row_print(6, 2, "[|<-][->|]: Toggle BCR/WCR mode");
+    row_print(7, 2, "[UP][DOWN]: Select option");
+    row_print(8, 2, "[LEFT][RIGHT]: Select CSn area");
+    row_print(9, 2, "[PGUP][PGDW]: Quick jump to previous/next row");
+    row_print(11, 2, "[BACK]: Close help / Return to express menu");
+    #else
+    info_box(3, 9, "HELP");
+    row_print(4, 2, "[F1][+]: Increase option value");
+    row_print(5, 2, "[F2][-]: Decrease option value");
+    row_print(6, 2, "[F6]: Toggle BCR/WCR mode");
+    row_print(7, 2, "[UP][DOWN]: Select option");
+    row_print(8, 2, "[LEFT][RIGHT]: Select CSn area");
+    row_print(11, 2, "[EXIT]: Close help / Return to express menu");
+    #endif
+    dupdate();
+    while (getkey().key != KEY_EXIT);
+}
+#endif
+
 const char *csn_name[] = {"0", "2", "3", "4", "5A", "5B", "6A", "6B"};
 
 struct cpg_overclock_setting s_default;
@@ -160,6 +186,9 @@ void bsc_menu()
     key_event_t key;
     select_option select;
     select.byte = 0;
+    #ifdef ENABLE_HELP
+    set_help_function(help_info);
+    #endif
     get_default_preset();
 
     while (true)

@@ -30,6 +30,47 @@ enum select_option
     SELECT_PFC
 };
 
+#ifdef ENABLE_HELP
+static void help_info()
+{
+    #ifdef CG100
+    info_box(1, 13, "HELP");
+    row_print(2, 2, "[ON]: Reset to default");
+    row_print(3, 2, "[|<-][->|]: Select preset, [OK]: Confirm");
+    row_print(4, 2, "[PGUP]: Toggle benchmark");
+    row_print(5, 2, "[UP][DOWN]: Select option");
+    row_print(6, 2, "[LEFT][RIGHT]: -/+ option value");
+    row_print(7, 2, "[x][/]: +/- roR");
+    row_print(8, 2, "[+][-]: +/- CL");
+    row_print(9, 2, "[SHIFT][+][-]: +/- TRC");
+    row_print(10, 2, "[SETTINGS]: Settings");
+    row_print(11, 2, "[VARIABLE]: BSC settings");
+    row_print(12, 2, "[TOOLS]: Memory data & tests");
+    row_print(13, 2, "[BACK]: Close help / Quit Ptune4");
+    #else
+    info_box(1, 13, "HELP");
+    row_print(2, 2, "[F1]-[F5]: Apply preset");
+    row_print(3, 2, "[F6]: Toggle benchmark");
+    row_print(4, 2, "[UP][DOWN]: Select option");
+    row_print(5, 2, "[LEFT][RIGHT]: -/+ option value");
+    row_print(6, 2, "[x][/]: +/- roR");
+    # ifdef CG50
+    row_print(7, 2, "[+][-]: +/- CL");
+    row_print(8, 2, "[SHIFT][+][-]: +/- TRC");
+    # else
+    row_print(7, 2, "[+]/[-]: +/- raR");
+    row_print(8, 2, "[SHIFT][+]/[-]: +/- raW");
+    # endif
+    row_print(9, 2, "[OPTN]: Memory data & tests");
+    row_print(10, 2, "[VARS]: BSC settings");
+    row_print(11, 2, "[SHIFT][MENU]: Settings");
+    row_print(13, 2, "[EXIT]: Close help / Quit Ptune4");
+    #endif
+    dupdate();
+    while (getkey().key != KEY_EXIT);
+}
+#endif
+
 static void print_preset(int current)
 {
     #ifdef CG100
@@ -145,16 +186,13 @@ void express_menu()
 
         u8 current_preset = clock_get_speed();
         dclear(C_WHITE);
+        #ifdef ENABLE_HELP
+        set_help_function(help_info);
+        #endif
         print_preset(current_preset);
         fkey_menu(6, "Bench");
 
-        row_title(VERSION
-            #ifdef CG100
-            " SETTINGS / VARIABLE / TOOLS"
-            #else
-            " OPTN / VARS / SET UP"
-            #endif
-        );
+        row_title(VERSION);
         row_print(1, 29, "FLLFRQ:");
         row_print(2, 29, "FRQCR:");
         for (int i = 0; i < 8; i++)
@@ -189,15 +227,26 @@ void express_menu()
         row_print_color(6, 11, C_WHITE, C_BLACK, "TRC %d", trc_wait[BSC.CS3WCR.TRC]);
 #endif
 
-#if defined CG20
-        row_print(8, 2, "[x]/[/]: +/- roR");
-        row_print(9, 2, "[+]/[-]: +/- raR");
-        row_print(10, 2, "[SHIFT][+]/[-]: +/- raW");
-#elif defined CG50 || defined CG100
-        row_print(8, 2, "[x][/]: +/- roR");
-        row_print(9, 2, "[+][-]: +/- CL");
-        row_print(10, 2, "[SHIFT][+][-]: +/- TRC");
-#endif
+        #ifdef ENABLE_USB
+        if (usb_is_open())
+            row_print(9, 2, "Capture");
+        else
+            row_print(9, 2, "Open USB");
+        # ifdef CG100
+        row_print(9, 12, "[SHIFT][x10^]");
+        # else
+        row_print(9, 12, "[SHIFT][7]");
+        # endif
+        #endif
+
+        #ifdef ENABLE_HELP
+        row_print(10, 2, "Help");
+        # ifdef CG100
+        row_print(10, 12, "[CATALOG]");
+        # else
+        row_print(10, 12, "[SHIFT][4]");
+        # endif
+        #endif
 
         u32 freq[6] =
             {f.FLL * 32768, f.FLL * f.PLL * 32768, f.Iphi_f, f.Sphi_f, f.Bphi_f, f.Pphi_f};

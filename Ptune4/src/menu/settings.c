@@ -7,6 +7,32 @@
 #include "validate.h"
 #include "mem_test.h"
 
+#ifdef ENABLE_HELP
+static void help_info()
+{
+    #ifdef CG100
+    info_box(4, 7, "HELP");
+    row_print(5, 2, "[ON]: Reset to default");
+    row_print(6, 2, "[+][-]: +/- option value (1000 KHz)");
+    row_print(7, 2, "[LEFT][RIGHT]: -/+ option value (100 KHz)");
+    row_print(8, 2, "[UP][DOWN]: Select option");
+    row_print(9, 2, "[PGUP]: About this add-in");
+    row_print(10, 2, "[BACK]: Close help / Return to express menu");
+    #else
+    info_box(3, 9, "HELP");
+    row_print(4, 2, "[F1]: Reset to default");
+    row_print(5, 2, "[F2][+]: Increase option value (1000 KHz)");
+    row_print(6, 2, "[F3][-]: Decrease option value (1000 KHz)");
+    row_print(7, 2, "[LEFT][RIGHT]: -/+ option value (100 KHz)");
+    row_print(8, 2, "[UP][DOWN]: Select option");
+    row_print(10, 2, "[F6]: About this add-in");
+    row_print(11, 2, "[EXIT]: Close help / Return to express menu");
+    #endif
+    dupdate();
+    while (getkey().key != KEY_EXIT);
+}
+#endif
+
 i32 settings[] =
     {
         ROM_MARGIN_DEF,
@@ -50,6 +76,10 @@ void settings_menu()
 
     static const i8 select_max = SELECT_PFC + 1;
 
+    #ifdef ENABLE_HELP
+    set_help_function(help_info);
+    #endif
+
     while (true)
     {
         dclear(C_WHITE);
@@ -67,9 +97,11 @@ void settings_menu()
 
         row_highlight(select + 1);
 
-        fkey_action(1, "+");
-        fkey_action(2, "-");
-        fkey_action(3, "Init");
+        fkey_action(1, "Reset");
+        #ifndef CG100
+        fkey_action(2, "+");
+        fkey_action(3, "-");
+        #endif
         fkey_button(6, "About");
 
         dupdate();
@@ -87,22 +119,23 @@ void settings_menu()
             break;
 
         case KEY_F1:
+        case KEY_ON:
+            settings[select] = settings_def[select];
+            break;
+
+        case KEY_F2:
         case KEY_PLUS:
             scale = true;
             __attribute__((fallthrough));
         case KEY_RIGHT:
             modify++;
             break;
-        case KEY_F2:
+        case KEY_F3:
         case KEY_MINUS:
             scale = true;
             __attribute__((fallthrough));
         case KEY_LEFT:
             modify--;
-            break;
-        case KEY_F3:
-        case KEY_PREVTAB:
-            settings[select] = settings_def[select];
             break;
 
         case KEY_F6:

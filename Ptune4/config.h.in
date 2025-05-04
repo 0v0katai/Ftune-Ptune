@@ -16,6 +16,7 @@
 // #define ENABLE_WHET
 #define ENABLE_USB
 // #define ENABLE_AZUR
+#define ENABLE_HELP
 
 /* Settings defaults */
 

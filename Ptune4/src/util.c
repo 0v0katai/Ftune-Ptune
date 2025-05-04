@@ -336,3 +336,15 @@ void row_clear(int row)
 }
 
 #endif /* FXCG50 */
+
+static help_function_t help_function = NULL;
+
+void set_help_function(help_function_t function)
+{
+	help_function = function;
+}
+
+void call_help_function()
+{
+	help_function();
+}

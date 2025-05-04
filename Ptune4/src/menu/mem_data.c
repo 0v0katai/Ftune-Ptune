@@ -9,6 +9,37 @@
 #include "config.h"
 #include "menu.h"
 
+#ifdef ENABLE_HELP
+static void help_info()
+{
+    #ifdef CG100
+    info_box(4, 7, "HELP");
+    row_print(5, 2, "[ON]: Reset to default");
+    row_print(6, 2, "[|<-]: Toggle margin view");
+    row_print(7, 2, "[->|]: ROM read test");
+    row_print(8, 2, "[PGUP]: SDRAM write test");
+    row_print(10, 2, "[BACK]: Close help / Return to express menu");
+    #elif defined CG50
+    info_box(4, 7, "HELP");
+    row_print(5, 2, "[F1]: Reset to default");
+    row_print(6, 2, "[F3]: Toggle margin view");
+    row_print(7, 2, "[F5]: ROM read test");
+    row_print(8, 2, "[F6]: SDRAM write test");
+    row_print(10, 2, "[EXIT]: Close help / Return to express menu");
+    #else
+    info_box(3, 9, "HELP");
+    row_print(4, 2, "[F1]: Reset to default");
+    row_print(5, 2, "[F2]: Toggle SRAM read/write view");
+    row_print(6, 2, "[F3]: Toggle margin view");
+    row_print(7, 2, "[F5]: ROM read test");
+    row_print(8, 2, "[F6]: SRAM read/write test");
+    row_print(11, 2, "[EXIT]: Close help / Return to express menu");
+    #endif
+    dupdate();
+    while (getkey().key != KEY_EXIT);
+}
+#endif
+
 void mem_data_menu()
 {
     key_event_t key;
@@ -26,6 +57,10 @@ void mem_data_menu()
     static const u32 raW_default[] = {raW_0, raW_1, raW_2, raW_3, raW_4, raW_5, raW_6};
     #else
     static const u32 raW_TRC_default[] = {raW_TRC_3, raW_TRC_4, raW_TRC_6, raW_TRC_9};
+    #endif
+
+    #ifdef ENABLE_HELP
+    set_help_function(help_info);
     #endif
 
     while (true)

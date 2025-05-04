@@ -9,10 +9,11 @@
 
 #include "config.h"
 #include "menu.h"
+#include "util.h"
 
 static bool global_getkey(key_event_t key)
 {
-    #if defined ENABLE_USB
+    #ifdef ENABLE_USB
     if (key.shift && (key.key == KEY_EXP || key.key == KEY_7))
     {
         if (usb_is_open())
@@ -25,6 +26,10 @@ static bool global_getkey(key_event_t key)
         }
         return true;
     }
+    #endif
+    #ifdef ENABLE_HELP
+    if ((key.shift && key.key == KEY_4) || key.key == KEY_CATALOG)
+        call_help_function();
     #endif
     return false;
 }
