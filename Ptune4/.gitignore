@@ -2,6 +2,7 @@
 /build*/
 /*.g1a
 /*.g3a
+/*-hh2.bin
 
 # Python bytecode
 __pycache__/

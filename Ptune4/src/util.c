@@ -27,7 +27,6 @@
 #define ROW_Y      0
 #define ROW_YPAD   0
 #define ROW_H      8
-#define ROW_COUNT  8
 #endif
 
 #if GINT_RENDER_RGB
@@ -36,7 +35,6 @@
 #define ROW_Y      20
 #define ROW_YPAD   2
 #define ROW_H      14
-#define ROW_COUNT  14
 #endif
 
 /* row_title(): Render the main title */
@@ -56,8 +54,6 @@ void row_title(char const *format, ...)
 /* row_print(): Formatted printing in a predefined row */
 void row_print(int row, int x, char const *format, ...)
 {
-	if(row < 0 || row > ROW_COUNT) return;
-
 	char str[80];
 	shortprint(str, format);
 
@@ -68,8 +64,6 @@ void row_print(int row, int x, char const *format, ...)
 /* row_print_color(): Formatted printing... with custom colors! */
 void row_print_color(int row, int x, int fg, int bg, char const *format, ...)
 {
-	if(row < 0 || row > ROW_COUNT) return;
-
 	char str[80];
 	shortprint(str, format);
 
@@ -113,12 +107,6 @@ void scrollbar(int offset, int length, int top, int bottom)
 
 	drect(area_x, area_top + bar_top, area_x + area_width - 1,
 		area_top + bar_top + bar_height, C_BLACK);
-}
-
-/* row_count(): Number of rows available to row_print() */
-int row_count(void)
-{
-	return ROW_COUNT;
 }
 
 int row_x(int x)
@@ -291,7 +279,21 @@ void warning_box(int row, int size)
 
 bool yes_no(int row)
 {
-	#ifdef CG100
+	#ifdef CP400
+	row_print(row, 11, "%s %25s", "[KBD]: Yes", "[DEL]: No");
+	dupdate();
+	while (true)
+	{
+		switch (getkey().key)
+		{
+			case KEY_KBD:
+			case KEY_EXE:
+				return true;
+			case KEY_DEL:
+				return false;
+		}
+	}
+	#elif defined CG100
 	row_print(row, 11, "%s %25s", "[OK]: Yes", "[BACK]: No");
 	dupdate();
 	while (true)

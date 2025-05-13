@@ -31,7 +31,7 @@ void run_benchmark()
     for (int i = 0; i < 3; i++)
     {
         static const char *mem[] = {"ROM:", "RAM:", "I/O:"};
-        #if defined CG50 || defined CG100
+        #if defined CG50 || defined CG100 || defined CP400
         static const u32 address[] = {0xa0150000, 0xac150000, 0xa4150000};
         #else
         static const u32 address[] = {0xa0150000, 0xa8150000, 0xa4150000};

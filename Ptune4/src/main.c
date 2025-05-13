@@ -17,10 +17,7 @@ static bool global_getkey(key_event_t key)
 {
     #ifdef ENABLE_USB
     if (key.shift)
-        #ifdef CG100
-        if (key.key == KEY_EXP)
-        #else
-        if (key.key == KEY_7)
+        if (key.key == KEY_ENABLE_USB)
         #endif
         {
             if (usb_is_open())
@@ -33,13 +30,11 @@ static bool global_getkey(key_event_t key)
             }
             return true;
         }
-    #endif
     #ifdef ENABLE_HELP
-    # ifdef CG100
-    if (key.key == KEY_CATALOG)
-    # else
-    if (key.shift && key.key == KEY_4)
+    # if !defined CG100
+    if (key.shift)
     # endif
+    if (key.key == KEY_OPEN_HELP)
         call_help_function();
     #endif
     return false;
@@ -56,13 +51,7 @@ int main()
     __printf_enable_fp();
     #endif
 
-    #ifdef CG20
-    if (gint[HWCALC] != HWCALC_PRIZM)
-    #elif defined CG50
-    if (gint[HWCALC] != HWCALC_FXCG50)
-    #elif defined CG100
-    if (gint[HWCALC] != HWCALC_FXCG100)
-    #endif
+    if (gint[HWCALC] != HARDWARE_TARGET)
         abort();
 
     prof_init();

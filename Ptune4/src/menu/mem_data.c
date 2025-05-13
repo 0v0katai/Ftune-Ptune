@@ -51,7 +51,7 @@ void mem_data_menu()
         roR_5, roR_6, roR_8, roR_10, roR_12,
         roR_14, roR_18
     };
-    #if !defined CG50 && !defined CG100
+    #if !defined CG50 && !defined CG100 && !defined CP400
     bool mode = READ;
     static const u32 raR_default[] = {raR_0, raR_1, raR_2, raR_3, raR_4, raR_5, raR_6, raR_8};
     static const u32 raW_default[] = {raW_0, raW_1, raW_2, raW_3, raW_4, raW_5, raW_6};
@@ -77,7 +77,7 @@ void mem_data_menu()
                 ? roR[i] / 100 * (100 - ROM_MARGIN) / 1000
                 : roR[i] / 1000);
         }
-        #if defined CG50 || defined CG100
+        #if defined CG50 || defined CG100 || defined CP400
         for (int i = 0; i < 4; i++)
         {
             static const u8 trc_wait[] = {3, 4, 6, 9};
@@ -105,6 +105,7 @@ void mem_data_menu()
             }
         #endif
 
+        #ifndef CP400
         fkey_action(1, "Reset");
         #if !defined CG50 && !defined CG100
         if (mode)
@@ -118,19 +119,16 @@ void mem_data_menu()
             fkey_action(3, "Margin");
         fkey_menu(5, "ROM");
         fkey_menu(6, "RAM");
+        #endif
 
         dupdate();
         key = getkey();
         switch (key.key)
         { 
-            #ifdef CG100
-            case KEY_ON:
-            #else
-            case KEY_F1:
-            #endif
+            case KEY_MEMDATA_RESET:
                 for (int i = WAIT_0; i <= WAIT_18; i++)
                     roR[i] = roR_default[i];
-                #if !defined CG50 && !defined CG100
+                #if !defined CG50 && !defined CG100 && !defined CP400
                 for (int i = WAIT_0; i <= WAIT_8; i++)
                     raR[i] = raR_default[i];
                 for (int i = WAIT_0; i <= WAIT_6; i++)
@@ -141,34 +139,22 @@ void mem_data_menu()
                 #endif
                 break;
 
-            #if !defined CG50 && !defined CG100
+            #if !defined CG50 && !defined CG100 && !defined CP400
             case KEY_F2:
                 mode = !mode;
                 break;
             #endif
 
-            #ifdef CG100
-            case KEY_PREVTAB:
-            #else
-            case KEY_F3:
-            #endif
+            case KEY_MEMDATA_MARGIN:
                 margin = !margin;
                 break;
 
-            #ifdef CG100
-            case KEY_NEXTTAB:
-            #else
-            case KEY_F5:
-            #endif
+            case KEY_MEMDATA_ROMTEST:
                 rom_test();
                 break;
             
-            #ifdef CG100
-            case KEY_PAGEUP:
-            #else
-            case KEY_F6:
-            #endif
-                #if defined CG50 || defined CG100
+            case KEY_MEMDATA_RAMTEST:
+                #if defined CG50 || defined CG100 || defined CP400
                 warning_box(5, 6);
                 row_print_color(6, 2, C_RED, C_WHITE,
                     "SDRAM test may cause system errors!");

@@ -9,7 +9,7 @@
 #include "util.h"
 #include "config.h"
 
-#if defined CG50 || defined CG100
+#if defined CG50 || defined CG100 || defined CP400
 u32 raW_TRC[4] = {raW_TRC_3, raW_TRC_4, raW_TRC_6, raW_TRC_9};
 
 static void print_SDRAM_speed(u32 Bphi_f, u8 TRC)

@@ -30,7 +30,7 @@ unsigned int best_rom_wait(i32 Bphi_f)
     return i + 1;
 }
 
-#if defined CG50 || defined CG100
+#if defined CG50 || defined CG100 || defined CP400
 unsigned int best_TRC(i32 Bphi_f)
 {
     int i;

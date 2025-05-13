@@ -1,7 +1,7 @@
 #include "config.h"
 
 extern i32 roR[];
-#if !defined CG50 && !defined CG100
+#if !defined CG50 && !defined CG100 && !defined CP400
     extern u32 raR[];
     extern u32 raW[];
 #else

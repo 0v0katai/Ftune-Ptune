@@ -189,7 +189,7 @@ void bsc_modify(BSC_option select, i8 modify)
         i8 check = ((wcr_addr->lword >> mask[select.REG]) & field[select.REG]) + modify;
         if (select.byte == CS0WCR_WR_ptr.byte)
             min = best_rom_wait(Bphi_f);
-        #if !defined CG50 && !defined CG100
+        #if !defined CG50 && !defined CG100 && !defined CP400
         else if (select.byte == CS2WCR_WW_ptr.byte)
         {
             u8 best_wait = best_ram_write(Bphi_f);
@@ -228,7 +228,8 @@ void bsc_menu()
         row_highlight(0);
         row_highlight(7);
 
-        #ifndef CG100
+        #ifndef CP400
+        #if !defined CG100
         fkey_action(1, "+");
         fkey_action(2, "-");
         fkey_menu(6, "BCR/WCR");
@@ -243,6 +244,7 @@ void bsc_menu()
             tab_action(1, 3, "BCR");
             tab_menu(4, 6, "WCR");
         }
+        #endif
         #endif
 
         dupdate();
@@ -266,10 +268,8 @@ void bsc_menu()
 
             #ifdef CG100
             case KEY_PREVTAB:
-            case KEY_NEXTTAB:
-            #else
-            case KEY_F6:
             #endif
+            case KEY_BSC_BCRWCR:
                 select.MODE = !select.MODE;
                 break;
 

@@ -73,7 +73,7 @@ static void help_info()
 
 static void print_preset(int current)
 {
-    #ifdef CG100
+    #if defined CG100
     fkey_action(1, "Default");
     if (current == CLOCK_SPEED_UNKNOWN)
         tab_menu(2, 5, "Current preset: Custom");
@@ -92,8 +92,8 @@ static void print_preset(int current)
     #endif
 }
 
-#if defined CG50 || defined CG100
-static void fxcg50_100_shift_f5_preset()
+#if defined CG50 || defined CG100 || defined CP400
+static void shift_f5_preset()
 {
     /* dupdate: 5633 μs/177 FPS, INT: 211264 Dhrystone/s */
     static struct cpg_overclock_setting const settings_fxcg50_100_shift_f5 =
@@ -111,7 +111,7 @@ static void fxcg50_100_shift_f5_preset()
     cpg_set_overclock_setting(&settings_fxcg50_100_shift_f5);
 }
 
-static void fxcg50_100_alpha_f5_preset()
+static void alpha_f5_preset()
 {
     /* dupdate: 3896 μs/256 FPS, INT: 257122 Dhrystone/s */
     static struct cpg_overclock_setting const settings_fxcg50_100_alpha_f5 =
@@ -136,9 +136,9 @@ static void cg100_getkey(key_event_t key)
     if (key.key == KEY_ON)
         clock_set_speed(CLOCK_SPEED_DEFAULT);
     if (key.key == KEY_NEXTTAB && key.shift)
-        fxcg50_100_shift_f5_preset();
+        shift_f5_preset();
     else if (key.key == KEY_NEXTTAB && key.alpha)
-        fxcg50_100_alpha_f5_preset();
+        alpha_f5_preset();
     else if (key.key == KEY_PREVTAB || key.key == KEY_NEXTTAB)
     {
         u8 select_preset = CLOCK_SPEED_DEFAULT - 1;
@@ -167,6 +167,45 @@ static void cg100_getkey(key_event_t key)
 }
 #endif
 
+#ifdef CP400
+static void cp400_getkey(key_event_t key)
+{
+    if (key.key == KEY_KBD)
+        clock_set_speed(CLOCK_SPEED_DEFAULT);
+    if (key.key == KEY_Z && key.shift)
+        shift_f5_preset();
+    else if (key.key == KEY_POWER && key.shift)
+        alpha_f5_preset();
+}
+#endif
+
+static void print_express_cpg_bsc(struct cpg_overclock_setting s)
+{
+    #ifdef CP400
+    row_print(15, 2, "FLLFRQ:");
+    row_print(16, 2, "FRQCR:");
+    for (int i = 0; i < 8; i++)
+    {
+        static const char *csn_name[] = {"0", "2", "3", "5A"};
+        static const char reg_name[] = {'B', 'W'};
+        row_print(i + 17, 2, "CS%s%cCR:", csn_name[i % 4], reg_name[i >= 4]);
+    }
+    for (int i = 0; i < 10; i++)
+        row_print(i + 15, 11, "0x%08X", *(&(s.FLLFRQ) + i));
+    #else
+    row_print(1, 29, "FLLFRQ:");
+    row_print(2, 29, "FRQCR:");
+    for (int i = 0; i < 8; i++)
+    {
+        static const char *csn_name[] = {"0", "2", "3", "5A"};
+        static const char reg_name[] = {'B', 'W'};
+        row_print(i + 3, 29, "CS%s%cCR:", csn_name[i % 4], reg_name[i >= 4]);
+    }
+    for (int i = 0; i < 10; i++)
+        row_print(i + 1, 38, "0x%08X", *(&(s.FLLFRQ) + i));
+    #endif
+}
+
 void express_menu()
 {
     key_event_t key;
@@ -189,20 +228,13 @@ void express_menu()
         #ifdef ENABLE_HELP
         set_help_function(help_info);
         #endif
+        #if !defined CP400
         print_preset(current_preset);
         fkey_menu(6, "Bench");
+        #endif
 
         row_title(VERSION);
-        row_print(1, 29, "FLLFRQ:");
-        row_print(2, 29, "FRQCR:");
-        for (int i = 0; i < 8; i++)
-        {
-            static const char *csn_name[] = {"0", "2", "3", "5A"};
-            static const char reg_name[] = {'B', 'W'};
-            row_print(i + 3, 29, "CS%s%cCR:", csn_name[i % 4], reg_name[i >= 4]);
-        }
-        for (int i = 0; i < 10; i++)
-            row_print(i + 1, 38, "0x%08X", *(&(s.FLLFRQ) + i));
+        print_express_cpg_bsc(s);
 
         const clock_frequency_t f = *clock_freq();
         row_print(1, 7, "x%d", f.FLL);
@@ -221,7 +253,7 @@ void express_menu()
             row_print_color(6, 11, C_WHITE, C_BLACK, "raW %d", BSC.CS2WCR.WW - 1);
         else
             row_print_color(6, 11, C_WHITE, C_BLACK, "raW =R");
-        #elif defined CG50 || defined CG100
+        #elif defined CG50 || defined CG100 || defined CP400
         static const int trc_wait[4] = {3, 4, 6, 9};
         row_print_color(5, 11, C_WHITE, C_BLACK, "CL %d", BSC.CS3WCR.A3CL + 1);
         row_print_color(6, 11, C_WHITE, C_BLACK, "TRC %d", trc_wait[BSC.CS3WCR.TRC]);
@@ -290,9 +322,14 @@ void express_menu()
         };
         u8 divs[4] = {f.Iphi_div, f.Sphi_div, f.Bphi_div, f.Pphi_div};
         update = false;
+        #ifdef CG100
+        cg100_getkey(key);
+        #elif defined CP400
+        cp400_getkey(key);
+        #endif
         switch (key.key)
         {
-            #ifndef CG100
+            #if !defined CG100 && !defined CP400
             case KEY_F1:
             case KEY_F2:
             case KEY_F3:
@@ -300,20 +337,16 @@ void express_menu()
             case KEY_F5:
             # ifdef CG50
             if (key.shift)
-                fxcg50_100_shift_f5_preset();
+                shift_f5_preset();
             else if (key.alpha)
-                fxcg50_100_alpha_f5_preset();
+                alpha_f5_preset();
             else
             # endif
             clock_set_speed(key.key - KEY_F1 + 1);
             break;
             #endif
 
-            #ifdef CG100
-            case KEY_PAGEUP:
-            #else
-            case KEY_F6:
-            #endif
+            case KEY_EXPRESS_BENCHMARK:
                 benchmark = !benchmark;
                 break;
 
@@ -332,26 +365,24 @@ void express_menu()
                 break;
             case KEY_PLUS:
             case KEY_MINUS:
-                #if defined CG50 || defined CG100
+                #if defined CG50 || defined CG100 || defined CP400
                 bsc_modify(key.shift ? CS3WCR_TRC_ptr : CS3WCR_CL_ptr, key.key == KEY_PLUS ? 1 : -1);
                 #else
                 bsc_modify(key.shift ? CS2WCR_WW_ptr : CS2WCR_WR_ptr, key.key == KEY_PLUS ? 1 : -1);
                 #endif
                 break;
 
-            #ifdef CG100
-            case KEY_SETTINGS:
-            #else
-            case KEY_MENU:
+            case KEY_EXPRESS_SETTINGS:
+            #if !defined CG100 && !defined CP400
                 if (!key.shift)
                     break;
             #endif
                 settings_menu();
                 break;
-            case KEY_VARS:
+            case KEY_EXPRESS_BSC:
                 bsc_menu();
                 break;
-            case KEY_OPTN:
+            case KEY_EXPRESS_MEMDATA:
                 mem_data_menu();
                 break;
 
@@ -430,9 +461,6 @@ void express_menu()
                 }
                 break;
         }
-        #ifdef CG100
-        cg100_getkey(key);
-        #endif
         if (update)
         {
             CPG.FRQCR.lword &= 0xFF000000;
@@ -447,7 +475,7 @@ void express_menu()
             const u8 new_CS0WCR_WR = best_rom_wait(Bphi_f);
             if (new_CS0WCR_WR > BSC.CS0WCR.WR)
                 BSC.CS0WCR.WR = new_CS0WCR_WR;
-            #if defined CG50 || defined CG100
+            #if defined CG50 || defined CG100 || defined CP400
             BSC.CS3WCR.TRC = best_TRC(Bphi_f);
             #else
             BSC.CS2WCR.WR = best_ram_read(Bphi_f);

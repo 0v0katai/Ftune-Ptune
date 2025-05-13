@@ -1,3 +1,5 @@
+#include <gint/keycodes.h>
+#include <gint/hardware.h>
 #define VERSION "Ptune4 v@VERSTR@ (@@COMMIT_ID_SHORT@)" 
 
 /* Platform toggles */
@@ -6,7 +8,8 @@
 // #define MONO_SH4A   /* All SH4A monochrome calculators */
 // #define CG20        /* fx-CG10, fx-CG20 */
 // #define CG50        /* fx-CG50, Graph 90+E */
-#define CG100       /* fx-CG100, fx-1AU Graph, Graph Math+ */
+// #define CG100       /* fx-CG100, fx-1AU Graph, Graph Math+ */
+#define CP400       /* fx-CP400(+E), fx-CG500 */
 
 /* Feature toggles */
 
@@ -18,6 +21,55 @@
 // #define ENABLE_AZUR
 #define ENABLE_HELP
 
+/* Keybinds */
+#if defined CP400
+# define HARDWARE_TARGET HWCALC_FXCP400
+# define KEY_EXPRESS_SETTINGS KEY_EQUALS
+# define KEY_EXPRESS_BENCHMARK KEY_DEL
+# define KEY_EXPRESS_BSC KEY_X
+# define KEY_EXPRESS_MEMDATA KEY_Y
+# define KEY_BSC_BCRWCR KEY_X
+# define KEY_MEMDATA_RESET KEY_EQUALS
+# define KEY_MEMDATA_MARGIN KEY_X
+# define KEY_MEMDATA_ROMTEST KEY_Y
+# define KEY_MEMDATA_RAMTEST KEY_Z
+# define KEY_SETTINGS_RESET KEY_Z
+# define KEY_ENABLE_USB KEY_7
+# define KEY_OPEN_HELP KEY_4
+#elif defined CG100
+# define HARDWARE_TARGET HWCALC_FXCG100
+# define KEY_EXPRESS_SETTINGS KEY_SETTINGS
+# define KEY_EXPRESS_BENCHMARK KEY_PAGEUP
+# define KEY_EXPRESS_BSC KEY_VARS
+# define KEY_EXPRESS_MEMDATA KEY_TOOLS
+# define KEY_BSC_BCRWCR KEY_NEXTTAB
+# define KEY_MEMDATA_RESET KEY_ON
+# define KEY_MEMDATA_MARGIN KEY_PREVTAB
+# define KEY_MEMDATA_ROMTEST KEY_NEXTTAB
+# define KEY_MEMDATA_RAMTEST KEY_PAGEUP
+# define KEY_ENABLE_USB KEY_EXP
+# define KEY_OPEN_HELP KEY_CATALOG
+#else
+# if defined CG50
+#  define HARDWARE_TARGET HWCALC_FXCG50
+# elif defined CG20
+#  define HARDWARE_TARGET HWCALC_PRIZM
+# elif defined MONO_SH4A
+#  define HARDWARE_TARGET HWCALC_FX9860G_SH4
+# endif
+# define KEY_EXPRESS_SETTINGS KEY_MENU
+# define KEY_EXPRESS_BENCHMARK KEY_F6
+# define KEY_EXPRESS_BSC KEY_VARS
+# define KEY_EXPRESS_MEMDATA KEY_OPTN
+# define KEY_BSC_BCRWCR KEY_F6
+# define KEY_MEMDATA_RESET KEY_F1
+# define KEY_MEMDATA_MARGIN KEY_F3
+# define KEY_MEMDATA_ROMTEST KEY_F5
+# define KEY_MEMDATA_RAMTEST KEY_F6
+# define KEY_ENABLE_USB KEY_7
+# define KEY_OPEN_HELP KEY_4
+#endif
+
 /* Settings defaults */
 
 #define ROM_MARGIN_DEF 5
@@ -26,7 +78,7 @@
 #define IFC_CLK_MAX_DEF 275 * 1000000
 #define SFC_CLK_MAX_DEF 180 * 1000000
 #define BFC_CLK_MAX_DEF 134 * 1000000
-#if defined CG50 || defined CG100
+#if defined CG50 || defined CG100 || defined CP400
     #define PFC_CLK_MAX_DEF  50 * 1000000
 #else
     #define PFC_CLK_MAX_DEF  24 * 1000000
@@ -38,7 +90,7 @@
 #define CPU_MAX 350 * 1000000
 #define SHW_MAX 200 * 1000000
 #define BUS_MAX 200 * 1000000
-#if defined CG50 || defined CG100
+#if defined CG50 || defined CG100 || defined CP400
     #define IO_MAX 60 * 1000000
 #else
     #define IO_MAX 45 * 1000000
@@ -49,7 +101,7 @@
 #define IFC_RED_ZONE 250 * 1000000
 #define SFC_RED_ZONE 150 * 1000000
 #define BFC_RED_ZONE 120 * 1000000
-#if defined CG50 || defined CG100
+#if defined CG50 || defined CG100 || defined CP400
     #define PFC_RED_ZONE 48 * 1000000
 #else
     #define PFC_RED_ZONE 25 * 1000000

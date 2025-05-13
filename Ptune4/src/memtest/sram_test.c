@@ -9,8 +9,8 @@
 #include "util.h"
 #include "config.h"
 
-#if !defined CG50 && !defined CG100
-#define RAM_WAIT(CS2WCR) (((CS2WCR) >> 7) & 0b1111)
+#if !defined CG50 && !defined CG100 && !defined CP400
+# define RAM_WAIT(CS2WCR) (((CS2WCR) >> 7) & 0b1111)
 
 u32 raR[] = {raR_0, raR_1, raR_2, raR_3, raR_4, raR_5, raR_6, raR_8};
 u32 raW[] = {raW_0, raW_1, raW_2, raW_3, raW_4, raW_5, raW_6};

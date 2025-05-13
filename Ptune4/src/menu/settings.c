@@ -97,12 +97,14 @@ void settings_menu()
 
         row_highlight(select + 1);
 
+        #ifndef CP400
         fkey_action(1, "Reset");
-        #ifndef CG100
+        # ifndef CG100
         fkey_action(2, "+");
         fkey_action(3, "-");
-        #endif
+        # endif
         fkey_button(6, "About");
+        #endif
 
         dupdate();
         key = getkey();

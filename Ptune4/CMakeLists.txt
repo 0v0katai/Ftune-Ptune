@@ -71,5 +71,5 @@ elseif("${FXSDK_PLATFORM_LONG}" STREQUAL fx9860G_G3A)
   generate_g3a(TARGET Ptune4 VERSION ${PTUNE4_VERSION} OUTPUT "Ptune4-fx.g3a"
     NAME "Ptune4-fx" ICONS assets-cg/icon-uns.png assets-cg/icon-sel.png)
 elseif("${FXSDK_PLATFORM_LONG}" STREQUAL fxCP)
-  generate_hh2_bin(TARGET Ptune4 VERSION ${PTUNE4_VERSION} OUTPUT "Ptune4-hh2.bin")
+  generate_hh2_bin(TARGET Ptune4 OUTPUT "CPtune4-hh2.bin")
 endif()
