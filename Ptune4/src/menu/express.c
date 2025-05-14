@@ -1,6 +1,5 @@
 #include <math.h>
-#include <stdlib.h>
-#include <fxlibc/printf.h>
+#include <stdio.h>
 
 #include <gint/display.h>
 #include <gint/keyboard.h>
@@ -286,15 +285,9 @@ void express_menu()
             {FLL_RED_ZONE, PLL_RED_ZONE, IFC_RED_ZONE, SFC_RED_ZONE, BFC_RED_ZONE, PFC_RED_ZONE};
         for (int i = 0; i < 6; i++)
         {
-            #ifdef ENABLE_FP
-            row_print(i + 1, 24, "MHz");
-            row_print_color(i + 1, 17, freq[i] > red_zone[i]
-                ? C_RED : C_BLACK, C_WHITE, "%3.2f", freq[i] / 1e6);
-            #else
             row_print(i + 1, 24, "KHz");
             row_print_color(i + 1, 17, freq[i] > red_zone[i]
                 ? C_RED : C_BLACK, C_WHITE, "%d", freq[i] / 1000);
-            #endif
         }
 
         if (benchmark)

@@ -1,4 +1,3 @@
-#include <fxlibc/printf.h>
 #include <gint/gint.h>
 #include <gint/hardware.h>
 #include <gint/clock.h>
@@ -16,20 +15,19 @@
 static bool global_getkey(key_event_t key)
 {
     #ifdef ENABLE_USB
-    if (key.shift)
-        if (key.key == KEY_ENABLE_USB)
-        #endif
+    if (key.shift && key.key == KEY_ENABLE_USB)
+    {
+        if (usb_is_open())
+            usb_fxlink_screenshot(true);
+        else
         {
-            if (usb_is_open())
-                usb_fxlink_screenshot(true);
-            else
-            {
-                usb_interface_t const *interfaces[] = {&usb_ff_bulk, NULL};
-                usb_open(interfaces, GINT_CALL_NULL);
-                usb_open_wait();
-            }
-            return true;
+            usb_interface_t const *interfaces[] = {&usb_ff_bulk, NULL};
+            usb_open(interfaces, GINT_CALL_NULL);
+            usb_open_wait();
         }
+        return true;
+    }
+    #endif
     #ifdef ENABLE_HELP
     # if !defined CG100
     if (key.shift)
@@ -45,10 +43,6 @@ int main()
     #ifdef ENABLE_GDB
     gdb_start_on_exception();
     __asm__("trapa #42");
-    #endif
-
-    #ifdef ENABLE_FP
-    __printf_enable_fp();
     #endif
 
     if (gint[HWCALC] != HARDWARE_TARGET)

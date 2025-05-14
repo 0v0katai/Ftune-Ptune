@@ -45,29 +45,9 @@ void run_benchmark()
     const u32 time_azrp_update = prof_exec(azrp_update());
     #endif
     const u32 time_dupdate = prof_exec(dupdate());
-    row_print(12, 2, "dupd: "
-    #ifdef ENABLE_FP
-        "%.4g ms/%.4g FPS",
-        time_dupdate / 1000.0f,
-        1000000.0f / time_dupdate
-    #else
-        "%d us/%d FPS",
-        time_dupdate,
-        1000000 / time_dupdate
-    #endif
-    );
+    row_print(12, 2, "dupd: %d us/%d FPS", time_dupdate, 1000000 / time_dupdate);
     #ifdef ENABLE_AZUR
-    row_print(12, 26, "azrp: "
-    # ifdef ENABLE_FP
-        "%.4g ms/%.4g FPS",
-        time_azrp_update / 1000.0f,
-        1000000.0f / time_azrp_update
-    # else
-        "%d us/%d FPS",
-        time_azrp_update,
-        1000000 / time_azrp_update
-    # endif
-    );
+    row_print(12, 26, "azrp: %d us/%d FPS", time_azrp_update, 1000000 / time_azrp_update);
     #endif
     row_highlight(12);
 
