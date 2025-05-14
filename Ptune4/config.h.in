@@ -1,6 +1,5 @@
 #include <gint/keycodes.h>
 #include <gint/hardware.h>
-#define VERSION "Ptune4 v@VERSTR@ (@@COMMIT_ID_SHORT@)" 
 
 /* Platform toggles */
 
@@ -10,6 +9,14 @@
 // #define CG50        /* fx-CG50, Graph 90+E */
 // #define CG100       /* fx-CG100, fx-1AU Graph, Graph Math+ */
 #define CP400       /* fx-CP400(+E), fx-CG500 */
+
+#if defined CP400
+# define VERSION "CPtune4 v@VERSTR@ (@@COMMIT_ID_SHORT@)"
+#elif defined MONO_SH3 || defined MONO_SH4A
+# define VERSION "Ftune4 v@VERSTR@ (@@COMMIT_ID_SHORT@)"
+#else
+# define VERSION "Ptune4 v@VERSTR@ (@@COMMIT_ID_SHORT@)"
+#endif
 
 /* Feature toggles */
 
@@ -31,7 +38,8 @@
 # define KEY_MEMDATA_MARGIN KEY_X
 # define KEY_MEMDATA_ROMTEST KEY_Y
 # define KEY_MEMDATA_RAMTEST KEY_Z
-# define KEY_SETTINGS_RESET KEY_Z
+# define KEY_SETTINGS_RESET KEY_EQUALS
+# define KEY_SETTINGS_ABOUT KEY_DIV
 # define KEY_ENABLE_USB KEY_7
 # define KEY_OPEN_HELP KEY_4
 #elif defined CG100
@@ -45,6 +53,8 @@
 # define KEY_MEMDATA_MARGIN KEY_PREVTAB
 # define KEY_MEMDATA_ROMTEST KEY_NEXTTAB
 # define KEY_MEMDATA_RAMTEST KEY_PAGEUP
+# define KEY_SETTINGS_RESET KEY_ON
+# define KEY_SETTINGS_ABOUT KEY_PAGEUP
 # define KEY_ENABLE_USB KEY_EXP
 # define KEY_OPEN_HELP KEY_CATALOG
 #else
@@ -64,6 +74,8 @@
 # define KEY_MEMDATA_MARGIN KEY_F3
 # define KEY_MEMDATA_ROMTEST KEY_F5
 # define KEY_MEMDATA_RAMTEST KEY_F6
+# define KEY_SETTINGS_RESET KEY_F1
+# define KEY_SETTINGS_ABOUT KEY_F6
 # define KEY_ENABLE_USB KEY_7
 # define KEY_OPEN_HELP KEY_4
 #endif

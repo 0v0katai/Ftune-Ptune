@@ -39,6 +39,11 @@ unsigned int best_TRC(i32 Bphi_f)
             break;
     return i + 1;
 }
+
+int TRC_equivalent(u8 reg_value)
+{
+    return (reg_value * (reg_value + 1) + 6) / 2;
+}
 #else
 unsigned int best_ram_read(i32 Bphi_f)
 {

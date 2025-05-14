@@ -10,14 +10,22 @@
 #ifdef ENABLE_HELP
 static void help_info()
 {
-    #ifdef CG100
+    #if defined CP400
+    info_box(15, 7, "HELP");
+    row_print(16, 2, "[=]: Reset to default");
+    row_print(17, 2, "[-][+]: -/+ option value (1000 KHz)");
+    row_print(18, 2, "[LEFT][RIGHT]: -/+ option value (100 KHz)");
+    row_print(19, 2, "[UP][DOWN]: Select option");
+    row_print(20, 2, "[/]: About this add-in");
+    row_print(21, 2, "[Clear]: Close help / < Express menu");
+    #elif defined CG100
     info_box(4, 7, "HELP");
     row_print(5, 2, "[ON]: Reset to default");
     row_print(6, 2, "[+][-]: +/- option value (1000 KHz)");
     row_print(7, 2, "[LEFT][RIGHT]: -/+ option value (100 KHz)");
     row_print(8, 2, "[UP][DOWN]: Select option");
     row_print(9, 2, "[PGUP]: About this add-in");
-    row_print(10, 2, "[BACK]: Close help / Return to express menu");
+    row_print(10, 2, "[BACK]: Close help / < Express menu");
     #else
     info_box(3, 9, "HELP");
     row_print(4, 2, "[F1]: Reset to default");
@@ -26,7 +34,7 @@ static void help_info()
     row_print(7, 2, "[LEFT][RIGHT]: -/+ option value (100 KHz)");
     row_print(8, 2, "[UP][DOWN]: Select option");
     row_print(10, 2, "[F6]: About this add-in");
-    row_print(11, 2, "[EXIT]: Close help / Return to express menu");
+    row_print(11, 2, "[EXIT]: Close help / < Express menu");
     #endif
     dupdate();
     while (getkey().key != KEY_EXIT);
@@ -56,10 +64,20 @@ enum select_option
 
 static void about()
 {
+    #if defined CP400
+    info_box(15, 8, "About");
+    row_print(16, 2, VERSION);
+    row_print(18, 2, "Copyright (C) 2025");
+    row_print(19, 2, "Sentaro21, CalcLoverHK.");
+    row_print(21, 2, "This software is licensed under");
+    row_print(22, 2, "MIT/Expat.");
+    #else
     info_box(5, 4, "About");
     row_print(6, 2, VERSION);
     row_print(7, 2, "Copyright (C) 2025 Sentaro21, CalcLoverHK");
     row_print(8, 2, "This software is licensed under MIT/Expat.");
+    #endif
+
     dupdate();
     getkey();
 }
@@ -120,15 +138,11 @@ void settings_menu()
                 select = (select + 1) % select_max;
                 break;
 
-            #ifdef CG100
-            case KEY_ON:
-            #else
-            case KEY_F1:
-            #endif
+            case KEY_SETTINGS_RESET:
                 settings[select] = settings_def[select];
                 break;
 
-            #ifndef CG100
+            #if !defined CG100 && !defined CP400
             case KEY_F2:
             #endif
             case KEY_PLUS:
@@ -137,7 +151,7 @@ void settings_menu()
             case KEY_RIGHT:
                 modify++;
                 break;
-            #ifndef CG100
+            #if !defined CG100 && !defined CP400
             case KEY_F3:
             #endif
             case KEY_MINUS:
@@ -147,11 +161,7 @@ void settings_menu()
                 modify--;
                 break;
 
-            #ifdef CG100
-            case KEY_PAGEUP:
-            #else
-            case KEY_F6:
-            #endif
+            case KEY_SETTINGS_ABOUT:
                 about();
                 break;
 

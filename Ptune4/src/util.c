@@ -274,13 +274,17 @@ void info_box(int row, int size, const char *title)
 void warning_box(int row, int size)
 {
 	msg_box_frame(row, size, C_RED);
+	#if defined CP400
+	row_print_color(row, 15, C_WHITE, C_RED, "WARNING");
+	#else
 	row_print_color(row, 21, C_WHITE, C_RED, "WARNING");
+	#endif
 }
 
 bool yes_no(int row)
 {
-	#ifdef CP400
-	row_print(row, 11, "%s %25s", "[KBD]: Yes", "[DEL]: No");
+	#if defined CP400
+	row_print(row, 7, "%s %21s", "[KBD]: Yes", "[DEL]: No");
 	dupdate();
 	while (true)
 	{

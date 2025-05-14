@@ -32,7 +32,19 @@ enum select_option
 #ifdef ENABLE_HELP
 static void help_info()
 {
-    #ifdef CG100
+    #if defined CP400
+    row_print(26, 2, "[KBD]: Reset to default");
+    row_print(27, 2, "[DEL]: Toggle benchmark");
+    row_print(28, 2, "[UP][DOWN]: Select option");
+    row_print(29, 2, "[LEFT][RIGHT]: -/+ option value");
+    row_print(30, 2, "[/][x]: -/+ roR");
+    row_print(31, 2, "[-][+]: -/+ CL");
+    row_print(32, 2, "[SHIFT][-][+]: -/+ TRC");
+    row_print(33, 2, "[=]: Settings");
+    row_print(34, 2, "[x]: BSC settings");
+    row_print(35, 2, "[y]: Memory data & tests");
+    row_print(36, 2, "[Clear]: Close help / Quit CPtune4");
+    #elif defined CG100
     info_box(1, 13, "HELP");
     row_print(2, 2, "[ON]: Reset to default");
     row_print(3, 2, "[|<-][->|]: Select preset, [OK]: Confirm");
@@ -181,16 +193,14 @@ static void cp400_getkey(key_event_t key)
 static void print_express_cpg_bsc(struct cpg_overclock_setting s)
 {
     #ifdef CP400
-    row_print(15, 2, "FLLFRQ:");
-    row_print(16, 2, "FRQCR:");
-    for (int i = 0; i < 8; i++)
+    row_print(13, 2, "FLLFRQ: 0x%08X", s.FLLFRQ);
+    row_print(13, 21, "FRQCR: 0x%08X", s.FRQCR);
+    for (int i = 0; i < 4; i++)
     {
         static const char *csn_name[] = {"0", "2", "3", "5A"};
-        static const char reg_name[] = {'B', 'W'};
-        row_print(i + 17, 2, "CS%s%cCR:", csn_name[i % 4], reg_name[i >= 4]);
+        row_print(i + 14, 2, "CS%sBCR: 0x%08X", csn_name[i], *(&(s.CS0BCR) + i));
+        row_print(i + 14, 21, "CS%sWCR: 0x%08X", csn_name[i], *(&(s.CS0WCR) + i));
     }
-    for (int i = 0; i < 10; i++)
-        row_print(i + 15, 11, "0x%08X", *(&(s.FLLFRQ) + i));
     #else
     row_print(1, 29, "FLLFRQ:");
     row_print(2, 29, "FRQCR:");
@@ -253,29 +263,35 @@ void express_menu()
         else
             row_print_color(6, 11, C_WHITE, C_BLACK, "raW =R");
         #elif defined CG50 || defined CG100 || defined CP400
-        static const int trc_wait[4] = {3, 4, 6, 9};
         row_print_color(5, 11, C_WHITE, C_BLACK, "CL %d", BSC.CS3WCR.A3CL + 1);
-        row_print_color(6, 11, C_WHITE, C_BLACK, "TRC %d", trc_wait[BSC.CS3WCR.TRC]);
+        row_print_color(6, 11, C_WHITE, C_BLACK, "TRC %d", TRC_equivalent(BSC.CS3WCR.TRC));
+        #endif
+
+        #if defined CP400
+        # define DISPLAY_ROW 8
+        #else
+        # define DISPLAY_ROW 9
         #endif
 
         #ifdef ENABLE_USB
         if (usb_is_open())
-            row_print(9, 2, "Capture");
+            row_print(DISPLAY_ROW, 2, "Capture");
         else
-            row_print(9, 2, "Open USB");
+            row_print(DISPLAY_ROW, 2, "Open USB");
+
         # ifdef CG100
-        row_print(9, 12, "[SHIFT][x10^]");
+        row_print(DISPLAY_ROW, 12, "[SHIFT][x10^]");
         # else
-        row_print(9, 12, "[SHIFT][7]");
+        row_print(DISPLAY_ROW, 12, "[SHIFT][7]");
         # endif
         #endif
 
         #ifdef ENABLE_HELP
-        row_print(10, 2, "Help");
+        row_print(DISPLAY_ROW + 1, 2, "Help");
         # ifdef CG100
-        row_print(10, 12, "[CATALOG]");
+        row_print(DISPLAY_ROW + 1, 12, "[CATALOG]");
         # else
-        row_print(10, 12, "[SHIFT][4]");
+        row_print(DISPLAY_ROW + 1, 12, "[SHIFT][4]");
         # endif
         #endif
 
@@ -290,19 +306,30 @@ void express_menu()
                 ? C_RED : C_BLACK, C_WHITE, "%d", freq[i] / 1000);
         }
 
+        #if !defined CP400
+        if (!benchmark)
+        #endif
+        {
+            static const char *description[] = {"FLL", "PLL", "CPU", "SuperHyway", "Bus", "I/O"};
+            static const char *type[] = {"multiplier", "clock divider"};
+            row_print(DISPLAY_ROW + 3, 2, "%s %s", description[select], type[select >= SELECT_IFC]);
+            #if defined CP400
+            if (select == SELECT_FLL)
+                row_print(11, 27, "(Max x1023)");
+            else
+                row_print(11, 27, "(Max %d MHz)", settings[select + 1] / 1000000);
+            row_highlight(11);
+            #else
+            if (select == SELECT_FLL)
+                row_print(12, 35, "(Max x1023)");
+            else
+                row_print(12, 35, "(Max %d MHz)", settings[select + 1] / 1000000);
+            row_highlight(12);
+            #endif
+        }
+
         if (benchmark)
             run_benchmark();
-        else
-        {
-            static const char *description[] = {"FLL", "PLL", "CPU core", "SuperHyway", "Memory bus", "I/O bus"};
-            static const char *type[] = {"multiplier", "frequency ratio"};
-            row_print(12, 2, "%s %s", description[select], type[select >= SELECT_IFC]);
-            if (select == SELECT_FLL)
-                row_print(12, 34, "(Up to x1023)");
-            else
-                row_print(12, 34, "(Up to %d MHz)", settings[select + 1] / 1000000);
-            row_highlight(12);
-        }
 
         dupdate();
         key = getkey();

@@ -25,12 +25,12 @@ static int disable_bench_flag()
 void run_benchmark()
 {
     bench_flag = true;
-    timer_start(timer_configure(TIMER_TMU, 100000, GINT_CALL(disable_bench_flag)));
-    row_print(11, 2, "CPU: %d", tick_count(&bench_flag) / 100);
+    u32 benchmark_data[8] = {0};
     
+    timer_start(timer_configure(TIMER_TMU, 100000, GINT_CALL(disable_bench_flag)));
+    benchmark_data[0] = tick_count(&bench_flag) / 100;
     for (int i = 0; i < 3; i++)
     {
-        static const char *mem[] = {"ROM:", "RAM:", "I/O:"};
         #if defined CG50 || defined CG100 || defined CP400
         static const u32 address[] = {0xa0150000, 0xac150000, 0xa4150000};
         #else
@@ -38,28 +38,62 @@ void run_benchmark()
         #endif
         bench_flag = true;
         timer_start(timer_configure(TIMER_TMU, 50000, GINT_CALL(disable_bench_flag)));
-        row_print(11, 14 + i * 12, "%s %d", mem[i], mem_bench((u32 *)address[i], &bench_flag));
+        benchmark_data[i + 1] = mem_bench((u32 *)address[i], &bench_flag);
     }
-    row_highlight(11);
+
     #ifdef ENABLE_AZUR
-    const u32 time_azrp_update = prof_exec(azrp_update());
+    benchmark_data[5] = prof_exec(azrp_update());
     #endif
-    const u32 time_dupdate = prof_exec(dupdate());
-    row_print(12, 2, "dupd: %d us/%d FPS", time_dupdate, 1000000 / time_dupdate);
-    #ifdef ENABLE_AZUR
-    row_print(12, 26, "azrp: %d us/%d FPS", time_azrp_update, 1000000 / time_azrp_update);
-    #endif
-    row_highlight(12);
+    benchmark_data[4] = prof_exec(dupdate());
 
     #ifdef ENABLE_DHRY
-    const u32 time_dhrystone = prof_exec(dhrystone(DHRY_LOOP));
-    row_print(13, 2, "INT: %llu Dhrystone/s", DHRY_LOOP * 1000000ull / time_dhrystone);
+    benchmark_data[6] = prof_exec(dhrystone(DHRY_LOOP));
     #endif
 
     #ifdef ENABLE_WHET
-    const u32 time_whetstone = prof_exec(whetstone());
-    row_print(13, 26, "DBL: %d KWIPS", 100 * ITERATIONS * 1000000 / time_whetstone);
+    benchmark_data[7] = prof_exec(whetstone());
     #endif
     
-    row_highlight(13);
+    #if defined CP400
+    for (int i = 0; i < 4; i++)
+    {
+        static const char *score_name[] = {"CPU", "ROM", "RAM", "I/O"};
+        row_print(19 + i, 2, "%s %d", score_name[i], benchmark_data[i]);
+    }
+    row_print(23, 2, "dupdate: %d us/%d FPS", benchmark_data[4], 1000000 / benchmark_data[4]);
+    
+    # ifdef ENABLE_DHRY
+    row_print(24, 2, "INT: %llu Dhrystone/s", DHRY_LOOP * 1000000ull / benchmark_data[6]);
+    # endif
+
+    # ifdef ENABLE_WHET
+    row_print(25, 2, "DBL: %d KWIPS", 100 * ITERATIONS * 1000000 / benchmark_data[7]);
+    row_highlight(25);
+    # endif
+
+    for (int i = 0; i < 6; i++)
+        row_highlight(19 + i);
+    #else
+    for (int i = 0; i < 4; i++)
+    {
+        static const char *score_name[] = {"CPU", "ROM", "RAM", "I/O"};
+        row_print(11, 2 + i * 12, "%s %d", score_name[i], benchmark_data[i]);
+    }
+
+    row_print(12, 2, "dupd: %d us/%d FPS", benchmark_data[4], 1000000 / benchmark_data[4]);
+    # ifdef ENABLE_AZUR
+    row_print(12, 26, "azrp: %d us/%d FPS", benchmark_data[5], 1000000 / benchmark_data[5]);
+    # endif
+
+    # ifdef ENABLE_DHRY
+    row_print(13, 2, "INT: %llu Dhrystone/s", DHRY_LOOP * 1000000ull / benchmark_data[6]);
+    # endif
+
+    # ifdef ENABLE_WHET
+    row_print(13, 26, "DBL: %d KWIPS", 100 * ITERATIONS * 1000000 / benchmark_data[7]);
+    # endif
+
+    for (int i = 0; i < 3; i++)
+        row_highlight(11 + i);
+    #endif
 }

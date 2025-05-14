@@ -9,7 +9,14 @@
 #ifdef ENABLE_HELP
 static void help_info()
 {
-    #ifdef CG100
+    #if defined CP400
+    info_box(15, 7, "HELP");
+    row_print(16, 2, "[-][+]: -/+ option value");
+    row_print(17, 2, "[x]: Toggle BCR/WCR mode");
+    row_print(18, 2, "[UP][DOWN]: Select option");
+    row_print(19, 2, "[LEFT][RIGHT]: Select CSn area");
+    row_print(21, 2, "[Clear]: Close help / < Express menu");
+    #elif defined CG100
     info_box(3, 9, "HELP");
     row_print(4, 2, "[+]: Increase option value");
     row_print(5, 2, "[-]: Decrease option value");
@@ -17,7 +24,7 @@ static void help_info()
     row_print(7, 2, "[UP][DOWN]: Select option");
     row_print(8, 2, "[LEFT][RIGHT]: Select CSn area");
     row_print(9, 2, "[PGUP][PGDW]: Quick jump to previous/next row");
-    row_print(11, 2, "[BACK]: Close help / Return to express menu");
+    row_print(11, 2, "[BACK]: Close help / < Express menu");
     #else
     info_box(3, 9, "HELP");
     row_print(4, 2, "[F1][+]: Increase option value");
@@ -25,7 +32,7 @@ static void help_info()
     row_print(6, 2, "[F6]: Toggle BCR/WCR mode");
     row_print(7, 2, "[UP][DOWN]: Select option");
     row_print(8, 2, "[LEFT][RIGHT]: Select CSn area");
-    row_print(11, 2, "[EXIT]: Close help / Return to express menu");
+    row_print(11, 2, "[EXIT]: Close help / < Express menu");
     #endif
     dupdate();
     while (getkey().key != KEY_EXIT);
@@ -52,71 +59,57 @@ static void get_default_preset()
     cpg_set_overclock_setting(&s_current);
 }
 
-static void print_csnbcr(BSC_option select)
+static void print_csnxcr(int row, int x, u8 check, BSC_option select)
 {
     static const char *bcr_reg_name[] = {"IWW", "IWRWD", "IWRWS", "IWRRD", "IWRRS", 0};
-    static const u8 bcr_wait[] = {0, 1, 2, 4, 6, 8, 10, 12};
-    for (int CSn = 0; CSn < 8; CSn++)
-    {
-        const u32 bcr_lword = (&BSC.CS0BCR + CSn)->lword;
-        const u8 column = (CSn % 4) * 12;
-        const u8 row = (CSn >= SELECT_CS5A) * 7;
-        row_print(0 + row, 2 + column, "CS%sBCR", csn_name[CSn]);
-        row_print(1 + row, 2 + column, "%08X", bcr_lword);
-        print_options(2 + row, 1 + column, bcr_reg_name, CSn == select.CSn ? select.REG : -1);
-        for (int REG = 0; REG < 5; REG++)
-        {
-            const u8 mask = 28 - REG * 3;
-            const u8 value = (bcr_lword >> mask) & 0b111;
-            const u32 s_select = *(&s_default.CS0BCR + CSn - (CSn == SELECT_CS5A));
-            const i8 diff = value - ((s_select >> mask) & 0b111);
-            row_print_color(2 + row + REG, 9 + column,
-                CSn <= SELECT_CS5A && CSn != SELECT_CS4 && diff
-                ? diff > 0 ? C_BLUE : C_RED
-                : C_BLACK, C_WHITE, "%d", bcr_wait[value]);
-        }
-    }
-}
-
-static void print_csnwcr(BSC_option select)
-{
     static const char *csnwcr_reg_name[] = {"WW", "SW", "HW", "WR", 0};
-    static const u8 wr_wait[] = {0, 1, 2, 3, 4, 5, 6, 8, 10, 12, 14, 18, 24};
+    static const char *cs3wcr_reg_name[] = {"TRP", "TRCD", "A3CL", "TRWL", "TRC", 0};
+    static const int mode_name[] = {'B', 'W'};
 
-    for (int CSn = 0; CSn < 8; CSn++)
+    BSC_option read;
+    read.byte = check;
+    const u32 lword = (&BSC.CS0BCR + read.MODE * 8 + read.CSn)->lword;
+    row_print(row, x, "CS%s%cCR", csn_name[read.CSn], mode_name[read.MODE]);
+    row_print(row + 1, x, "%08X", lword);
+    print_options(row + 2, x - 1, read.MODE
+        ? (read.CSn == SELECT_CS3 ? cs3wcr_reg_name : csnwcr_reg_name)
+        : bcr_reg_name, (read.MODE == select.MODE && read.CSn == select.CSn) ? select.REG : -1);
+
+    const u8 REG_count = 5 - (read.MODE == SELECT_WCR && read.CSn != SELECT_CS3);
+    u8 mask, field, value;
+    char str[4];
+
+    for (int REG = 0; REG < REG_count; REG++)
     {
-        const u32 wcr_lword = (&BSC.CS0WCR + CSn)->lword;
-        const u8 column = (CSn % 4) * 12;
-        const u8 row = (CSn >= SELECT_CS5A) * 7;
-        const u8 highlight = CSn == select.CSn ? select.REG : -1;
-        const u32 s_select = *(&s_default.CS0WCR + CSn - (CSn == SELECT_CS5A));
-        row_print(0 + row, 2 + column, "CS%sWCR", csn_name[CSn]);
-        row_print(1 + row, 2 + column, "%08X", wcr_lword);
-        if (CSn == SELECT_CS3)
+        if (read.MODE == SELECT_BCR)
         {
-            static const char *cs3wcr_reg_name[] = {"TRP", "TRCD", "A3CL", "TRWL", "TRC", 0};
-            print_options(2, 25, cs3wcr_reg_name, highlight);
-            for (int REG = 0; REG < 5; REG++)
-            {
-                static const u8 trc_wait[4] = {3, 4, 6, 9};
-                const u8 mask = 13 - REG * 3 - (REG >= SELECT_TRWL);
-                const u8 value = (wcr_lword >> mask) & 0b11;
-                const i8 diff = value - ((s_select >> mask) & 0b11);
-                row_print_color(2 + REG, 32,
-                    diff > 0 ? C_BLUE : diff < 0 ? C_RED : C_BLACK, C_WHITE, "%d",
-                    REG == SELECT_TRC ? trc_wait[value] : value + (REG != SELECT_TRWL)
-                );
-            }
-            continue;
+            mask = 28 - REG * 3;
+            field = 0b111;
         }
-        print_options(2 + row, 1 + column, csnwcr_reg_name, highlight);
-        for (int REG = 0; REG < 4; REG++)
+        else if (read.CSn == SELECT_CS3)
         {
-            static const u8 mask[4] = {16, 11, 0, 7};
-            static const u8 field[4] = {0b111, 0b11, 0b11, 0b1111};
-            const u8 value = (wcr_lword >> mask[REG]) & field[REG];
-            const i8 diff = value - ((s_select >> mask[REG]) & field[REG]);
-            char str[4];
+            mask = 13 - REG * 3 - (REG >= SELECT_TRWL);
+            field = 0b11;
+        }
+        else
+        {
+            static const u8 csnwcr_mask[4] = {16, 11, 0, 7};
+            static const u8 csnwcr_field[4] = {0b111, 0b11, 0b11, 0b1111};
+            mask = csnwcr_mask[REG];
+            field = csnwcr_field[REG];
+        }
+        value = (lword >> mask) & field;
+        const u32 s_select = *(&s_default.CS0BCR + read.MODE * 4 + read.CSn - (read.CSn == SELECT_CS5A));
+        const i8 diff = value - ((s_select >> mask) & field);
+        if (read.MODE == SELECT_BCR)
+        {
+            static const u8 bcr_wait[] = {0, 1, 2, 4, 6, 8, 10, 12};
+            sprintf(str, "%d", bcr_wait[value]);
+        }
+        else if (read.CSn == SELECT_CS3)
+            sprintf(str, "%d", REG == SELECT_TRC ? TRC_equivalent(value) : value + (REG != SELECT_TRWL));
+        else
+        {
             if (REG == SELECT_WW)
             {
                 if (value)
@@ -125,14 +118,17 @@ static void print_csnwcr(BSC_option select)
                     sprintf(str, "=WR");
             }
             else if (REG == SELECT_WR)
+            {
+                static const u8 wr_wait[] = {0, 1, 2, 3, 4, 5, 6, 8, 10, 12, 14, 18, 24};
                 sprintf(str, "%d", wr_wait[value]);
+            }
             else
                 sprintf(str, "%d.5", value);
-            row_print_color(2 + row + REG, 7 + column,
-                CSn <= SELECT_CS5A && CSn != SELECT_CS4 && diff
-                ? diff > 0 ? C_BLUE : C_RED
-                : C_BLACK, C_WHITE, str);
         }
+        row_print_color(row + 2 + REG, x + 6 - read.MODE,
+            read.CSn <= SELECT_CS5A && read.CSn != SELECT_CS4 && diff
+            ? diff > 0 ? C_BLUE : C_RED
+            : C_BLACK, C_WHITE, str);
     }
 }
 
@@ -220,13 +216,27 @@ void bsc_menu()
     {
         dclear(C_WHITE);
 
-        if (select.MODE == SELECT_BCR)
-            print_csnbcr(select);
-        else
-            print_csnwcr(select);
-
+        #if defined CP400
+        row_title("Bus State Controller");
+        row_print(2, 11, "Bus Control Register");
+        row_print(19, 11, "Wait Control Register");
+        for (int i = 0; i < 8; i++)
+        {
+            const u8 shift = (i >= SELECT_CS5A) * 7;
+            print_csnxcr(4 + shift, 2 + (i % 4) * 10, (SELECT_BCR << 6) | (i << 3), select);
+            print_csnxcr(21 + shift, 2 + (i % 4) * 10, (SELECT_WCR << 6) | (i << 3), select);
+        }
+        for (int i = 0; i < 6; i++)
+        {
+            static const u8 highlight_row[6] = {2, 4, 11, 19, 21, 28};
+            row_highlight(highlight_row[i]);
+        }
+        #else
+        for (int i = 0; i < 8; i++)
+            print_csnxcr((i >= SELECT_CSd5A) * 7, 2 + (i % 4) * 12, (select.MODE << 6) | (i << 3), select);
         row_highlight(0);
         row_highlight(7);
+        #endif
 
         #ifndef CP400
         #if !defined CG100
@@ -252,14 +262,14 @@ void bsc_menu()
 
         switch (key.key)
         {
-            #ifndef CG100
+            #if !defined CG100 && !defined CP400
             case KEY_F1:
             #endif
             case KEY_PLUS:
                 bsc_modify(select, 1);
                 break;
             
-            #ifndef CG100
+            #if !defined CG100 && !defined CP400
             case KEY_F2:
             #endif
             case KEY_MINUS:

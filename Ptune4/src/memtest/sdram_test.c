@@ -14,9 +14,8 @@ u32 raW_TRC[4] = {raW_TRC_3, raW_TRC_4, raW_TRC_6, raW_TRC_9};
 
 static void print_SDRAM_speed(u32 Bphi_f, u8 TRC)
 {
-    static const int trc_wait[4] = {3, 4, 6, 9};
     row_clear(2 + TRC);
-    row_print(2 + TRC, 25, "TRC_%d", trc_wait[TRC]);
+    row_print(2 + TRC, 25, "TRC_%d", TRC_equivalent(TRC));
     row_print(2 + TRC, 35, "%d KHz", Bphi_f / 1000);
 }
 

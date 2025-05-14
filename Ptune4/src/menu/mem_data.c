@@ -12,20 +12,27 @@
 #ifdef ENABLE_HELP
 static void help_info()
 {
-    #ifdef CG100
+    #if defined CP400
+    info_box(15, 7, "HELP");
+    row_print(16, 2, "[=]: Reset to default");
+    row_print(17, 2, "[x]: Toggle margin view");
+    row_print(18, 2, "[y]: ROM read test");
+    row_print(19, 2, "[z]: SDRAM write test");
+    row_print(21, 2, "[Clear]: Close help / < Express menu");
+    #elif defined CG100
     info_box(4, 7, "HELP");
     row_print(5, 2, "[ON]: Reset to default");
     row_print(6, 2, "[|<-]: Toggle margin view");
     row_print(7, 2, "[->|]: ROM read test");
     row_print(8, 2, "[PGUP]: SDRAM write test");
-    row_print(10, 2, "[BACK]: Close help / Return to express menu");
+    row_print(10, 2, "[BACK]: Close help / < Express menu");
     #elif defined CG50
     info_box(4, 7, "HELP");
     row_print(5, 2, "[F1]: Reset to default");
     row_print(6, 2, "[F3]: Toggle margin view");
     row_print(7, 2, "[F5]: ROM read test");
     row_print(8, 2, "[F6]: SDRAM write test");
-    row_print(10, 2, "[EXIT]: Close help / Return to express menu");
+    row_print(10, 2, "[EXIT]: Close help / < Express menu");
     #else
     info_box(3, 9, "HELP");
     row_print(4, 2, "[F1]: Reset to default");
@@ -33,7 +40,7 @@ static void help_info()
     row_print(6, 2, "[F3]: Toggle margin view");
     row_print(7, 2, "[F5]: ROM read test");
     row_print(8, 2, "[F6]: SRAM read/write test");
-    row_print(11, 2, "[EXIT]: Close help / Return to express menu");
+    row_print(11, 2, "[EXIT]: Close help / < Express menu");
     #endif
     dupdate();
     while (getkey().key != KEY_EXIT);
@@ -68,7 +75,11 @@ void mem_data_menu()
         dclear(C_WHITE);
         row_title("Memory data");
         row_print(1, 1, "ROM Margin: %d%%", ROM_MARGIN);
+        #if defined CP400
+        row_print(13, 1, "RAM Margin: %d%%", RAM_MARGIN);
+        #else
         row_print(1, 25, "RAM Margin: %d%%", RAM_MARGIN);
+        #endif
         for (int i = 0; i < 10; i++)
         {
             static const u8 mem_wait[] = {0, 1, 2, 3, 4, 5, 6, 8, 10, 12};
@@ -77,11 +88,18 @@ void mem_data_menu()
                 ? roR[i] / 100 * (100 - ROM_MARGIN) / 1000
                 : roR[i] / 1000);
         }
-        #if defined CG50 || defined CG100 || defined CP400
+        #if defined CP400
         for (int i = 0; i < 4; i++)
         {
-            static const u8 trc_wait[] = {3, 4, 6, 9};
-            row_print(i + 2, 25, "TRC_%d", trc_wait[i]);
+            row_print(i + 14, 1, "TRC_%d", TRC_equivalent(i));
+            row_print_color(i + 14, 11, margin ? C_BLUE : C_BLACK, C_WHITE, "%d KHz", margin
+                ? raW_TRC[i] / 100 * (100 - RAM_MARGIN) / 1000
+                : raW_TRC[i] / 1000);
+        }
+        #elif defined CG50 || defined CG100
+        for (int i = 0; i < 4; i++)
+        {
+            row_print(i + 2, 25, "TRC_%d", TRC_equivalent(i));
             row_print_color(i + 2, 35, margin ? C_BLUE : C_BLACK, C_WHITE, "%d KHz", margin
                 ? raW_TRC[i] / 100 * (100 - RAM_MARGIN) / 1000
                 : raW_TRC[i] / 1000);
@@ -154,7 +172,21 @@ void mem_data_menu()
                 break;
             
             case KEY_MEMDATA_RAMTEST:
-                #if defined CG50 || defined CG100 || defined CP400
+                #if defined CP400
+                warning_box(15, 8);
+                row_print_color(16, 2, C_RED, C_WHITE,
+                    "SDRAM test may cause system errors!");
+                row_print_color(17, 2, C_RED, C_WHITE,
+                    "It is highly recommended to press the");
+                row_print_color(18, 2, C_RED, C_WHITE,
+                    "RESTART button after this test is");
+                row_print_color(19, 2, C_RED, C_WHITE,
+                    "finished.");
+                row_print(21, 2,
+                    "Are you sure you want to continue?");
+                if (yes_no(22))
+                    sdram_test();
+                #elif defined CG50 || defined CG100
                 warning_box(5, 6);
                 row_print_color(6, 2, C_RED, C_WHITE,
                     "SDRAM test may cause system errors!");
