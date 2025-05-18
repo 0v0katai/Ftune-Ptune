@@ -82,8 +82,7 @@ void mem_data_menu()
         #endif
         for (int i = 0; i < 10; i++)
         {
-            static const u8 mem_wait[] = {0, 1, 2, 3, 4, 5, 6, 8, 10, 12};
-            row_print(i + 2, 1, "roR_%d", mem_wait[i]);
+            row_print(i + 2, 1, "roR_%d", WR_equivalent(i));
             row_print_color(i + 2, 11, margin ? C_BLUE : C_BLACK, C_WHITE, "%d KHz", margin
                 ? roR[i] / 100 * (100 - ROM_MARGIN) / 1000
                 : roR[i] / 1000);

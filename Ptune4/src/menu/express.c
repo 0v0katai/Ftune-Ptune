@@ -222,7 +222,6 @@ void express_menu()
     bool benchmark = false;
     bool update = false;
     static const char *option[] = {"FLL:", "PLL:", "IFC:", "SFC:", "BFC:", "PFC:", 0};
-    static const u8 mem_wait[] = {0, 1, 2, 3, 4, 5, 6, 8, 10, 12, 14, 18, 24};
 
     do
     {
@@ -255,9 +254,9 @@ void express_menu()
 
         print_options(1, 1, option, select);
         row_print_color(3, 11, C_WHITE, f.Iphi_f > IFC_RED_ZONE ? C_RED : C_BLUE, "CPU");
-        row_print_color(4, 11, C_WHITE, C_BLACK, "roR %d", mem_wait[BSC.CS0WCR.WR]);
+        row_print_color(4, 11, C_WHITE, C_BLACK, "roR %d", WR_equivalent(BSC.CS0WCR.WR));
         #if defined CG20
-        row_print_color(5, 11, C_WHITE, C_BLACK, "raR %d", mem_wait[BSC.CS2WCR.WR]);
+        row_print_color(5, 11, C_WHITE, C_BLACK, "raR %d", WR_equivalent(BSC.CS2WCR.WR));
         if (BSC.CS2WCR.WW)
             row_print_color(6, 11, C_WHITE, C_BLACK, "raW %d", BSC.CS2WCR.WW - 1);
         else

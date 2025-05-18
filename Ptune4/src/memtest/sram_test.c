@@ -69,10 +69,9 @@ static void ram_read_test()
             BSC.CS2WCR.WR = i;
             if (read_address(FLF, RAM_read_area))
                 break;
-            static const u8 mem_wait[] = {0, 1, 2, 3, 4, 5, 6, 8};
             const u32 Bphi_f = clock_freq()->Bphi_f;
             row_clear(2 + i);
-            row_print(2 + i, 25, "raR_%d", mem_wait[i]);
+            row_print(2 + i, 25, "raR_%d", WR_equivalent(i));
             row_print(2 + i, 35, "%d KHz", Bphi_f / 1000);
             raR[i] = Bphi_f;
             dupdate();

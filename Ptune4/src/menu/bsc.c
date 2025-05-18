@@ -102,10 +102,7 @@ static void print_csnxcr(int row, int x, u8 check, BSC_option select)
         const u32 s_select = *(&s_default.CS0BCR + read.MODE * 4 + read.CSn - (read.CSn == SELECT_CS5A));
         const i8 diff = value - ((s_select >> mask) & field);
         if (read.MODE == SELECT_BCR)
-        {
-            static const u8 bcr_wait[] = {0, 1, 2, 4, 6, 8, 10, 12};
-            sprintf(str, "%d", bcr_wait[value]);
-        }
+            sprintf(str, "%d", BCR_equivalent(value));
         else if (read.CSn == SELECT_CS3)
             sprintf(str, "%d", REG == SELECT_TRC ? TRC_equivalent(value) : value + (REG != SELECT_TRWL));
         else
@@ -118,10 +115,7 @@ static void print_csnxcr(int row, int x, u8 check, BSC_option select)
                     sprintf(str, "=WR");
             }
             else if (REG == SELECT_WR)
-            {
-                static const u8 wr_wait[] = {0, 1, 2, 3, 4, 5, 6, 8, 10, 12, 14, 18, 24};
-                sprintf(str, "%d", wr_wait[value]);
-            }
+                sprintf(str, "%d", WR_equivalent(value));
             else
                 sprintf(str, "%d.5", value);
         }

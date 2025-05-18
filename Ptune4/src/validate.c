@@ -64,6 +64,18 @@ unsigned int best_ram_write(i32 Bphi_f)
 }
 #endif
 
+int BCR_equivalent(u8 reg_value)
+{
+    static const u8 bcr_wait[] = {0, 1, 2, 4, 6, 8, 10, 12};
+    return bcr_wait[reg_value];
+}
+
+int WR_equivalent(u8 reg_value)
+{
+    static const u8 wr_wait[] = {0, 1, 2, 3, 4, 5, 6, 8, 10, 12, 14, 18, 24};
+    return wr_wait[reg_value];
+}
+
 bool auto_up_PFC()
 {
     cpg_compute_freq();

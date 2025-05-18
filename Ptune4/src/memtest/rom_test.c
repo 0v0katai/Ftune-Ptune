@@ -72,10 +72,9 @@ static void rom_read_test()
             BSC.CS0WCR.WR = i;
             if (read_address(FLF, ROM_read_area))
                 break;
-            static const u8 mem_wait[] = {0, 1, 2, 3, 4, 5, 6, 8, 10, 12};
             const u32 Bphi_f = clock_freq()->Bphi_f;
             row_clear(2 + i);
-            row_print(2 + i, 1, "roR_%d", mem_wait[i]);
+            row_print(2 + i, 1, "roR_%d", WR_equivalent(i));
             row_print(2 + i, 11, "%d KHz", Bphi_f / 1000);
             roR[i] = Bphi_f;
             dupdate();
