@@ -233,7 +233,7 @@ void bsc_menu()
         }
         #else
         for (int i = 0; i < 8; i++)
-            print_csnxcr((i >= SELECT_CSd5A) * 7, 2 + (i % 4) * 12, (select.MODE << 6) | (i << 3), select);
+            print_csnxcr((i >= SELECT_CS5A) * 7, 2 + (i % 4) * 12, (select.MODE << 6) | (i << 3), select);
         row_highlight(0);
         row_highlight(7);
         #endif
