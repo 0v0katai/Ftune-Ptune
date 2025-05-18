@@ -50,7 +50,7 @@ enum roR_default_table
 #endif
 enum raW_TRC_default_table
 {
-    raW_TRC_3 =  50 * 1000000, raW_TRC_4 = 100 * 1000000,
+    raW_TRC_3 =  50 * 1000000, raW_TRC_4 = 80 * 1000000,
     raW_TRC_6 = 120 * 1000000, raW_TRC_9 = 130 * 1000000
 };
 
