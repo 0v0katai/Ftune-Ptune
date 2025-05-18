@@ -31,7 +31,7 @@ static void ram_write_test()
     s.FRQCR = (PLL(24) << 24) + (IFC << 20) + (SFC << 12) + (BFC << 8) + PFC;
     cpg_set_overclock_setting(&s);
     
-    int FLF_max = 300;
+    int FLF_max = 600;
     for (int TRC = 0; TRC <= 3; TRC++)
     {
         for (int FLF = FLF_max; FLF < 2048; FLF += 2)
