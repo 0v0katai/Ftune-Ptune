@@ -93,6 +93,9 @@
 #else
 # define PFC_CLK_MAX_DEF  24 * 1000000
 #endif
+#define UNLOCKED_MODE_DEF false
+#define AUTO_REDUCE_WAIT_DEF true
+#define AUTO_UP_PFC_DEF true
 
 #define ROM_MARGIN_MAX 15
 #define RAM_MARGIN_MAX 15

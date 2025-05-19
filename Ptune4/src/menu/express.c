@@ -228,7 +228,7 @@ void express_menu()
         static struct cpg_overclock_setting s;
         cpg_get_overclock_setting(&s);
         cpg_set_overclock_setting(&s);
-        if (update)
+        if (update && AUTO_REDUCE_WAIT)
             BSC.CS0WCR.WR = best_rom_wait(clock_freq()->Bphi_f);
 
         u8 current_preset = clock_get_speed();
@@ -468,7 +468,7 @@ void express_menu()
                         break;
                     const i32 fs[4] = {f.Iphi_f, f.Sphi_f, f.Bphi_f, f.Pphi_f};
                     const i32 limit[4] = {CPU_CLK_MAX, SHW_CLK_MAX, BUS_CLK_MAX, IO_CLK_MAX};
-                    if ((fs[check] << 1) > limit[check])
+                    if (!UNLOCKED_MODE && (fs[check] << 1) > limit[check])
                         break;
                     for (int i = check - 1; i >= 0; i--)
                         if (divs[check] == divs[i])
@@ -495,10 +495,16 @@ void express_menu()
             if (new_CS0WCR_WR > BSC.CS0WCR.WR)
                 BSC.CS0WCR.WR = new_CS0WCR_WR;
             #if defined CG50 || defined CG100 || defined CP400
-            BSC.CS3WCR.TRC = best_TRC(Bphi_f);
+            const u8 new_CS3WCR_TRC = best_TRC(Bphi_f);
+            if (new_CS3WCR_TRC > BSC.CS3WCR.TRC || AUTO_REDUCE_WAIT)
+                BSC.CS3WCR.TRC = new_CS3WCR_TRC;
             #else
-            BSC.CS2WCR.WR = best_ram_read(Bphi_f);
-            BSC.CS2WCR.WW = best_ram_write(Bphi_f);
+            const u8 new_CS2WCR_WR = best_ram_read(Bphi_f);
+            const u8 new_CS2WCR_WW = best_ram_write(Bphi_f);
+            if (new_CS2WCR_WR > BSC.CS2WCR.WR || AUTO_REDUCE_WAIT)
+                BSC.CS2WCR.WR = new_CS2WCR_WR;
+            if (new_CS2WCR_WW > BSC.CS2WCR.WW || AUTO_REDUCE_WAIT)
+                BSC.CS2WCR.WW = new_CS2WCR_WW;
             #endif
         }
     } while (key.key != KEY_EXIT);

@@ -16,9 +16,9 @@ bool exceed_limit()
 {
     cpg_compute_freq();
     const clock_frequency_t *freq = clock_freq();
-    return (freq->FLL * freq->PLL * 32768 > PLL_CLK_MAX) ||
-           (freq->Iphi_f > CPU_CLK_MAX) || (freq->Sphi_f > SHW_CLK_MAX) ||
-           (freq->Bphi_f > BUS_CLK_MAX) || (freq->Pphi_f > IO_CLK_MAX && freq->Pphi_div == 64);
+    return !UNLOCKED_MODE && (freq->FLL * freq->PLL * 32768 > PLL_CLK_MAX ||
+           freq->Iphi_f > CPU_CLK_MAX || freq->Sphi_f > SHW_CLK_MAX ||
+           freq->Bphi_f > BUS_CLK_MAX || (freq->Pphi_f > IO_CLK_MAX && freq->Pphi_div == 64));
 }
 
 unsigned int best_rom_wait(i32 Bphi_f)
@@ -80,16 +80,12 @@ bool auto_up_PFC()
 {
     cpg_compute_freq();
     const clock_frequency_t *freq = clock_freq();
-    if (freq->Pphi_f << 1 >= IO_CLK_MAX || freq->Pphi_div == freq->Bphi_div)
-        return false;
-    return true;
+    return AUTO_UP_PFC && freq->Pphi_f << 1 < IO_CLK_MAX && freq->Pphi_div != freq->Bphi_div;
 }
 
 bool auto_down_PFC()
 {
     cpg_compute_freq();
     const clock_frequency_t *freq = clock_freq();
-    if (freq->Pphi_f < IO_CLK_MAX || freq->Pphi_div == 64)
-        return false;
-    return true;
+    return !UNLOCKED_MODE && freq->Pphi_f > IO_CLK_MAX && freq->Pphi_div != 64;
 }

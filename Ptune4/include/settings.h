@@ -16,3 +16,6 @@ extern i32 settings[];
 #define SHW_CLK_MAX settings[4]
 #define BUS_CLK_MAX settings[5]
 #define IO_CLK_MAX settings[6]
+#define UNLOCKED_MODE settings[7]
+#define AUTO_REDUCE_WAIT settings[8]
+#define AUTO_UP_PFC settings[9]

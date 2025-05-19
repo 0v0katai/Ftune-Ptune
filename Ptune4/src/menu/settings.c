@@ -42,14 +42,18 @@ static void help_info()
 #endif
 
 i32 settings[] =
-    {
-        ROM_MARGIN_DEF,
-        RAM_MARGIN_DEF,
-        PLL_CLK_MAX_DEF,
-        IFC_CLK_MAX_DEF,
-        SFC_CLK_MAX_DEF,
-        BFC_CLK_MAX_DEF,
-        PFC_CLK_MAX_DEF};
+{
+    ROM_MARGIN_DEF,
+    RAM_MARGIN_DEF,
+    PLL_CLK_MAX_DEF,
+    IFC_CLK_MAX_DEF,
+    SFC_CLK_MAX_DEF,
+    BFC_CLK_MAX_DEF,
+    PFC_CLK_MAX_DEF,
+    UNLOCKED_MODE_DEF,
+    AUTO_REDUCE_WAIT_DEF,
+    AUTO_UP_PFC_DEF
+};
 
 enum select_option
 {
@@ -59,7 +63,10 @@ enum select_option
     SELECT_IFC,
     SELECT_SFC,
     SELECT_BFC,
-    SELECT_PFC
+    SELECT_PFC,
+    SELECT_UNLOCKED_MODE,
+    SELECT_AUTO_REDUCE_WAIT,
+    SELECT_AUTO_UP_PFC
 };
 
 static void about()
@@ -87,12 +94,15 @@ void settings_menu()
     key_event_t key;
     i8 select = 0;
     static const char *option[] = {"PLL", "CPU", "SHW", "Bus", "I/O"};
+    static const char *off_on[] = {"Off", "On"};
     static const i32 settings_def[] =
-        {ROM_MARGIN_DEF, RAM_MARGIN_DEF, PLL_CLK_MAX_DEF, IFC_CLK_MAX_DEF, SFC_CLK_MAX_DEF, BFC_CLK_MAX_DEF, PFC_CLK_MAX_DEF};
+        {ROM_MARGIN_DEF, RAM_MARGIN_DEF, PLL_CLK_MAX_DEF,
+         IFC_CLK_MAX_DEF, SFC_CLK_MAX_DEF, BFC_CLK_MAX_DEF,
+         PFC_CLK_MAX_DEF, false, true, true};
     static const i32 settings_max[] =
-        {ROM_MARGIN_MAX, RAM_MARGIN_MAX, PLL_MAX, CPU_MAX, SHW_MAX, BUS_MAX, IO_MAX};
+        {ROM_MARGIN_MAX, RAM_MARGIN_MAX, PLL_MAX, CPU_MAX, SHW_MAX, BUS_MAX, IO_MAX, true, true, true};
 
-    static const i8 select_max = SELECT_PFC + 1;
+    static const i8 select_max = SELECT_AUTO_UP_PFC + 1;
 
     #ifdef ENABLE_HELP
     set_help_function(help_info);
@@ -112,14 +122,22 @@ void settings_menu()
             row_print(i + 3, 25, "%d", settings[i + 2] / 1000);
             row_print(i + 3, 33, "KHz");
         }
+        row_print(8, 1, "Unlocked mode");
+        row_print(9, 1, "Auto Reduce Wait");
+        row_print(10, 1, "Auto Up PFC");
+        for (int i = 0; i < 3; i++)
+            row_print(8 + i, 25, off_on[settings[7 + i]]);
 
         row_highlight(select + 1);
 
         #ifndef CP400
         fkey_action(1, "Reset");
         # ifndef CG100
-        fkey_action(2, "+");
-        fkey_action(3, "-");
+        if (select <= SELECT_PFC)
+        {
+            fkey_action(2, "+");
+            fkey_action(3, "-");
+        }
         # endif
         fkey_button(6, "About");
         #endif
