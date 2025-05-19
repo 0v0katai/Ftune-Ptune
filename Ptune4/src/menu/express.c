@@ -215,6 +215,16 @@ static void print_express_cpg_bsc(struct cpg_overclock_setting s)
     #endif
 }
 
+#if defined CP400
+# define KEY_DISPLAY_ROW 8
+# define WAIT_DISPLAY_X 13
+# define SPEED_DISPLAY_X 21
+#else
+# define KEY_DISPLAY_ROW 9
+# define WAIT_DISPLAY_X 11
+# define SPEED_DISPLAY_X 17
+#endif
+
 void express_menu()
 {
     key_event_t key;
@@ -253,44 +263,38 @@ void express_menu()
         row_print(6, 7, "1/%d", f.Pphi_div);
 
         print_options(1, 1, option, select);
-        row_print_color(3, 11, C_WHITE, f.Iphi_f > IFC_RED_ZONE ? C_RED : C_BLUE, "CPU");
-        row_print_color(4, 11, C_WHITE, C_BLACK, "roR %d", WR_equivalent(BSC.CS0WCR.WR));
+        row_print_color(3, WAIT_DISPLAY_X, C_WHITE, f.Iphi_f > IFC_RED_ZONE ? C_RED : C_BLUE, "CPU");
+        row_print_color(4, WAIT_DISPLAY_X, C_WHITE, C_BLACK, "roR %d", WR_equivalent(BSC.CS0WCR.WR));
         #if defined CG20
-        row_print_color(5, 11, C_WHITE, C_BLACK, "raR %d", WR_equivalent(BSC.CS2WCR.WR));
+        row_print_color(5, WAIT_DISPLAY_X, C_WHITE, C_BLACK, "raR %d", WR_equivalent(BSC.CS2WCR.WR));
         if (BSC.CS2WCR.WW)
-            row_print_color(6, 11, C_WHITE, C_BLACK, "raW %d", BSC.CS2WCR.WW - 1);
+            row_print_color(6, WAIT_DISPLAY_X, C_WHITE, C_BLACK, "raW %d", BSC.CS2WCR.WW - 1);
         else
-            row_print_color(6, 11, C_WHITE, C_BLACK, "raW =R");
+            row_print_color(6, WAIT_DISPLAY_X, C_WHITE, C_BLACK, "raW =R");
         #elif defined CG50 || defined CG100 || defined CP400
-        row_print_color(5, 11, C_WHITE, C_BLACK, "CL %d", BSC.CS3WCR.A3CL + 1);
-        row_print_color(6, 11, C_WHITE, C_BLACK, "TRC %d", TRC_equivalent(BSC.CS3WCR.TRC));
-        #endif
-
-        #if defined CP400
-        # define DISPLAY_ROW 8
-        #else
-        # define DISPLAY_ROW 9
+        row_print_color(5, WAIT_DISPLAY_X, C_WHITE, C_BLACK, "CL %d", BSC.CS3WCR.A3CL + 1);
+        row_print_color(6, WAIT_DISPLAY_X, C_WHITE, C_BLACK, "TRC %d", TRC_equivalent(BSC.CS3WCR.TRC));
         #endif
 
         #ifdef ENABLE_USB
         if (usb_is_open())
-            row_print(DISPLAY_ROW, 2, "Capture");
+            row_print(KEY_DISPLAY_ROW, 2, "Capture");
         else
-            row_print(DISPLAY_ROW, 2, "Open USB");
+            row_print(KEY_DISPLAY_ROW, 2, "Open USB");
 
         # ifdef CG100
-        row_print(DISPLAY_ROW, 12, "[SHIFT][x10^]");
+        row_print(KEY_DISPLAY_ROW, 12, "[SHIFT][x10^]");
         # else
-        row_print(DISPLAY_ROW, 12, "[SHIFT][7]");
+        row_print(KEY_DISPLAY_ROW, 12, "[SHIFT][7]");
         # endif
         #endif
 
         #ifdef ENABLE_HELP
-        row_print(DISPLAY_ROW + 1, 2, "Help");
+        row_print(KEY_DISPLAY_ROW + 1, 2, "Help");
         # ifdef CG100
-        row_print(DISPLAY_ROW + 1, 12, "[CATALOG]");
+        row_print(KEY_DISPLAY_ROW + 1, 12, "[CATALOG]");
         # else
-        row_print(DISPLAY_ROW + 1, 12, "[SHIFT][4]");
+        row_print(KEY_DISPLAY_ROW + 1, 12, "[SHIFT][4]");
         # endif
         #endif
 
@@ -300,9 +304,9 @@ void express_menu()
             {FLL_RED_ZONE, PLL_RED_ZONE, IFC_RED_ZONE, SFC_RED_ZONE, BFC_RED_ZONE, PFC_RED_ZONE};
         for (int i = 0; i < 6; i++)
         {
-            row_print(i + 1, 24, "KHz");
-            row_print_color(i + 1, 17, freq[i] > red_zone[i]
+            row_print_color(i + 1, SPEED_DISPLAY_X, freq[i] > red_zone[i]
                 ? C_RED : C_BLACK, C_WHITE, "%d", freq[i] / 1000);
+            row_print(i + 1, SPEED_DISPLAY_X + 7, "KHz");
         }
 
         #if !defined CP400
@@ -311,7 +315,7 @@ void express_menu()
         {
             static const char *description[] = {"FLL", "PLL", "CPU", "SuperHyway", "Bus", "I/O"};
             static const char *type[] = {"multiplier", "clock divider"};
-            row_print(DISPLAY_ROW + 3, 2, "%s %s", description[select], type[select >= SELECT_IFC]);
+            row_print(KEY_DISPLAY_ROW + 3, 2, "%s %s", description[select], type[select >= SELECT_IFC]);
             #if defined CP400
             if (select == SELECT_FLL)
                 row_print(11, 27, "(Max x1023)");

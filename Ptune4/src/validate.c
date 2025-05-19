@@ -39,11 +39,6 @@ unsigned int best_TRC(i32 Bphi_f)
             break;
     return i + 1;
 }
-
-int TRC_equivalent(u8 reg_value)
-{
-    return (reg_value * (reg_value + 1) + 6) / 2;
-}
 #else
 unsigned int best_ram_read(i32 Bphi_f)
 {
@@ -74,6 +69,11 @@ int WR_equivalent(u8 reg_value)
 {
     static const u8 wr_wait[] = {0, 1, 2, 3, 4, 5, 6, 8, 10, 12, 14, 18, 24};
     return wr_wait[reg_value];
+}
+
+int TRC_equivalent(u8 reg_value)
+{
+    return (reg_value * (reg_value + 1) + 6) / 2;
 }
 
 bool auto_up_PFC()
