@@ -11,6 +11,12 @@
 
 #define ROM_WAIT(CS0WCR) (((CS0WCR) >> 7) & 0b1111)
 
+#if defined CP400
+# define SELECT_DISPLAY_ROW 36
+#else
+# define SELECT_DISPLAY_ROW 14
+#endif
+
 i32 roR[] =
     { roR_0, roR_1, roR_2, roR_3, roR_4,
       roR_5, roR_6, roR_8, roR_10, roR_12,
@@ -18,8 +24,8 @@ i32 roR[] =
 
 static void print_RAM_read_select(u32 *ROM_read_area)
 {
-    row_clear(14);
-    row_print(14, 1, "ROM select: 0x%08X", ROM_read_area);
+    row_clear(SELECT_DISPLAY_ROW);
+    row_print(SELECT_DISPLAY_ROW, 1, "ROM select: 0x%08X", ROM_read_area);
 }
 
 static void rom_read_test()
@@ -55,7 +61,7 @@ static void rom_read_test()
             ROM_read_area = pointer;
         }
         print_RAM_read_select(ROM_read_area);
-        row_print_color(14, 25, C_RED, C_WHITE, "0x%08X", pointer);
+        row_print_color(SELECT_DISPLAY_ROW, 25, C_RED, C_WHITE, "0x%08X", pointer);
         dupdate();
         row_clear(14);
         pointer += 0x10000/4;
@@ -67,18 +73,19 @@ static void rom_read_test()
         static const u8 IFC = DIV_4, SFC = DIV_4, BFC = DIV_4, PFC = DIV_32;
         s.FRQCR = ((PLL(6) + i * 2) << 24) + (IFC << 20) + (SFC << 12) + (BFC << 8) + PFC;
         cpg_set_overclock_setting(&s);
+        u32 Bphi_f;
         for (int FLF = roR_default[i] / (PLL(6) + i * 2 + 1) / 4096; FLF < 2048; FLF += 2)
         {
             BSC.CS0WCR.WR = i;
             if (read_address(FLF, ROM_read_area))
                 break;
-            const u32 Bphi_f = clock_freq()->Bphi_f;
+            Bphi_f = clock_freq()->Bphi_f;
             row_clear(2 + i);
             row_print(2 + i, 1, "roR_%d", WR_equivalent(i));
             row_print(2 + i, 11, "%d KHz", Bphi_f / 1000);
-            roR[i] = Bphi_f;
             dupdate();
         }
+        roR[i] = Bphi_f;
     }
 
     /* Rough guess */
