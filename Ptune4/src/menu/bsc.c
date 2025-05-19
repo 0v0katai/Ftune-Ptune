@@ -165,7 +165,7 @@ void bsc_modify(BSC_option select, i8 modify)
                 modify_A3CL(check);
                 return;
             }
-            #if defined CG50 || defined CG100
+            #if defined CG50 || defined CG100 || defined CP400
             if (select.REG == SELECT_TRC)
                 min = best_TRC(Bphi_f);
             #endif
