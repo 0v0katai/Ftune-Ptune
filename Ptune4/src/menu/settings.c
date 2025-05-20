@@ -133,11 +133,8 @@ void settings_menu()
         #ifndef CP400
         fkey_action(1, "Reset");
         # ifndef CG100
-        if (select <= SELECT_PFC)
-        {
-            fkey_action(2, "+");
-            fkey_action(3, "-");
-        }
+        fkey_action(2, select <= SELECT_PFC ? "+" : "On");
+        fkey_action(3, select <= SELECT_PFC ? "-" : "Off");
         # endif
         fkey_button(6, "About");
         #endif

@@ -28,7 +28,7 @@ static void print_RAM_read_select(u32 *ROM_read_area)
     row_print(SELECT_DISPLAY_ROW, 1, "ROM select: 0x%08X", ROM_read_area);
 }
 
-static void rom_read_test()
+static void rom_read_test(mem_test_settings test_settings)
 {
     u32 *ROM_read_area = ROM_BASE;
     static const u32 roR_default[] =
@@ -70,8 +70,19 @@ static void rom_read_test()
     print_RAM_read_select(ROM_read_area);
     for (int i = WAIT_0; i <= WAIT_12; i++)
     {
+        if (i == WAIT_10 && !test_settings.roR_10_check)
+        {
+            roR[WAIT_10] = (roR[WAIT_8] * 2 - roR[WAIT_6]) / 100 * 99;
+            continue;
+        }
+        else if (i == WAIT_12 && !test_settings.roR_12_check)
+        {
+            roR[WAIT_12] = (roR[WAIT_10] * 2 - roR[WAIT_8]) / 100 * 99;
+            continue;
+        }
         static const u8 IFC = DIV_4, SFC = DIV_4, BFC = DIV_4, PFC = DIV_32;
         s.FRQCR = ((PLL(6) + i * 2) << 24) + (IFC << 20) + (SFC << 12) + (BFC << 8) + PFC;
+        s.CS0WCR = 0x000005C0;
         cpg_set_overclock_setting(&s);
         u32 Bphi_f;
         for (int FLF = roR_default[i] / (PLL(6) + i * 2 + 1) / 4096; FLF < 2048; FLF += 2)
@@ -93,13 +104,13 @@ static void rom_read_test()
     roR[WAIT_18] = (roR[WAIT_14] * 2 - roR[WAIT_10]) / 100 * 95;
 }
 
-void rom_test()
+void rom_test(mem_test_settings test_settings)
 {
     dclear(C_WHITE);
     row_title("ROM Test");
 
     struct cpg_overclock_setting s0;
     cpg_get_overclock_setting(&s0);
-    rom_read_test();
+    rom_read_test(test_settings);
     cpg_set_overclock_setting(&s0);
 }

@@ -29,7 +29,7 @@ static void print_SDRAM_speed(u32 Bphi_f, u8 TRC)
     row_print(TRC_DISPLAY_ROW + TRC, TRC_DISPLAY_X + 10, "%d KHz", Bphi_f / 1000);
 }
 
-static void ram_write_test()
+static void ram_write_test(bool TRC_3_check)
 {
     u32 temp[WRITE_N];
     u32 *write_area = NON_CACHE(temp);
@@ -44,7 +44,7 @@ static void ram_write_test()
     
     int FLF_max = 600;
     u32 Bphi_f;
-    for (int TRC = 0; TRC <= 3; TRC++)
+    for (int TRC = !TRC_3_check; TRC <= 3; TRC++)
     {
         for (int FLF = FLF_max; FLF < 2048; FLF += 2)
         {
@@ -80,14 +80,14 @@ static void ram_write_test()
     BUS_CLK_MAX = raW_TRC[3] / 100 * (100 - RAM_MARGIN);
 }
 
-void sdram_test()
+void sdram_test(bool TRC_3_check)
 {
     dclear(C_WHITE);
     row_title("SDRAM Test");
 
     struct cpg_overclock_setting s0;
     cpg_get_overclock_setting(&s0);
-    ram_write_test();
+    ram_write_test(TRC_3_check);
     cpg_set_overclock_setting(&s0);
 }
 #endif

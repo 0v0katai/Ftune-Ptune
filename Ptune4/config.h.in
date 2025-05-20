@@ -7,8 +7,8 @@
 // #define MONO_SH4A   /* All SH4A monochrome calculators */
 // #define CG20        /* fx-CG10, fx-CG20 */
 // #define CG50        /* fx-CG50, Graph 90+E */
-// #define CG100       /* fx-CG100, fx-1AU Graph, Graph Math+ */
-#define CP400       /* fx-CP400(+E), fx-CG500 */
+#define CG100       /* fx-CG100, fx-1AU Graph, Graph Math+ */
+// #define CP400       /* fx-CP400(+E), fx-CG500 */
 
 #if defined CP400
 # define VERSION "CPtune4 v@VERSTR@ (@@COMMIT_ID_SHORT@)"

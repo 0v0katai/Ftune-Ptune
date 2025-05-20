@@ -56,9 +56,15 @@ enum raW_TRC_default_table
 
 enum TEST_MODE {READ, WRITE};
 
+typedef byte_union(mem_test_settings,
+                   u8 : 5;
+                   bool TRC_3_check  : 1;
+                   bool roR_10_check : 1;
+                   bool roR_12_check : 1;);
+
 void sram_test();
-void sdram_test();
-void rom_test();
+void sdram_test(bool TRC_3_check);
+void rom_test(mem_test_settings test_settings);
 u32 *read_address(int FLF, volatile u32 *address);
 u32 *write_address(int FLF, volatile u32 *address);
 u32 *mem_read(volatile u32 *address, volatile u32 *FLLFRQ_lword, int FLF, int n);

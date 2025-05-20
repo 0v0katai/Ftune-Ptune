@@ -47,10 +47,21 @@ static void help_info()
 }
 #endif
 
+#if defined CP400
+# define RAM_DISPLAY_ROW 14
+# define OFFSET_X 1
+# define TEST_DISPLAY_ROW 20
+#else
+# define RAM_DISPLAY_ROW 2
+# define OFFSET_X 25
+# define TEST_DISPLAY_ROW 10
+#endif
+
 void mem_data_menu()
 {
     key_event_t key;
     bool margin = true;
+    mem_test_settings test_settings = {.byte = 0b111};
 
     static const i32 roR_default[] =
     {
@@ -87,19 +98,12 @@ void mem_data_menu()
                 ? roR[i] / 100 * (100 - ROM_MARGIN) / 1000
                 : roR[i] / 1000);
         }
-        #if defined CP400
+        #if defined CP400 || defined CG50 || defined CG100
         for (int i = 0; i < 4; i++)
         {
-            row_print(i + 14, 1, "TRC_%d", TRC_equivalent(i));
-            row_print_color(i + 14, 11, margin ? C_BLUE : C_BLACK, C_WHITE, "%d KHz", margin
-                ? raW_TRC[i] / 100 * (100 - RAM_MARGIN) / 1000
-                : raW_TRC[i] / 1000);
-        }
-        #elif defined CG50 || defined CG100
-        for (int i = 0; i < 4; i++)
-        {
-            row_print(i + 2, 25, "TRC_%d", TRC_equivalent(i));
-            row_print_color(i + 2, 35, margin ? C_BLUE : C_BLACK, C_WHITE, "%d KHz", margin
+            row_print(i + RAM_DISPLAY_ROW, OFFSET_X, "TRC_%d", TRC_equivalent(i));
+            row_print_color(i + RAM_DISPLAY_ROW, OFFSET_X + 10,
+                margin ? C_BLUE : C_BLACK, C_WHITE, "%d KHz", margin
                 ? raW_TRC[i] / 100 * (100 - RAM_MARGIN) / 1000
                 : raW_TRC[i] / 1000);
         }
@@ -107,7 +111,7 @@ void mem_data_menu()
         if (mode == READ)
             for (int i = WAIT_0; i <= WAIT_8; i++)
             {
-                row_print(i + 2, 25, "raR_%d", i == WAIT_8 ? 8 : i);
+                row_print(i + 2, 25, "raR_%d", WR_equivalent(i));
                 row_print_color(i + 2, 35, margin ? C_BLUE : C_BLACK, C_WHITE, "%d KHz", margin
                     ? raR[i] / 100 * (100 - RAM_MARGIN) / 1000
                     : raR[i] / 1000);
@@ -120,6 +124,22 @@ void mem_data_menu()
                     ? raW[i] / 100 * (100 - RAM_MARGIN) / 1000
                     : raW[i] / 1000);
             }
+        #endif
+
+        static const char *on_off[] = {"Off", "On"};
+        #if defined CP400 || defined CG50 || defined CG100
+        for (int i = 0; i < 3; i++)
+        {
+            static const char *test_settings_name[3] = {"TRC_3", "roR_10", "roR_12"};
+            row_print(TEST_DISPLAY_ROW - 1 + i, OFFSET_X, "%s Check [%d]", test_settings_name[i], i);
+            row_print_color(TEST_DISPLAY_ROW - 1 + i, OFFSET_X + 18, C_WHITE, C_BLACK, on_off[(test_settings.byte >> (2 - i)) & 0b1]);
+        }
+        #else
+        for (int i = 0; i < 2; i++)
+        {
+            row_print(TEST_DISPLAY_ROW, OFFSET_X, "roR_%d Check [%d]", i ? 12 : 10, i + 1);
+            row_print_color(TEST_DISPLAY_ROW - 1 + i, OFFSET_X + 18, C_WHITE, C_BLACK, on_off[(test_settings.byte >> (1 - i)) & 0b1]);
+        }
         #endif
 
         #ifndef CP400
@@ -162,12 +182,26 @@ void mem_data_menu()
                 break;
             #endif
 
+            case KEY_0:
+                test_settings.TRC_3_check = !test_settings.TRC_3_check;
+                break;
+            case KEY_1:
+                test_settings.roR_10_check = !test_settings.roR_10_check;
+                if (!test_settings.roR_10_check && test_settings.roR_12_check)
+                    test_settings.roR_12_check = false;
+                break;
+            case KEY_2:
+                test_settings.roR_12_check = !test_settings.roR_12_check;
+                if (!test_settings.roR_10_check && test_settings.roR_12_check)
+                    test_settings.roR_10_check = true;
+                break;
+
             case KEY_MEMDATA_MARGIN:
                 margin = !margin;
                 break;
 
             case KEY_MEMDATA_ROMTEST:
-                rom_test();
+                rom_test(test_settings);
                 break;
             
             case KEY_MEMDATA_RAMTEST:
@@ -184,7 +218,7 @@ void mem_data_menu()
                 row_print(21, 2,
                     "Are you sure you want to continue?");
                 if (yes_no(22))
-                    sdram_test();
+                    sdram_test(test_settings.TRC_3_check);
                 #elif defined CG50 || defined CG100
                 warning_box(5, 6);
                 row_print_color(6, 2, C_RED, C_WHITE,
@@ -196,7 +230,7 @@ void mem_data_menu()
                 row_print(9, 2,
                     "Are you sure you want to continue?");
                 if (yes_no(10))
-                    sdram_test();
+                    sdram_test(test_settings.TRC_3_check);
                 #else
                 sram_test();
                 #endif
