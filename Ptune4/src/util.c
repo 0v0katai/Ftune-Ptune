@@ -366,5 +366,10 @@ void set_help_function(help_function_t function)
 
 void call_help_function()
 {
+	extern bool help_status;
+	if (help_status)
+		return;
+	help_status = true;
 	help_function();
+	help_status = false;
 }

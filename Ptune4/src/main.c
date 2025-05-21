@@ -12,6 +12,8 @@
 #include "menu.h"
 #include "util.h"
 
+bool help_status = false;
+
 static bool global_getkey(key_event_t key)
 {
     #ifdef ENABLE_USB
@@ -32,7 +34,7 @@ static bool global_getkey(key_event_t key)
     # if !defined CG100
     if (key.shift)
     # endif
-    if (key.key == KEY_OPEN_HELP)
+    if (key.key == KEY_OPEN_HELP && !help_status)
         call_help_function();
     #endif
     return false;
