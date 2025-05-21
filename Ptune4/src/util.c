@@ -185,9 +185,9 @@ void tab_action(int start, int end, char const *format, ...)
 
 	int diff = end - start;
 	if (diff % 2)
-		dtext(4 + 65 * (start - 1) + 32 * diff + diff / 2 + ((w - width) >> 1), y + 3, C_BLACK, str);
+		dtext(4 + 65 * (start - 1) + 32 * diff + (diff >> 1) + ((w - width) >> 1), y + 3, C_BLACK, str);
 	else
-		dtext(4 + 65 * ((start + end) / 2 - 1) + ((w - width) >> 1), y + 3, C_BLACK, str);
+		dtext(4 + 65 * (((start + end) >> 1) - 1) + ((w - width) >> 1), y + 3, C_BLACK, str);
 }
 
 /* fkey_button(): A rectangular F-key */
@@ -226,9 +226,9 @@ void tab_menu(int start, int end, char const *format, ...)
 
 	int diff = end - start;
 	if (diff % 2)
-		dtext(4 + 65 * (start - 1) + 32 * diff + diff / 2 + ((w - width) >> 1), y + 3, C_WHITE, str);
+		dtext(4 + 65 * (start - 1) + 32 * diff + (diff >> 1) + ((w - width) >> 1), y + 3, C_WHITE, str);
 	else
-		dtext(4 + 65 * ((start + end) / 2 - 1) + ((w - width) >> 1), y + 3, C_WHITE, str);
+		dtext(4 + 65 * (((start + end) >> 1) - 1) + ((w - width) >> 1), y + 3, C_WHITE, str);
 }
 
 /* fkey_menu(): A rectangular F-key with the bottom right corner removed */

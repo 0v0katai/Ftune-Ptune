@@ -217,10 +217,12 @@ static void print_express_cpg_bsc(struct cpg_overclock_setting s)
 
 #if defined CP400
 # define KEY_DISPLAY_ROW 8
+# define REG_DISPLAY_X 7
 # define WAIT_DISPLAY_X 13
 # define SPEED_DISPLAY_X 21
 #else
 # define KEY_DISPLAY_ROW 9
+# define REG_DISPLAY_X 6
 # define WAIT_DISPLAY_X 11
 # define SPEED_DISPLAY_X 17
 #endif
@@ -231,6 +233,7 @@ void express_menu()
     u8 select = SELECT_FLL;
     bool benchmark = false;
     bool update = false;
+    bool spread_spectrum = false;
     static const char *option[] = {"FLL:", "PLL:", "IFC:", "SFC:", "BFC:", "PFC:", 0};
 
     do
@@ -238,6 +241,7 @@ void express_menu()
         static struct cpg_overclock_setting s;
         cpg_get_overclock_setting(&s);
         cpg_set_overclock_setting(&s);
+        CPG.SSCGCR.SSEN = spread_spectrum;
         if (update && AUTO_REDUCE_WAIT)
             BSC.CS0WCR.WR = best_rom_wait(clock_freq()->Bphi_f);
 
@@ -255,14 +259,16 @@ void express_menu()
         print_express_cpg_bsc(s);
 
         const clock_frequency_t f = *clock_freq();
-        row_print(1, 7, "x%d", f.FLL);
-        row_print(2, 7, "x%d", f.PLL);
-        row_print(3, 7, "1/%d", f.Iphi_div);
-        row_print(4, 7, "1/%d", f.Sphi_div);
-        row_print(5, 7, "1/%d", f.Bphi_div);
-        row_print(6, 7, "1/%d", f.Pphi_div);
+        row_print(1, REG_DISPLAY_X, "x%d", f.FLL);
+        row_print(2, REG_DISPLAY_X, "x%d", f.PLL);
+        row_print(3, REG_DISPLAY_X, "1/%d", f.Iphi_div);
+        row_print(4, REG_DISPLAY_X, "1/%d", f.Sphi_div);
+        row_print(5, REG_DISPLAY_X, "1/%d", f.Bphi_div);
+        row_print(6, REG_DISPLAY_X, "1/%d", f.Pphi_div);
 
         print_options(1, 1, option, select);
+        row_print_color(1, WAIT_DISPLAY_X, C_WHITE, C_BLACK, CPG.FLLFRQ.SELXM ? "XM 1/2" : "XM 1");
+        row_print_color(2, WAIT_DISPLAY_X, spread_spectrum ? C_GREEN : C_WHITE, C_BLACK, spread_spectrum ? "SS On" : "SS Off");
         row_print_color(3, WAIT_DISPLAY_X, C_WHITE, f.Iphi_f > IFC_RED_ZONE ? C_RED : C_BLUE, "CPU");
         row_print_color(4, WAIT_DISPLAY_X, C_WHITE, C_BLACK, "roR %d", WR_equivalent(BSC.CS0WCR.WR));
         #if defined CG20
@@ -382,6 +388,17 @@ void express_menu()
                     select++;
                 break;
 
+            case KEY_EXPRESS_SELXM:
+                if (f.FLL >= 1024)
+                    break;
+                CPG.FLLFRQ.lword = CPG.FLLFRQ.SELXM ? f.FLL : 0x4000 + (f.FLL << 1);
+                break;
+
+            case KEY_EXPRESS_SS:
+                if (f.PLL > 32)
+                    break;
+                spread_spectrum = !spread_spectrum;
+                break;
             case KEY_MUL:
             case KEY_DIV:
                 bsc_modify(CS0WCR_WR_ptr, key.key == KEY_MUL ? 1 : -1);
@@ -415,7 +432,7 @@ void express_menu()
                 {
                     if (f.FLL == 225)
                         break;
-                    CPG.FLLFRQ.FLF -= 2;
+                    CPG.FLLFRQ.FLF -= 1 + CPG.FLLFRQ.SELXM;
                     divs[SELECT_PFC - 2] >>= auto_up_PFC();
                 }
                 else if (select == SELECT_PLL)
@@ -443,19 +460,19 @@ void express_menu()
                 update = true;
                 if (select == SELECT_FLL)
                 {
-                    if (f.FLL == 1023)
+                    if (f.FLL == (2047 >> CPG.FLLFRQ.SELXM))
                         break;
-                    CPG.FLLFRQ.FLF += 2;
+                    CPG.FLLFRQ.FLF += 1 + CPG.FLLFRQ.SELXM;
                     if (exceed_limit())
                     {
-                        CPG.FLLFRQ.FLF -= 2;
+                        CPG.FLLFRQ.FLF -= 1 + CPG.FLLFRQ.SELXM;
                         break;
                     }
                     divs[SELECT_PFC - 2] <<= auto_down_PFC();
                 }
                 else if (select == SELECT_PLL)
                 {
-                    if (f.PLL == 64)
+                    if (f.PLL == (64 >> spread_spectrum))
                         break;
                     CPG.FRQCR.STC++;
                     if (exceed_limit())
