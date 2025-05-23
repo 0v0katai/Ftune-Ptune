@@ -1,6 +1,6 @@
 #include "config.h"
 
-#define FLF_x810 0x432a
+#define FLF_x500 0x41F4
 #define PLL(a) ((a) - 1)
 #define WRITE_N 2000
 #define READ_N 65536/4

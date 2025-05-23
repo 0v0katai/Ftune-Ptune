@@ -24,7 +24,7 @@ u32 *read_address(int FLF, volatile u32 *address)
     u32 *ad = (u32 *)address;
     update(FLF);
     if (*address == *address)
-        ad = mem_read(address, &CPG.FLLFRQ.lword, FLF_x810, READ_N);
+        ad = mem_read(address, &CPG.FLLFRQ.lword, FLF_x500, READ_N);
     slowdown();
     return ad;
 }
@@ -34,7 +34,7 @@ u32 *write_address(int FLF, volatile u32 *address)
     u32 *ad = (u32 *)address;
     update(FLF);
     if (*address == *address)
-        ad = mem_write(address, &CPG.FLLFRQ.lword, FLF_x810, WRITE_N);
+        ad = mem_write(address, &CPG.FLLFRQ.lword, FLF_x500, WRITE_N);
     slowdown();
     return ad;
 }
