@@ -232,6 +232,8 @@ void express_menu()
     key_event_t key;
     u8 select = SELECT_FLL;
     bool benchmark = false;
+    bool benchmark_update = false;
+    u32 benchmark_data[9] = {0};
     bool update = false;
     bool spread_spectrum = false;
     static const char *option[] = {"FLL:", "PLL:", "IFC:", "SFC:", "BFC:", "PFC:", 0};
@@ -338,7 +340,54 @@ void express_menu()
         }
 
         if (benchmark)
-            run_benchmark();
+        {
+            if (benchmark_update)
+                run_benchmark(benchmark_data);
+            benchmark_update = false;
+
+            #if defined CP400
+            # define SCORE_X(i) 2
+            # define SCORE_ROW(i) (19 + (i))
+            # define UPDATE_ROW 23
+            # define DHRYSTONE_ROW 24
+            # define WHETSTONE_X 2
+            # if defined ENABLE_WHETSTONE
+            #  define WHETSTONE_ROW 25
+            # else
+            #  define WHETSTONE_ROW 24
+            # endif
+            #else
+            # define SCORE_X(i) ((i) * 12 + 2)
+            # define SCORE_ROW(i) 11
+            # define UPDATE_ROW 12
+            # define DHRYSTONE_ROW 13
+            # define WHETSTONE_X 26
+            # define WHETSTONE_ROW 13
+            #endif
+            
+            for (int i = 0; i < 4; i++)
+            {
+                static const char *score_name[] = {"CPU", "ROM", "RAM", "I/O"};
+                row_print(SCORE_ROW(i), SCORE_X(i), "%s %d", score_name[i], benchmark_data[i]);
+            }
+            row_print_color(UPDATE_ROW, 2, benchmark_data[8] + 1 < 1000000 / benchmark_data[4] ? C_RGB(0,31,31) : C_RGB(31,0,31), C_WHITE,
+                "dupd: %d us/%d (%d) FPS", benchmark_data[4], 1000000 / benchmark_data[4], benchmark_data[8]);
+            
+            #ifdef ENABLE_AZUR
+            row_print(UPDATE_ROW, 26, "azrp: %d us/%d FPS", benchmark_data[5], 1000000 / benchmark_data[5]);
+            #endif
+
+            #ifdef ENABLE_DHRY
+            row_print(DHRYSTONE_ROW, 2, "INT: %llu Dhrystone/s", DHRY_LOOP * 1000000ull / benchmark_data[6]);
+            #endif
+
+            #ifdef ENABLE_WHET
+            row_print(WHETSTONE_ROW, WHETSTONE_X, "DBL: %d KWIPS", 100 * ITERATIONS * 1000000 / benchmark_data[7]);
+            #endif
+
+            for (int i = SCORE_ROW(0); i != WHETSTONE_ROW + 1; i++)
+                row_highlight(i);
+        }
 
         dupdate();
         key = getkey();
@@ -351,6 +400,8 @@ void express_menu()
         };
         u8 divs[4] = {f.Iphi_div, f.Sphi_div, f.Bphi_div, f.Pphi_div};
         update = false;
+        if (key.key != KEY_UP && key.key != KEY_DOWN)
+            benchmark_update = true;
         #ifdef CG100
         cg100_getkey(key);
         #elif defined CP400
@@ -503,6 +554,7 @@ void express_menu()
         }
         if (update)
         {
+            benchmark_update = true;
             CPG.FRQCR.lword &= 0xFF000000;
             for (int i = 0; i < 4; i++)
             {
