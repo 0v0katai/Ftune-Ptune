@@ -181,12 +181,26 @@ static void cg100_getkey(key_event_t key)
 #ifdef CP400
 static void cp400_getkey(key_event_t key)
 {
-    if (key.key == KEY_KBD)
-        clock_set_speed(CLOCK_SPEED_DEFAULT);
-    if (key.key == KEY_Z && key.shift)
-        shift_f5_preset();
-    else if (key.key == KEY_POWER && key.shift)
-        alpha_f5_preset();
+    switch (key.key)
+    {
+        case KEY_1:
+        case KEY_2:
+        case KEY_3:
+            clock_set_speed(key.key - KEY_1 + 1);
+            break;
+        case KEY_4:
+        case KEY_5:
+            clock_set_speed(key.key - KEY_4 + 4);
+            break;
+        case KEY_Z:
+            if (key.shift)
+                shift_f5_preset();
+            break;
+        case KEY_POWER:
+            if (key.shift)
+                alpha_f5_preset();
+            break;
+    }
 }
 #endif
 
