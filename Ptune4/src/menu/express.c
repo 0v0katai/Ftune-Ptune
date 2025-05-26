@@ -103,7 +103,7 @@ static void print_preset(int current)
     #endif
 }
 
-#if defined CG50 || defined CG100 || defined CP400
+#if defined CG50 || defined CG100
 static void shift_f5_preset()
 {
     /* dupdate: 5633 μs/177 FPS, INT: 211264 Dhrystone/s */
@@ -191,14 +191,6 @@ static void cp400_getkey(key_event_t key)
         case KEY_4:
         case KEY_5:
             clock_set_speed(key.key - KEY_4 + 4);
-            break;
-        case KEY_Z:
-            if (key.shift)
-                shift_f5_preset();
-            break;
-        case KEY_POWER:
-            if (key.shift)
-                alpha_f5_preset();
             break;
     }
 }
