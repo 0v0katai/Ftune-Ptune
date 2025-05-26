@@ -41,7 +41,7 @@ static bool global_getkey(key_event_t key)
     {
         info_box(4, 7, "Caution");
         row_print(6, 2, "Poweroff function is disabled in this build");
-        row_print(7, 2, "as it targets fx-CG50/100.");
+        row_print(7, 2, "as it targets " PLATFORM ".");
         row_print(8, 2, "Please return to the main menu before");
         row_print(9, 2, "turning off your calculator.");
         xtune_getkey();

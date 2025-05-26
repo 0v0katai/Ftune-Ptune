@@ -16,6 +16,13 @@
 # define VERSION "Ftune4 v@VERSTR@ (@@COMMIT_ID_SHORT@)"
 #else
 # define VERSION "Ptune4 v@VERSTR@ (@@COMMIT_ID_SHORT@)"
+# if defined CG20
+#  define PLATFORM "fx-CG10/20"
+# elif defined CG50
+#  define PLATFORM "fx-CG50/Graph 90+E"
+# elif defined CG100
+#  define PLATFORM "fx-CG100/Graph Math+"
+# endif
 #endif
 
 /* Feature toggles */

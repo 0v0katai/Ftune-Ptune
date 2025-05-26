@@ -78,12 +78,13 @@ static void about()
     row_print(21, 2, "This software is licensed under");
     row_print(22, 2, "MIT/Expat.");
     #else
-    info_box(5, 4, "About");
-    row_print(6, 2, VERSION);
-    row_print(7, 2, "Copyright (C) 2025 Sentaro21, CalcLoverHK");
+    info_box(4, 7, "About");
+    row_print(5, 2, VERSION);
+    row_print(6, 2, "Copyright (C) 2025 Sentaro21, CalcLoverHK.");
     row_print(8, 2, "This software is licensed under MIT/Expat.");
+    row_print(10, 2, "This build targets " PLATFORM ".");
     #endif
-
+    
     xtune_getkey();
 }
 
