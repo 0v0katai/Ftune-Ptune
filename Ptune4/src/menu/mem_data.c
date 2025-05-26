@@ -42,8 +42,7 @@ static void help_info()
     row_print(8, 2, "[F6]: SRAM read/write test");
     row_print(11, 2, "[EXIT]: Close help / < Express menu");
     #endif
-    dupdate();
-    while (getkey().key != KEY_EXIT);
+    while (xtune_getkey().key != KEY_EXIT);
 }
 #endif
 
@@ -158,8 +157,7 @@ void mem_data_menu()
         fkey_menu(6, "RAM");
         #endif
 
-        dupdate();
-        key = getkey();
+        key = xtune_getkey();
         switch (key.key)
         { 
             case KEY_MEMDATA_RESET:

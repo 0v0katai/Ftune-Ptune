@@ -118,6 +118,8 @@ void set_help_function(help_function_t function);
 
 void call_help_function();
 
+key_event_t xtune_getkey();
+
 //---
 // USB commands
 //---

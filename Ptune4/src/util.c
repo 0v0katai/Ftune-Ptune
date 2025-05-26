@@ -285,10 +285,9 @@ bool yes_no(int row)
 {
 	#if defined CP400
 	row_print(row, 7, "%s %21s", "[KBD]: Yes", "[DEL]: No");
-	dupdate();
 	while (true)
 	{
-		switch (getkey().key)
+		switch (xtune_getkey().key)
 		{
 			case KEY_KBD:
 			case KEY_EXE:
@@ -299,10 +298,9 @@ bool yes_no(int row)
 	}
 	#elif defined CG100
 	row_print(row, 11, "%s %25s", "[OK]: Yes", "[BACK]: No");
-	dupdate();
 	while (true)
 	{
-		switch (getkey().key)
+		switch (xtune_getkey().key)
 		{
 			case KEY_OK:
 			case KEY_EXE:
@@ -313,10 +311,9 @@ bool yes_no(int row)
 	}
 	#else
 	row_print(row, 11, "%s %25s", "[F1]: Yes", "[F6]: No");
-	dupdate();
 	while (true)
 	{
-		switch (getkey().key)
+		switch (xtune_getkey().key)
 		{
 			case KEY_F1:
 			case KEY_EXE:
@@ -372,4 +369,14 @@ void call_help_function()
 	help_status = true;
 	help_function();
 	help_status = false;
+}
+
+key_event_t xtune_getkey()
+{
+	dupdate();
+	#if defined CG50 || defined CG100
+	return getkey_opt(GETKEY_DEFAULT ^ GETKEY_POWEROFF, NULL);
+	#else
+	return getkey();
+	#endif
 }

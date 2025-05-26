@@ -36,8 +36,7 @@ static void help_info()
     row_print(10, 2, "[F6]: About this add-in");
     row_print(11, 2, "[EXIT]: Close help / < Express menu");
     #endif
-    dupdate();
-    while (getkey().key != KEY_EXIT);
+    while (xtune_getkey().key != KEY_EXIT);
 }
 #endif
 
@@ -85,8 +84,7 @@ static void about()
     row_print(8, 2, "This software is licensed under MIT/Expat.");
     #endif
 
-    dupdate();
-    getkey();
+    xtune_getkey();
 }
 
 void settings_menu()
@@ -139,8 +137,7 @@ void settings_menu()
         fkey_button(6, "About");
         #endif
 
-        dupdate();
-        key = getkey();
+        key = xtune_getkey();
 
         i32 modify = 0;
         bool scale = false;

@@ -77,8 +77,7 @@ static void help_info()
     row_print(11, 2, "[SHIFT][MENU]: Settings");
     row_print(13, 2, "[EXIT]: Close help / Quit Ptune4");
     #endif
-    dupdate();
-    while (getkey().key != KEY_EXIT);
+    while (xtune_getkey().key != KEY_EXIT);
 }
 #endif
 
@@ -157,8 +156,7 @@ static void cg100_getkey(key_event_t key)
         {
             tab_clear(2, 5);
             tab_action(2, 5, "%-10sSet preset: F%d%10s", "|<-", select_preset + 1, "->|");
-            dupdate();
-            switch (getkey().key)
+            switch (xtune_getkey().key)
             {
                 case KEY_PREVTAB:
                     select_preset = (select_preset - 1 + CLOCK_SPEED_F5) % CLOCK_SPEED_F5;
@@ -395,8 +393,7 @@ void express_menu()
                 row_highlight(i);
         }
 
-        dupdate();
-        key = getkey();
+        key = xtune_getkey();
 
         static const u8 divs_ratio[3][3] =
         {

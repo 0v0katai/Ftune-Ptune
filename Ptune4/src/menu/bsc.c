@@ -34,8 +34,7 @@ static void help_info()
     row_print(8, 2, "[LEFT][RIGHT]: Select CSn area");
     row_print(11, 2, "[EXIT]: Close help / < Express menu");
     #endif
-    dupdate();
-    while (getkey().key != KEY_EXIT);
+    while (xtune_getkey().key != KEY_EXIT);
 }
 #endif
 
@@ -254,8 +253,7 @@ void bsc_menu()
         #endif
         #endif
 
-        dupdate();
-        key = getkey();
+        key = xtune_getkey();
 
         switch (key.key)
         {
