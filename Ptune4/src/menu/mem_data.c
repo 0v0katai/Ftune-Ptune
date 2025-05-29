@@ -136,8 +136,8 @@ void mem_data_menu()
         #else
         for (int i = 0; i < 2; i++)
         {
-            row_print(TEST_DISPLAY_ROW, OFFSET_X, "roR_%d Check [%d]", i ? 12 : 10, i + 1);
-            row_print_color(TEST_DISPLAY_ROW - 1 + i, OFFSET_X + 18, C_WHITE, C_BLACK, on_off[(test_settings.byte >> (1 - i)) & 0b1]);
+            row_print(TEST_DISPLAY_ROW + i, OFFSET_X, "roR_%d Check [%d]", i ? 12 : 10, i + 1);
+            row_print_color(TEST_DISPLAY_ROW + i, OFFSET_X + 18, C_WHITE, C_BLACK, on_off[(test_settings.byte >> (1 - i)) & 0b1]);
         }
         #endif
 
