@@ -59,7 +59,7 @@ static void help_info()
 void mem_data_menu()
 {
     key_event_t key;
-    bool margin = true;
+    bool margin = false;
     mem_test_settings test_settings = {.byte = 0b111};
 
     static const i32 roR_default[] =
