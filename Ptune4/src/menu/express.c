@@ -220,11 +220,13 @@ static void print_express_cpg_bsc(struct cpg_overclock_setting s)
 }
 
 #if defined CP400
+# define MEMTEST_DISPLAY_ROW 15
 # define KEY_DISPLAY_ROW 8
 # define REG_DISPLAY_X 7
 # define WAIT_DISPLAY_X 13
 # define SPEED_DISPLAY_X 21
 #else
+# define MEMTEST_DISPLAY_ROW 4
 # define KEY_DISPLAY_ROW 9
 # define REG_DISPLAY_X 6
 # define WAIT_DISPLAY_X 11
@@ -241,6 +243,28 @@ void express_menu()
     bool update = false;
     bool spread_spectrum = false;
     static const char *option[] = {"FLL:", "PLL:", "IFC:", "SFC:", "BFC:", "PFC:", 0};
+
+    dclear(C_WHITE);
+    info_box(MEMTEST_DISPLAY_ROW, 7, "Start memory tests?");
+    row_print(MEMTEST_DISPLAY_ROW + 2, 2, "Select option:");
+    row_print(MEMTEST_DISPLAY_ROW + 3, 2, "[1] RAM only");
+    row_print(MEMTEST_DISPLAY_ROW + 4, 2, "[2] ROM & RAM");
+    row_print(MEMTEST_DISPLAY_ROW + 5, 2, "[3] None");
+    while (key.key < KEY_1 || key.key > KEY_3)
+        key = xtune_getkey();
+    switch (key.key)
+    {
+        case KEY_2:
+            mem_test_settings test_settings = {.byte = 0b111};    
+            rom_test(test_settings);
+            __attribute__((fallthrough));
+        case KEY_1:
+            #if defined CG50 || defined CG100 || defined CP400
+            sdram_test(true);
+            #else
+            sram_test();
+            #endif
+    }
 
     do
     {
